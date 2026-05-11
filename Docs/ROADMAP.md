@@ -6,6 +6,21 @@ Fase 0 — Planificación completada. PRD y Arquitectura definidos.
 
 ---
 
+## Fase 0: Setup inicial (infraestructura base)
+
+**Objetivo:** El repositorio tiene todos los archivos de configuracion base antes de escribir una sola linea de codigo de aplicacion.
+
+- [x] Definir PRD (`Docs/PRD.md`)
+- [x] Definir Arquitectura (`Docs/ARCHITECTURE.md`)
+- [x] Definir Roadmap (`Docs/ROADMAP.md`)
+- [x] Configurar instrucciones del proyecto (`CLAUDE.md`)
+- [x] Crear `.gitignore` (Next.js + Node.js + Supabase + entorno)
+- [x] Crear `.env.example` (template documentado de variables de entorno)
+- [x] Crear `.editorconfig` (UTF-8, LF, 2 espacios)
+**Done when:** Se puede clonar el repositorio y saber exactamente que variables de entorno configurar antes de iniciar el desarrollo.
+
+---
+
 ## Fase 1: Foundation (semana 1)
 
 **Objetivo:** Setup completo del proyecto. Usuario puede registrarse, hacer login, y ver el dashboard vacío. PWA instalable.
