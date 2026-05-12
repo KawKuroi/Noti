@@ -12,7 +12,7 @@ export async function crearClienteServidor() {
         getAll() {
           return almacenCookies.getAll()
         },
-        setAll(cookiesAConfigurar) {
+        setAll(cookiesAConfigurar: { name: string; value: string; options: Record<string, unknown> }[]) {
           try {
             cookiesAConfigurar.forEach(({ name, value, options }) => {
               almacenCookies.set(name, value, options)
