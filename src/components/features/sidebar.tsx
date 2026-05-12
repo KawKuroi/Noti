@@ -72,10 +72,9 @@ export function Sidebar({ categorias }: Props) {
               )}
             >
               {Icono && (
-                <Icono
-                  size={16}
-                  style={{ color: estaActiva ? cat.color : undefined }}
-                />
+                <span style={{ color: estaActiva ? cat.color : undefined }}>
+                  <Icono size={16} />
+                </span>
               )}
               {cat.nombre}
             </Link>
