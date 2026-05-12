@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Fase 0 — Planificación completada. PRD y Arquitectura definidos.
+Fase 1 — Foundation completada. App en producción en Vercel. Login con Google y email/password funcionando. PWA instalable.
 
 ---
 
@@ -25,18 +25,18 @@ Fase 0 — Planificación completada. PRD y Arquitectura definidos.
 
 **Objetivo:** Setup completo del proyecto. Usuario puede registrarse, hacer login, y ver el dashboard vacío. PWA instalable.
 
-- [ ] Inicializar Next.js 14+ con App Router + TypeScript + Tailwind
-- [ ] Configurar Supabase (proyecto, DB, Auth)
-- [ ] Configurar Drizzle ORM + schema inicial (`profiles`, `categories`)
-- [ ] Implementar autenticación con Supabase Auth (Google OAuth + email/password)
-- [ ] Crear middleware de protección de rutas
-- [ ] Layout autenticado: sidebar con categorías + header con perfil
-- [ ] Layout de auth: páginas de login y registro
-- [ ] Dashboard vacío con mensaje "Crea tu primer recordatorio"
-- [ ] Seed de categorías iniciales (6 categorías fijas)
-- [ ] Configurar PWA: manifest.json, Service Worker básico, íconos
-- [ ] Configurar variables de entorno en Vercel
-- [ ] Primer deploy a Vercel
+- [x] Inicializar Next.js 14+ con App Router + TypeScript + Tailwind
+- [x] Configurar Supabase (proyecto, DB, Auth)
+- [x] Configurar Drizzle ORM + schema inicial (`profiles`, `categories`)
+- [x] Implementar autenticación con Supabase Auth (Google OAuth + email/password)
+- [x] Crear middleware de protección de rutas
+- [x] Layout autenticado: sidebar con categorías + header con perfil
+- [x] Layout de auth: páginas de login y registro
+- [x] Dashboard vacío con mensaje "Crea tu primer recordatorio"
+- [x] Seed de categorías iniciales (6 categorías fijas)
+- [x] Configurar PWA: manifest.json, Service Worker básico, íconos
+- [x] Configurar variables de entorno en Vercel
+- [x] Primer deploy a Vercel
 
 **Done when:** Puedo instalar la PWA desde Chrome en Android/Windows, registrarme con Google, y ver el dashboard vacío con la sidebar de categorías.
 
