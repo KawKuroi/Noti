@@ -1,31 +1,59 @@
-import { Bell } from 'lucide-react'
+import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
+import { crearClienteServidor } from '@/lib/supabase/server'
+import { getCategorias } from '@/lib/queries/category.queries'
+import { getRecordatoriosProximos, getContadoresPorCategoria } from '@/lib/queries/reminder.queries'
+import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
+import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
+import { FiltroCategorias } from '@/components/features/reminders/filtro-categorias'
 
-export default function PaginaDashboard() {
+interface Props {
+  searchParams: Promise<{ categoria?: string }>
+}
+
+export default async function PaginaDashboard({ searchParams }: Props) {
+  const supabase = await crearClienteServidor()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const { categoria: categoriaIdParam } = await searchParams
+
+  const [categorias, todosLosRecordatorios, contadores] = await Promise.all([
+    getCategorias(),
+    getRecordatoriosProximos(user.id),
+    getContadoresPorCategoria(user.id),
+  ])
+
+  const recordatoriosFiltrados = categoriaIdParam
+    ? todosLosRecordatorios.filter((r) => r.categoriaId === Number(categoriaIdParam))
+    : todosLosRecordatorios
+
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Proximos recordatorios</h1>
-        <p className="text-sm text-gray-500 mt-1">Todo lo que tienes pendiente</p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Proximos recordatorios</h1>
+          <p className="text-sm text-gray-500 mt-1">Todo lo que tienes pendiente</p>
+        </div>
+        <BotonNuevoRecordatorio categorias={categorias} />
       </div>
 
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-          <Bell className="w-7 h-7 text-gray-400" />
-        </div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">
-          Crea tu primer recordatorio
-        </h2>
-        <p className="text-sm text-gray-500 max-w-xs mb-6">
-          Organiza peliculas, tareas, clases, cumpleanos y eventos en un solo lugar.
-        </p>
-        <button
-          disabled
-          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg opacity-40 cursor-not-allowed"
-          title="Disponible en la proxima fase"
-        >
-          Nuevo recordatorio
-        </button>
+      <div className="mb-5">
+        <Suspense fallback={null}>
+          <FiltroCategorias categorias={categorias} contadores={contadores} />
+        </Suspense>
       </div>
+
+      <ListaRecordatorios
+        recordatorios={recordatoriosFiltrados}
+        categorias={categorias}
+        agrupar={!categoriaIdParam}
+        mostrarCategoria={!categoriaIdParam}
+        mensajeVacio="Crea tu primer recordatorio"
+      />
     </div>
   )
 }

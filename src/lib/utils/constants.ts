@@ -41,3 +41,30 @@ export const CATEGORIAS: DefinicionCategoria[] = [
 
 export const ZONA_HORARIA_DEFECTO = 'America/Bogota'
 export const ANTICIPACION_DEFECTO = 15
+
+export const PRIORIDADES: { valor: string; etiqueta: string }[] = [
+  { valor: 'baja', etiqueta: 'Baja' },
+  { valor: 'media', etiqueta: 'Media' },
+  { valor: 'alta', etiqueta: 'Alta' },
+]
+
+export const DIAS_SEMANA: { valor: number; etiqueta: string; corto: string }[] = [
+  { valor: 1, etiqueta: 'Lunes', corto: 'Lun' },
+  { valor: 2, etiqueta: 'Martes', corto: 'Mar' },
+  { valor: 3, etiqueta: 'Miercoles', corto: 'Mie' },
+  { valor: 4, etiqueta: 'Jueves', corto: 'Jue' },
+  { valor: 5, etiqueta: 'Viernes', corto: 'Vie' },
+  { valor: 6, etiqueta: 'Sabado', corto: 'Sab' },
+  { valor: 7, etiqueta: 'Domingo', corto: 'Dom' },
+]
+
+export const OPCIONES_ANTICIPACION: { valor: number; etiqueta: string }[] = [
+  { valor: 5, etiqueta: '5 minutos antes' },
+  { valor: 15, etiqueta: '15 minutos antes' },
+  { valor: 30, etiqueta: '30 minutos antes' },
+  { valor: 60, etiqueta: '1 hora antes' },
+  { valor: 1440, etiqueta: '1 dia antes' },
+]
+
+export const SLUGS_VALIDOS = ['movies', 'study', 'classes', 'birthdays', 'tasks', 'events'] as const
+export type SlugCategoria = (typeof SLUGS_VALIDOS)[number]
