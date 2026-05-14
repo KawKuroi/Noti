@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Fase 1 — Foundation completada. App en producción en Vercel. Login con Google y email/password funcionando. PWA instalable.
+Fase 2 — CRUD de recordatorios completado. App en producción en Vercel con Supabase Connection Pooler. Login con Google y email/password funcionando. CRUD completo en las 6 categorías con soporte de recurrencia. Rendimiento optimizado con Turbopack, auth deduplicada con React cache() y revalidación granular.
 
 ---
 
@@ -46,21 +46,21 @@ Fase 1 — Foundation completada. App en producción en Vercel. Login con Google
 
 **Objetivo:** Usuario puede crear, ver, editar, eliminar y completar recordatorios en todas las categorías.
 
-- [ ] Schema DB: tabla `reminders` con migraciones
-- [ ] Server actions: `createReminder`, `updateReminder`, `deleteReminder`, `toggleComplete`
-- [ ] Queries: `getReminders`, `getRemindersByCategory`, `getUpcomingReminders`
-- [ ] Validaciones Zod para crear/editar recordatorios
-- [ ] Componente `ReminderForm`: formulario modal con campos por categoría
+- [x] Schema DB: tabla `reminders` con migraciones
+- [x] Server actions: `createReminder`, `updateReminder`, `deleteReminder`, `toggleComplete`
+- [x] Queries: `getReminders`, `getRemindersByCategory`, `getUpcomingReminders`
+- [x] Validaciones Zod para crear/editar recordatorios
+- [x] Componente `ReminderForm`: formulario modal con campos por categoría
   - Campos comunes: título, descripción, fecha, hora, categoría
   - Campos de cumpleaños: fecha sin hora, recurrencia anual automática
   - Campos de clases: día de la semana, hora inicio/fin, recurrencia semanal
   - Campos de tareas: fecha límite, prioridad (baja/media/alta)
-- [ ] Componente `ReminderCard`: tarjeta con acciones (editar, eliminar, completar)
-- [ ] Componente `ReminderList`: lista filtrable y ordenable
-- [ ] Componente `CategoryFilter`: pills de categorías con contadores
-- [ ] Dashboard: mostrar recordatorios próximos agrupados por día
-- [ ] Página por categoría: vista filtrada con UI específica
-- [ ] Soporte para recordatorios recurrentes (semanal para clases, anual para cumpleaños)
+- [x] Componente `ReminderCard`: tarjeta con acciones (editar, eliminar, completar)
+- [x] Componente `ReminderList`: lista filtrable y ordenable
+- [x] Componente `CategoryFilter`: pills de categorías con contadores
+- [x] Dashboard: mostrar recordatorios próximos agrupados por día
+- [x] Página por categoría: vista filtrada con UI específica
+- [x] Soporte para recordatorios recurrentes (semanal para clases, anual para cumpleaños)
 
 **Done when:** Puedo crear recordatorios en las 6 categorías, verlos en el dashboard filtrados, editarlos, eliminarlos y marcarlos como completados. Los recurrentes se muestran correctamente.
 
