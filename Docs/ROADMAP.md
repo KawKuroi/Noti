@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Fase 2 — CRUD de recordatorios completado. App en producción en Vercel con Supabase Connection Pooler. Login con Google y email/password funcionando. CRUD completo en las 6 categorías con soporte de recurrencia. Rendimiento optimizado con Turbopack, auth deduplicada con React cache() y revalidación granular.
+Fase 3 — Notificaciones push completadas. Sistema completo de Web Push con VAPID: suscripción por dispositivo, cron de Vercel cada minuto, acciones desde la notificación (Ver, Posponer 15min, Completar), reprogramación automática de recurrentes. Página /settings para gestionar anticipación y dispositivos.
 
 ---
 
@@ -70,21 +70,20 @@ Fase 2 — CRUD de recordatorios completado. App en producción en Vercel con Su
 
 **Objetivo:** El usuario recibe notificaciones push reales en Android y Windows cuando un recordatorio está por vencer.
 
-- [ ] Generar VAPID keys (par público/privado)
-- [ ] Service Worker: handler de evento `push` para mostrar notificación
-- [ ] Service Worker: handler de `notificationclick` para abrir la app
-- [ ] Componente `NotificationPrompt`: pedir permiso al usuario
-- [ ] Schema DB: tabla `push_subscriptions`
-- [ ] API route: `POST /api/push/subscribe` — guardar suscripción
-- [ ] API route: `POST /api/push/send` — enviar notificación a un usuario
-- [ ] Servicio `push.service.ts`: lógica de envío con librería `web-push`
-- [ ] Configurar pg_cron en Supabase: job cada minuto
-- [ ] Edge Function `process-notifications`: busca reminders con `notify_at <= now()` y envía push
-- [ ] Schema DB: tabla `notification_log` para tracking
-- [ ] Configurar `cron-job.org` como backup (pinga endpoint cada minuto)
-- [ ] Página de settings: configurar anticipación de notificación (5min, 15min, 30min, 1h, 1 día)
-- [ ] Gestión de múltiples dispositivos por usuario
-- [ ] Acciones desde la notificación: "Ver", "Posponer 15min", "Completar"
+- [x] Generar VAPID keys (par público/privado)
+- [x] Service Worker: handler de evento `push` para mostrar notificación
+- [x] Service Worker: handler de `notificationclick` para abrir la app
+- [x] Componente `NotificationPrompt`: pedir permiso al usuario
+- [x] Schema DB: tabla `push_subscriptions`
+- [x] API route: `POST /api/push/subscribe` — guardar suscripción
+- [x] API route: `POST /api/push/action` — acciones desde notificación (posponer/completar)
+- [x] Servicio `push.service.ts`: lógica de envío con librería `web-push`
+- [x] Vercel Cron Job: `/api/cron/check-reminders` cada minuto
+- [x] Schema DB: tabla `notification_log` para tracking
+- [x] Página de settings: configurar anticipación de notificación (5min, 15min, 30min, 1h, 1 día)
+- [x] Gestión de múltiples dispositivos por usuario
+- [x] Acciones desde la notificación: "Ver", "Posponer 15min", "Completar"
+- [x] Reprogramación automática de recordatorios recurrentes al enviar la notificación
 
 **Done when:** Al crear un recordatorio para dentro de 5 minutos, recibo una notificación push real en mi celular Android y en mi PC Windows. Puedo posponer o completar desde la notificación.
 

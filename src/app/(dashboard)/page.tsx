@@ -5,6 +5,7 @@ import { getRecordatoriosProximos, getContadoresPorCategoria } from '@/lib/queri
 import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
 import { FiltroCategorias } from '@/components/features/reminders/filtro-categorias'
+import { NotificationPrompt } from '@/components/features/notification-prompt'
 
 interface Props {
   searchParams: Promise<{ categoria?: string }>
@@ -27,6 +28,7 @@ export default async function PaginaDashboard({ searchParams }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <NotificationPrompt />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Proximos recordatorios</h1>

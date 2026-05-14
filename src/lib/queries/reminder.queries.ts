@@ -1,6 +1,6 @@
-import { eq, and, desc, asc, count } from 'drizzle-orm'
+import { eq, and, desc, asc, count, lte, gte } from 'drizzle-orm'
 import { db } from '@/db'
-import { recordatorios } from '@/db/schema'
+import { recordatorios, perfiles } from '@/db/schema'
 import type { Recordatorio } from '@/types/reminder.types'
 
 function mapearRecordatorio(fila: typeof recordatorios.$inferSelect): Recordatorio {
@@ -106,4 +106,51 @@ export async function getRecordatoriosTodos(usuarioId: string): Promise<Recordat
     .orderBy(desc(recordatorios.creadoEn))
 
   return filas.map(mapearRecordatorio)
+}
+
+export interface RecordatorioConAnticipacion extends Recordatorio {
+  anticipacionNotificacion: number
+}
+
+// Devuelve recordatorios cuyo notify_at cayo en la ventana [ahora - ventanaMin, ahora]
+// Se usa en el cron para saber que notificaciones enviar cada minuto
+export async function getRecordatoriosANotificar(
+  ahora: Date,
+  ventanaMin = 1,
+): Promise<RecordatorioConAnticipacion[]> {
+  const limiteInferior = new Date(ahora.getTime() - ventanaMin * 60 * 1000)
+
+  const filas = await db
+    .select({
+      id: recordatorios.id,
+      usuarioId: recordatorios.usuarioId,
+      categoriaId: recordatorios.categoriaId,
+      titulo: recordatorios.titulo,
+      descripcion: recordatorios.descripcion,
+      fechaVencimiento: recordatorios.fechaVencimiento,
+      notificarEn: recordatorios.notificarEn,
+      esRecurrente: recordatorios.esRecurrente,
+      reglaRecurrencia: recordatorios.reglaRecurrencia,
+      estaCompletado: recordatorios.estaCompletado,
+      tmdbId: recordatorios.tmdbId,
+      metadatos: recordatorios.metadatos,
+      creadoEn: recordatorios.creadoEn,
+      actualizadoEn: recordatorios.actualizadoEn,
+      anticipacionNotificacion: perfiles.anticipacionNotificacion,
+    })
+    .from(recordatorios)
+    .innerJoin(perfiles, eq(recordatorios.usuarioId, perfiles.id))
+    .where(
+      and(
+        lte(recordatorios.notificarEn, ahora),
+        gte(recordatorios.notificarEn, limiteInferior),
+        eq(recordatorios.estaCompletado, false),
+      ),
+    )
+    .orderBy(asc(recordatorios.notificarEn))
+
+  return filas.map((fila) => ({
+    ...mapearRecordatorio(fila),
+    anticipacionNotificacion: fila.anticipacionNotificacion,
+  }))
 }

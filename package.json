@@ -35,6 +35,7 @@
     "react": "^19",
     "react-dom": "^19",
     "tailwind-merge": "^2.6.0",
+    "web-push": "^3.6.7",
     "zod": "^3.24.4"
   },
   "overrides": {
@@ -50,6 +51,7 @@
     "@types/pg": "^8.11.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "autoprefixer": "^10.0.1",
     "drizzle-kit": "^0.31.0",
     "eslint": "^8",

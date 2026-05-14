@@ -10,6 +10,7 @@ import {
   CheckSquare,
   MapPin,
   LayoutDashboard,
+  Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import type { Categoria } from '@/types/category.types'
@@ -81,6 +82,21 @@ export function Sidebar({ categorias }: Props) {
           )
         })}
       </nav>
+
+      <div className="px-3 py-3 border-t border-gray-100">
+        <Link
+          href="/settings"
+          className={cn(
+            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            ruta === '/settings'
+              ? 'bg-gray-100 text-gray-900'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+          )}
+        >
+          <Settings size={16} />
+          Configuracion
+        </Link>
+      </div>
     </aside>
   )
 }
