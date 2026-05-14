@@ -13,6 +13,7 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.vercel.*
 
 # Supabase CLI (estado local, no configuracion del proyecto)
 .supabase/
@@ -58,3 +59,6 @@ Thumbs.db
 # Miscelaneo
 *.pem
 .cache/
+
+.vercel
+.env*.local
