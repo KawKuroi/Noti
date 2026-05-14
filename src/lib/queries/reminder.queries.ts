@@ -1,4 +1,4 @@
-import { eq, and, desc, asc } from 'drizzle-orm'
+import { eq, and, desc, asc, count } from 'drizzle-orm'
 import { db } from '@/db'
 import { recordatorios } from '@/db/schema'
 import type { Recordatorio } from '@/types/reminder.types'
@@ -81,7 +81,7 @@ export async function getContadoresPorCategoria(
   usuarioId: string,
 ): Promise<Record<number, number>> {
   const filas = await db
-    .select()
+    .select({ categoriaId: recordatorios.categoriaId, cantidad: count() })
     .from(recordatorios)
     .where(
       and(
@@ -89,10 +89,11 @@ export async function getContadoresPorCategoria(
         eq(recordatorios.estaCompletado, false),
       ),
     )
+    .groupBy(recordatorios.categoriaId)
 
   const contadores: Record<number, number> = {}
   for (const fila of filas) {
-    contadores[fila.categoriaId] = (contadores[fila.categoriaId] ?? 0) + 1
+    contadores[fila.categoriaId] = fila.cantidad
   }
   return contadores
 }

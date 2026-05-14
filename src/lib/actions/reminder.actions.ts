@@ -4,22 +4,22 @@ import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
 import { recordatorios } from '@/db/schema'
-import { crearClienteServidor } from '@/lib/supabase/server'
+import { obtenerUsuario } from '@/lib/auth'
 import { validarRecordatorio } from '@/lib/validations/reminder.schemas'
 import { calcularProximaOcurrencia, combinarFechaHora } from '@/lib/utils/date.utils'
 import { getCategorias } from '@/lib/queries/category.queries'
 import type { EstadoAccionRecordatorio, Recordatorio } from '@/types/reminder.types'
 
 async function obtenerUsuarioId(): Promise<string | null> {
-  const supabase = await crearClienteServidor()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await obtenerUsuario()
   return user?.id ?? null
 }
 
-function revalidarRutas() {
-  revalidatePath('/', 'layout')
+function revalidarRutas(slug?: string) {
+  revalidatePath('/')
+  if (slug) {
+    revalidatePath(`/${slug}`)
+  }
 }
 
 export async function crearRecordatorio(
@@ -64,7 +64,7 @@ export async function crearRecordatorio(
       })
       .returning()
 
-    revalidarRutas()
+    revalidarRutas(slug)
     return { ok: true, data: fila as unknown as Recordatorio }
   } catch (e) {
     console.error('Error al crear recordatorio:', e)
@@ -116,7 +116,7 @@ export async function actualizarRecordatorio(
 
     if (!fila) return { ok: false, error: 'Recordatorio no encontrado' }
 
-    revalidarRutas()
+    revalidarRutas(slug)
     return { ok: true, data: fila as unknown as Recordatorio }
   } catch (e) {
     console.error('Error al actualizar recordatorio:', e)
@@ -131,11 +131,18 @@ export async function eliminarRecordatorio(
   if (!usuarioId) return { ok: false, error: 'No autenticado' }
 
   try {
+    const [fila] = await db
+      .select({ categoriaId: recordatorios.categoriaId })
+      .from(recordatorios)
+      .where(and(eq(recordatorios.id, id), eq(recordatorios.usuarioId, usuarioId)))
+      .limit(1)
+
     await db
       .delete(recordatorios)
       .where(and(eq(recordatorios.id, id), eq(recordatorios.usuarioId, usuarioId)))
 
-    revalidarRutas()
+    const slug = fila ? (await getCategorias()).find((c) => c.id === fila.categoriaId)?.slug : undefined
+    revalidarRutas(slug)
     return { ok: true }
   } catch (e) {
     console.error('Error al eliminar recordatorio:', e)
@@ -188,7 +195,8 @@ export async function alternarCompletado(
         .where(eq(recordatorios.id, id))
     }
 
-    revalidarRutas()
+    const slug = (await getCategorias()).find((c) => c.id === actual.categoriaId)?.slug
+    revalidarRutas(slug)
     return { ok: true }
   } catch (e) {
     console.error('Error al alternar completado:', e)

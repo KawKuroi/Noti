@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation'
-import { crearClienteServidor } from '@/lib/supabase/server'
+import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { Sidebar } from '@/components/features/sidebar'
 import { Header } from '@/components/features/header'
@@ -9,12 +8,7 @@ interface Props {
 }
 
 export default async function LayoutDashboard({ children }: Props) {
-  const supabase = await crearClienteServidor()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
+  const user = await requerirUsuario()
 
   const categorias = await getCategorias()
 

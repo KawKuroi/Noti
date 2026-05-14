@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import {
   Film,
   BookOpen,
@@ -7,7 +7,7 @@ import {
   CheckSquare,
   MapPin,
 } from 'lucide-react'
-import { crearClienteServidor } from '@/lib/supabase/server'
+import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getRecordatoriosPorCategoria } from '@/lib/queries/reminder.queries'
 import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
@@ -35,12 +35,7 @@ export default async function PaginaCategoria({ params }: Props) {
     notFound()
   }
 
-  const supabase = await crearClienteServidor()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
+  const user = await requerirUsuario()
 
   const categorias = await getCategorias()
   const categoria = categorias.find((c) => c.slug === slug)

@@ -1,6 +1,5 @@
-import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
-import { crearClienteServidor } from '@/lib/supabase/server'
+import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getRecordatoriosProximos, getContadoresPorCategoria } from '@/lib/queries/reminder.queries'
 import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
@@ -12,12 +11,7 @@ interface Props {
 }
 
 export default async function PaginaDashboard({ searchParams }: Props) {
-  const supabase = await crearClienteServidor()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
+  const user = await requerirUsuario()
 
   const { categoria: categoriaIdParam } = await searchParams
 
