@@ -52,7 +52,7 @@ export async function POST(req: Request) {
 
   try {
     const { object } = await generateObject({
-      model: groq('llama-3.1-8b-instant'),
+      model: groq('openai/gpt-oss-20b'),
       schema: esquemaRecordatorioIA,
       prompt: `Fecha actual: ${fechaHoy ?? new Date().toISOString().split('T')[0]}
 
