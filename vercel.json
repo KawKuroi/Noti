@@ -2,11 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/check-reminders",
-      "schedule": "* * * * *"
+      "schedule": "0 8 * * *"
     },
     {
       "path": "/api/cron/resumen-diario",
-      "schedule": "0 * * * *"
+      "schedule": "0 20 * * *"
     }
   ]
 }
