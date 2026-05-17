@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { toast } from 'sonner'
 import { Sparkles, SendHorizontal, Check, X, Loader2 } from 'lucide-react'
 import { crearRecordatorioDesdeIA } from '@/lib/actions/reminder.actions'
 import { SLUGS_VALIDOS, CATEGORIAS } from '@/lib/utils/constants'
@@ -24,7 +25,6 @@ export function AsistenteIA() {
   const [cargando, setCargando] = useState(false)
   const [parseado, setParseado] = useState<RecordatorioParseado | null>(null)
   const [guardando, setGuardando] = useState(false)
-  const [exito, setExito] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -35,7 +35,6 @@ export function AsistenteIA() {
     setCargando(true)
     setParseado(null)
     setError(null)
-    setExito(false)
 
     try {
       const res = await fetch('/api/ai/recordatorio', {
@@ -49,18 +48,24 @@ export function AsistenteIA() {
 
       if (!res.ok) {
         if (res.status === 429) {
-          setError('Demasiadas peticiones, intenta en un momento')
+          const msg = 'Demasiadas peticiones, intenta en un momento'
+          setError(msg)
+          toast.error(msg)
           return
         }
         const data = await res.json().catch(() => null)
-        setError(data?.error ?? 'Error al procesar')
+        const msg = data?.error ?? 'Error al procesar'
+        setError(msg)
+        toast.error(msg)
         return
       }
 
       const datos: RecordatorioParseado = await res.json()
       setParseado(datos)
     } catch {
-      setError('No se pudo conectar con el asistente')
+      const msg = 'No se pudo conectar con el asistente'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setCargando(false)
     }
@@ -74,12 +79,13 @@ export function AsistenteIA() {
     const resultado = await crearRecordatorioDesdeIA(parseado)
 
     if (resultado.ok) {
-      setExito(true)
+      toast.success('Recordatorio creado correctamente')
       setParseado(null)
       setTexto('')
-      setTimeout(() => setExito(false), 3000)
     } else {
-      setError(typeof resultado.error === 'string' ? resultado.error : 'Error al crear')
+      const msg = typeof resultado.error === 'string' ? resultado.error : 'Error al crear'
+      setError(msg)
+      toast.error(msg)
     }
     setGuardando(false)
   }
@@ -100,13 +106,6 @@ export function AsistenteIA() {
 
   return (
     <div className="mb-5">
-      {exito && (
-        <div className="mb-3 flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-          <Check size={14} />
-          Recordatorio creado correctamente
-        </div>
-      )}
-
       {parseado && (
         <div className="mb-3 bg-gray-50 border border-gray-200 rounded-lg p-3">
           <div className="flex items-start justify-between gap-2 mb-3">

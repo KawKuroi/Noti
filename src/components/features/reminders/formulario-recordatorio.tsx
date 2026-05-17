@@ -193,8 +193,10 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
     if (estado.ok) {
       toast.success(esEdicion ? 'Recordatorio actualizado' : 'Recordatorio creado')
       if (onExito) onExito()
+    } else if (typeof estado.error === 'string') {
+      toast.error(estado.error)
     }
-  }, [estado.ok, esEdicion, onExito])
+  }, [estado.ok, estado.error, esEdicion, onExito])
 
   function alCambiarCategoria(slug: string) {
     const cat = categorias.find((c) => c.slug === slug)

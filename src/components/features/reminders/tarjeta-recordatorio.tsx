@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { Check, Pencil, Trash2, RotateCcw, Clock, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,15 +37,32 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
 
   async function manejarCompletar() {
     setCargando(true)
-    await alternarCompletado(recordatorio.id)
+    const estabaCompletado = recordatorio.estaCompletado
+    const resultado = await alternarCompletado(recordatorio.id)
     setCargando(false)
+    if (resultado.ok) {
+      if (estabaCompletado) {
+        toast.success('Recordatorio reabierto')
+      } else if (recordatorio.esRecurrente) {
+        toast.success('Avanzado a la proxima ocurrencia')
+      } else {
+        toast.success('Recordatorio completado')
+      }
+    } else {
+      toast.error(resultado.error ?? 'No se pudo actualizar el recordatorio')
+    }
   }
 
   async function manejarEliminar() {
     if (!confirm('¿Eliminar este recordatorio?')) return
     setCargando(true)
-    await eliminarRecordatorio(recordatorio.id)
+    const resultado = await eliminarRecordatorio(recordatorio.id)
     setCargando(false)
+    if (resultado.ok) {
+      toast.success('Recordatorio eliminado')
+    } else {
+      toast.error(resultado.error ?? 'No se pudo eliminar el recordatorio')
+    }
   }
 
   return (
