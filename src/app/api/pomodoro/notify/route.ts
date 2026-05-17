@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { obtenerUsuario } from '@/lib/auth'
 import { enviarPushAUsuario } from '@/lib/services/push.service'
 import { esquemaNotificacionPomodoro } from '@/lib/validations/push.schemas'
+import { verificarLimite } from '@/lib/utils/rate-limit'
 import type { PayloadPush } from '@/lib/services/push.service'
 
 const MENSAJES: Record<string, { titulo: string; body: (titulo?: string) => string }> = {
@@ -26,6 +27,14 @@ export async function POST(request: Request) {
   const usuario = await obtenerUsuario()
   if (!usuario) {
     return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  }
+
+  const limite = verificarLimite(`pomodoro-notify:${usuario.id}`, 60, 60_000)
+  if (!limite.ok) {
+    return NextResponse.json({ error: 'Demasiadas peticiones' }, {
+      status: 429,
+      headers: { 'Retry-After': String(limite.retryAfter ?? 60) },
+    })
   }
 
   let body: unknown

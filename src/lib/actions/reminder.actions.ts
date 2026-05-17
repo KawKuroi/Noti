@@ -18,7 +18,7 @@ async function obtenerUsuarioId(): Promise<string | null> {
 }
 
 function revalidarRutas(slug?: string) {
-  revalidatePath('/')
+  revalidatePath('/inicio')
   if (slug) {
     revalidatePath(`/${slug}`)
   }

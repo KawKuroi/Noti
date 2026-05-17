@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react'
 import { Trash2, Monitor } from 'lucide-react'
+import { toast } from 'sonner'
 import { eliminarSuscripcion } from '@/lib/actions/push-subscription.actions'
 import type { SuscripcionPush } from '@/lib/queries/push.queries'
 
@@ -14,7 +15,12 @@ export function ListaDispositivos({ suscripciones }: Props) {
 
   const eliminar = (id: string) => {
     startTransition(async () => {
-      await eliminarSuscripcion(id)
+      const resultado = await eliminarSuscripcion(id)
+      if (resultado.ok) {
+        toast.success('Dispositivo eliminado')
+      } else {
+        toast.error(resultado.error ?? 'Error al eliminar el dispositivo')
+      }
     })
   }
 

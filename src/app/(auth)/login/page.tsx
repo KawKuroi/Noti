@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { crearClienteNavegador } from '@/lib/supabase/client'
 
+
 export default function PaginaLogin() {
   const [email, setEmail] = useState('')
   const [contrasena, setContrasena] = useState('')
@@ -38,7 +39,7 @@ export default function PaginaLogin() {
       return
     }
 
-    window.location.href = '/'
+    window.location.href = '/inicio'
   }
 
   return (

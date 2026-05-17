@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import {
   startOfMonth,
   endOfMonth,
@@ -5,6 +6,8 @@ import {
   endOfWeek,
   addDays,
 } from 'date-fns'
+
+export const metadata: Metadata = { title: 'Calendario | Noti' }
 import { requerirUsuario } from '@/lib/auth'
 import { getRecordatoriosEnRango } from '@/lib/queries/reminder.queries'
 import { getCategorias } from '@/lib/queries/category.queries'

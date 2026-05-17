@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { registrarSuscripcion } from '@/lib/actions/push-subscription.actions'
+import { verificarLimite } from '@/lib/utils/rate-limit'
 
 function detectarDispositivo(userAgent: string): string {
   if (/android/i.test(userAgent)) return 'Chrome Android'
@@ -12,6 +13,15 @@ function detectarDispositivo(userAgent: string): string {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+    const limite = verificarLimite(`push-subscribe:${ip}`, 10, 60_000)
+    if (!limite.ok) {
+      return NextResponse.json({ error: 'Demasiadas peticiones' }, {
+        status: 429,
+        headers: { 'Retry-After': String(limite.retryAfter ?? 60) },
+      })
+    }
+
     const body = await req.json()
     const { endpoint, keys } = body
 

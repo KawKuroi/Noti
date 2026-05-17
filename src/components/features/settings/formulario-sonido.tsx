@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import { actualizarSonido } from '@/lib/actions/notification.actions'
 
 interface Props {
@@ -9,16 +10,18 @@ interface Props {
 
 export function FormularioSonido({ sonidoActual }: Props) {
   const [activo, setActivo] = useState(sonidoActual)
-  const [mensaje, setMensaje] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
   function manejarCambio(nuevoValor: boolean) {
     setActivo(nuevoValor)
-    setMensaje(null)
 
     startTransition(async () => {
       const resultado = await actualizarSonido(nuevoValor)
-      setMensaje(resultado.ok ? 'Guardado' : (resultado.error ?? 'Error al guardar'))
+      if (resultado.ok) {
+        toast.success('Configuracion guardada')
+      } else {
+        toast.error(resultado.error ?? 'Error al guardar')
+      }
     })
   }
 
@@ -41,11 +44,6 @@ export function FormularioSonido({ sonidoActual }: Props) {
         />
       </button>
       <span className="text-sm text-gray-600">{activo ? 'Activado' : 'Desactivado'}</span>
-      {mensaje && (
-        <span className={`text-xs ${mensaje === 'Guardado' ? 'text-gray-500' : 'text-red-500'}`}>
-          {mensaje}
-        </span>
-      )}
     </div>
   )
 }

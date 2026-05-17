@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { Send, Sparkles } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TarjetaConfirmacion } from './tarjeta-confirmacion'
@@ -149,12 +150,14 @@ export function ChatLanzamientos() {
                   if (parte.state === 'output-available') {
                     const salida = parte.output as SalidaAgregar
                     if (salida.agregado) {
+                      toast.success('Lanzamiento agregado al calendario')
                       return (
                         <p key={idx} className="text-xs text-emerald-600 italic">
                           Lanzamiento agregado al calendario.
                         </p>
                       )
                     }
+                    toast.error(salida.error ?? 'No se pudo agregar el lanzamiento')
                     return (
                       <p key={idx} className="text-xs text-red-600 italic">
                         Error: {salida.error ?? 'no se pudo agregar'}

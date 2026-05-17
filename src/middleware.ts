@@ -31,15 +31,20 @@ export async function middleware(solicitud: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const estaEnRutaAuth = solicitud.nextUrl.pathname.startsWith('/login') ||
-    solicitud.nextUrl.pathname.startsWith('/register')
+  const ruta = solicitud.nextUrl.pathname
+  const estaEnRutaAuth = ruta.startsWith('/login') || ruta.startsWith('/register')
+  const esRutaPublica = ruta === '/' || ruta === '/auth/callback'
 
-  if (!user && !estaEnRutaAuth && solicitud.nextUrl.pathname !== '/auth/callback') {
+  if (!user && !estaEnRutaAuth && !esRutaPublica) {
     return NextResponse.redirect(new URL('/login', solicitud.url))
   }
 
+  if (user && ruta === '/') {
+    return NextResponse.redirect(new URL('/inicio', solicitud.url))
+  }
+
   if (user && estaEnRutaAuth) {
-    return NextResponse.redirect(new URL('/', solicitud.url))
+    return NextResponse.redirect(new URL('/inicio', solicitud.url))
   }
 
   return respuesta

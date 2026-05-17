@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react'
 import { useFormStatus } from 'react-dom'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -189,10 +190,11 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
   const [categoriaIdActual, setCategoriaId] = useState(categoriaInicial?.id ?? categorias[0]?.id)
 
   useEffect(() => {
-    if (estado.ok && onExito) {
-      onExito()
+    if (estado.ok) {
+      toast.success(esEdicion ? 'Recordatorio actualizado' : 'Recordatorio creado')
+      if (onExito) onExito()
     }
-  }, [estado.ok, onExito])
+  }, [estado.ok, esEdicion, onExito])
 
   function alCambiarCategoria(slug: string) {
     const cat = categorias.find((c) => c.slug === slug)

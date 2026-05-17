@@ -93,7 +93,7 @@ export async function posponerRecordatorio(
         ),
       )
 
-    revalidatePath('/')
+    revalidatePath('/inicio')
     return { ok: true }
   } catch (e) {
     console.error('Error al posponer recordatorio:', e)
@@ -118,7 +118,7 @@ export async function completarDesdeNotificacion(
         ),
       )
 
-    revalidatePath('/')
+    revalidatePath('/inicio')
     return { ok: true }
   } catch (e) {
     console.error('Error al completar recordatorio:', e)

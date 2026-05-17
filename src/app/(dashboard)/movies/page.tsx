@@ -1,4 +1,7 @@
+import type { Metadata } from 'next'
 import { Film } from 'lucide-react'
+
+export const metadata: Metadata = { title: 'Lanzamientos | Noti' }
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getRecordatoriosPorCategoria } from '@/lib/queries/reminder.queries'

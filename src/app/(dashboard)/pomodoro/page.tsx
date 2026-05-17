@@ -1,4 +1,7 @@
+import type { Metadata } from 'next'
 import { requerirUsuario } from '@/lib/auth'
+
+export const metadata: Metadata = { title: 'Pomodoro | Noti' }
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { getRecordatorioPorId } from '@/lib/queries/reminder.queries'
 import { Temporizador } from '@/components/features/pomodoro/temporizador'

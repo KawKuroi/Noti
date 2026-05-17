@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { addMonths, addWeeks, isSameDay } from 'date-fns'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/features/empty-state'
 import { VistaMes } from './vista-mes'
 import { VistaSemana } from './vista-semana'
 import { DialogDia } from './dialog-dia'
@@ -124,6 +125,13 @@ export function VistaCalendario({
           recordatorios={recordatorios}
           categorias={categorias}
           onDiaClick={setDiaAbierto}
+        />
+      )}
+
+      {recordatorios.length === 0 && (
+        <EmptyState
+          titulo="Nada agendado en este periodo"
+          descripcion="Crea un recordatorio desde el inicio o cualquier categoria para verlo aqui."
         />
       )}
 

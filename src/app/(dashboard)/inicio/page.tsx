@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
@@ -6,6 +7,8 @@ import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nu
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
 import { FiltroCategorias } from '@/components/features/reminders/filtro-categorias'
 import { NotificationPrompt } from '@/components/features/notification-prompt'
+
+export const metadata: Metadata = { title: 'Inicio | Noti' }
 
 interface Props {
   searchParams: Promise<{ categoria?: string }>

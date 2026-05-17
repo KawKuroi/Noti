@@ -41,10 +41,10 @@ export function Sidebar({ categorias }: Props) {
 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         <Link
-          href="/"
+          href="/inicio"
           className={cn(
             'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-            ruta === '/'
+            ruta === '/inicio'
               ? 'bg-gray-100 text-gray-900'
               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
           )}

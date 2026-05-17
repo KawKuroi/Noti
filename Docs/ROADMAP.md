@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Fase 5 — Pomodoro + Calendario completada. Timer de pomodoro 25/5/15 min con notificacion push inmediata (a todos los dispositivos suscritos) al terminar cada sesion, beep Web Audio opcional y boton "Iniciar pomodoro" desde recordatorios de estudio. Vista de calendario mensual y semanal con dots de colores por categoria, expansion de recurrentes y dialog por dia.
+Fase 6 — Pulido + deploy publico completada. Landing publica extendida en `/`, dashboard movido a `/inicio`, perfil editable (nombre + zona horaria), toasts globales con sonner, skeletons y loading.tsx por ruta, empty states adicionales (calendario), OG/Twitter meta tags, favicon SVG via `app/icon.svg`, RLS habilitado en las 5 tablas de Supabase (migration en `src/db/migrations/0002_rls_policies.sql` — aplicar manualmente en Supabase dashboard), rate limiting in-memory en `/api/chat` (20 req/min), `/api/push/subscribe` (10/min por IP), `/api/push/action` (30/min por IP) y `/api/pomodoro/notify` (60/min por usuario). Items manuales pendientes: Lighthouse audit, testing en dispositivos fisicos, captura de screenshots y GIFs para el README.
 
 ---
 
@@ -135,21 +135,21 @@ Fase 5 — Pomodoro + Calendario completada. Timer de pomodoro 25/5/15 min con n
 
 **Objetivo:** La app está pulida, testeada, y lista para que cualquier persona la use. Portafolio-ready.
 
-- [ ] Landing page pública con descripción de la app y CTA de registro
-- [ ] Página de perfil: editar nombre, zona horaria, preferencias
-- [ ] Gestionar dispositivos: ver y eliminar suscripciones push
-- [ ] Empty states para cada sección (sin recordatorios, sin películas seguidas, etc.)
-- [ ] Loading states y skeletons
-- [ ] Error handling global con toasts
-- [ ] Validación de formularios con mensajes claros
-- [ ] Meta tags y OG tags para SEO y compartir
-- [ ] Favicon y splash screens para PWA
-- [ ] Lighthouse audit: PWA score > 90, Performance > 80
-- [ ] Testing manual en Android Chrome + Windows Chrome + Windows Edge
-- [ ] Documentar README del repositorio para portafolio
-- [ ] Screenshots y demo GIF para portafolio
-- [ ] Row Level Security (RLS) en Supabase: un usuario solo ve sus datos
-- [ ] Rate limiting básico en API routes
+- [x] Landing page pública con descripción de la app y CTA de registro
+- [x] Página de perfil: editar nombre, zona horaria, preferencias
+- [x] Gestionar dispositivos: ver y eliminar suscripciones push
+- [x] Empty states para cada sección (sin recordatorios, sin películas seguidas, etc.)
+- [x] Loading states y skeletons
+- [x] Error handling global con toasts
+- [x] Validación de formularios con mensajes claros
+- [x] Meta tags y OG tags para SEO y compartir
+- [x] Favicon y splash screens para PWA
+- [ ] Lighthouse audit: PWA score > 90, Performance > 80 (manual)
+- [ ] Testing manual en Android Chrome + Windows Chrome + Windows Edge (manual)
+- [x] Documentar README del repositorio para portafolio
+- [ ] Screenshots y demo GIF para portafolio (manual)
+- [x] Row Level Security (RLS) en Supabase: migration en `src/db/migrations/0002_rls_policies.sql` — aplicar en Supabase dashboard
+- [x] Rate limiting básico en API routes
 
 **Done when:** Puedo compartir `noti.vercel.app` con 5 personas, todas pueden registrarse, crear recordatorios, y recibir notificaciones sin problemas. El README del repo tiene screenshots y explica el proyecto.
 
@@ -162,12 +162,9 @@ Fase 5 — Pomodoro + Calendario completada. Timer de pomodoro 25/5/15 min con n
 - [ ] Internacionalización (i18n) — inglés
 - [ ] Dark mode
 - [ ] Categorías custom (el usuario crea las suyas)
-- [ ] Integración con Google Calendar (importar eventos)
-- [ ] Compartir recordatorios con otros usuarios
 - [ ] Widget de resumen diario (email matutino)
 - [ ] Estadísticas: recordatorios completados, sesiones pomodoro, streaks
 - [ ] Búsqueda global de recordatorios
-- [ ] Atajos de teclado
 - [ ] Drag & drop para reordenar recordatorios
 - [ ] Integración con más fuentes: series (TMDB TV), eventos deportivos, lanzamientos de videojuegos
 - [ ] PWA offline mejorado: sync cuando vuelve la conexión

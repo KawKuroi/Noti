@@ -5,7 +5,7 @@ import { upsertPerfil } from '@/lib/actions/user.actions'
 export async function GET(solicitud: Request) {
   const { searchParams, origin } = new URL(solicitud.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
+  const next = searchParams.get('next') ?? '/inicio'
 
   if (code) {
     const supabase = await crearClienteServidor()

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import { actualizarAnticipacion } from '@/lib/actions/notification.actions'
 
 const OPCIONES = [
@@ -18,16 +19,18 @@ interface Props {
 
 export function FormularioAnticipacion({ anticipacionActual }: Props) {
   const [valor, setValor] = useState(anticipacionActual)
-  const [mensaje, setMensaje] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
   const manejarCambio = (nuevoValor: number) => {
     setValor(nuevoValor)
-    setMensaje(null)
 
     startTransition(async () => {
       const resultado = await actualizarAnticipacion(nuevoValor)
-      setMensaje(resultado.ok ? 'Guardado' : (resultado.error ?? 'Error al guardar'))
+      if (resultado.ok) {
+        toast.success('Configuracion guardada')
+      } else {
+        toast.error(resultado.error ?? 'Error al guardar')
+      }
     })
   }
 
@@ -45,11 +48,6 @@ export function FormularioAnticipacion({ anticipacionActual }: Props) {
           </option>
         ))}
       </select>
-      {mensaje && (
-        <span className={`text-xs ${mensaje === 'Guardado' ? 'text-gray-500' : 'text-red-500'}`}>
-          {mensaje}
-        </span>
-      )}
     </div>
   )
 }
