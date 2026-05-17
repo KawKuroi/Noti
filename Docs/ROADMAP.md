@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Fase 6 — Pulido + deploy publico completada. Landing publica extendida en `/`, dashboard movido a `/inicio`, perfil editable (nombre + zona horaria), toasts globales con sonner, skeletons y loading.tsx por ruta, empty states adicionales (calendario), OG/Twitter meta tags, favicon SVG via `app/icon.svg`, RLS habilitado en las 5 tablas de Supabase (migration en `src/db/migrations/0002_rls_policies.sql` — aplicar manualmente en Supabase dashboard), rate limiting in-memory en `/api/chat` (20 req/min), `/api/push/subscribe` (10/min por IP), `/api/push/action` (30/min por IP) y `/api/pomodoro/notify` (60/min por usuario). Items manuales pendientes: Lighthouse audit, testing en dispositivos fisicos, captura de screenshots y GIFs para el README.
+Fase 7 completada. Busqueda global con Ctrl+K, asistente IA para crear recordatorios por lenguaje natural, resumen diario por push notification, Background Sync en el Service Worker y shortcuts en el manifest PWA. Pendiente manual: aplicar migracion de BD en Supabase dashboard (columnas `daily_summary` y `summary_hour` en tabla `profiles` — SQL en `src/db/migrations/0002_magical_maddog.sql`).
 
 ---
 
@@ -17,6 +17,7 @@ Fase 6 — Pulido + deploy publico completada. Landing publica extendida en `/`,
 - [x] Crear `.gitignore` (Next.js + Node.js + Supabase + entorno)
 - [x] Crear `.env.example` (template documentado de variables de entorno)
 - [x] Crear `.editorconfig` (UTF-8, LF, 2 espacios)
+
 **Done when:** Se puede clonar el repositorio y saber exactamente que variables de entorno configurar antes de iniciar el desarrollo.
 
 ---
@@ -148,24 +149,67 @@ Fase 6 — Pulido + deploy publico completada. Landing publica extendida en `/`,
 - [ ] Testing manual en Android Chrome + Windows Chrome + Windows Edge (manual)
 - [x] Documentar README del repositorio para portafolio
 - [ ] Screenshots y demo GIF para portafolio (manual)
-- [x] Row Level Security (RLS) en Supabase: migration en `src/db/migrations/0002_rls_policies.sql` — aplicar en Supabase dashboard
+- [x] Row Level Security (RLS) en Supabase: migration en `src/db/migrations/0001_rls_policies.sql` — aplicar en Supabase dashboard
 - [x] Rate limiting básico en API routes
 
 **Done when:** Puedo compartir `noti.vercel.app` con 5 personas, todas pueden registrarse, crear recordatorios, y recibir notificaciones sin problemas. El README del repo tiene screenshots y explica el proyecto.
 
 ---
 
-## Fase 7 (post-MVP): Mejoras futuras
+## Fase 7: Busqueda, IA general y segundo plano (completada)
 
-**No priorizado — ideas para después del MVP:**
+**Objetivo:** App funcionando en segundo plano, asistente IA para cualquier tipo de recordatorio, busqueda global, mejoras PWA.
 
-- [ ] Internacionalización (i18n) — inglés
-- [ ] Dark mode
-- [ ] Categorías custom (el usuario crea las suyas)
-- [ ] Widget de resumen diario (email matutino)
-- [ ] Estadísticas: recordatorios completados, sesiones pomodoro, streaks
-- [ ] Búsqueda global de recordatorios
-- [ ] Drag & drop para reordenar recordatorios
-- [ ] Integración con más fuentes: series (TMDB TV), eventos deportivos, lanzamientos de videojuegos
-- [ ] PWA offline mejorado: sync cuando vuelve la conexión
-- [ ] Asistente IA para crear recordatorios por lenguaje natural
+- [x] Busqueda global con Ctrl+K — modal flotante con debounce 300ms, ilike sobre titulo y descripcion, badge de categoria y fecha relativa en resultados
+- [x] Asistente IA en dashboard — input de lenguaje natural que usa Gemini (`generateObject`) para parsear la intencion y mostrar tarjeta de confirmacion antes de crear
+- [x] Endpoint `POST /api/ai/recordatorio` — extrae titulo, categoria, fecha, hora, recurrencia y regla RRULE desde texto libre
+- [x] Server action `crearRecordatorioDesdeIA` — crea cualquier tipo de recordatorio desde datos parseados por IA
+- [x] Resumen diario por push notification — toggle en Settings para recibir una notificacion matutina con los recordatorios del dia
+- [x] Cron `/api/cron/resumen-diario` ejecutado cada hora en Vercel — envia a usuarios configurados segun su hora preferida
+- [x] Funcion `enviarResumenDiario` en push.service.ts
+- [x] Schema DB: columnas `daily_summary` y `summary_hour` en tabla `profiles` — migracion en `src/db/migrations/0002_magical_maddog.sql` (aplicar manualmente en Supabase)
+- [x] Background Sync en Service Worker — guarda mutaciones fallidas en IndexedDB y las reintenta cuando vuelve la conexion
+- [x] API routes excluidas del cache del Service Worker para garantizar datos frescos
+- [x] Shortcuts en manifest.json — accesos rapidos a "Nuevo recordatorio", "Pomodoro" y "Calendario" desde el icono instalado
+- [x] `display_override: window-controls-overlay` en manifest.json para mejor integracion en Windows
+
+**Done when:** Puedo crear un recordatorio escribiendo "cumpleanos de Maria el 20 de junio", buscarlo con Ctrl+K, y recibir un resumen push cada manana con mis pendientes del dia.
+
+---
+
+## Fase 8 (futuras mejoras)
+
+**No priorizado — oportunidades de mejora identificadas:**
+
+### UX / Productividad
+- [ ] Dark mode — Tailwind lo soporta nativamente, impacto visual alto
+- [ ] Drag & drop para reordenar recordatorios dentro de una categoria
+- [ ] Optimistic updates en completar/eliminar — el item desaparece visualmente de inmediato sin esperar al servidor
+- [ ] Paginacion o infinite scroll en la lista de recordatorios para usuarios con muchos items
+- [ ] Atajos de teclado adicionales: `N` para nuevo recordatorio, `C` para ir al calendario
+
+### Notificaciones y segundo plano
+- [ ] PWA Widget API (Windows 11 + Android) — widget nativo en la pantalla de inicio con los proximos recordatorios del dia (experimental, requiere Edge/Chrome reciente)
+- [ ] Share Target API — recibir texto desde otras apps para crear un recordatorio directamente
+- [ ] Notificacion por email como fallback cuando las push notifications estan bloqueadas
+- [ ] Recordatorio de cumpleanos con cuenta regresiva ("Faltan 3 dias para el cumpleanos de Juan")
+
+### IA y contenido
+- [ ] Asistente IA conversacional en el dashboard (no solo single-shot) — historial de conversacion para refinar recordatorios
+- [ ] Deteccion automatica de duplicados al crear con IA — avisar si ya existe un recordatorio similar
+- [ ] Integracion con mas fuentes: eventos deportivos, lanzamientos de software, estrenos de temporadas de TV
+- [ ] Sugerencias de categoria inteligente al tipear en el formulario manual
+
+### Estadisticas
+- [ ] Pagina de estadisticas: recordatorios completados por semana, sesiones pomodoro, racha de dias activos, categoria mas usada
+- [ ] Resumen semanal — push notification cada domingo con el resumen de la semana pasada y los proximos 7 dias
+
+### Personalizacion
+- [ ] Categorias custom — el usuario puede crear y nombrar sus propias categorias con color e icono
+- [ ] Temas de color — no solo dark/light, sino paletas personalizables
+
+### Tecnico
+- [ ] Internacionalizacion (i18n) — soporte para ingles ademas de espanol
+- [ ] Cache de cliente con SWR o React Query para reducir recargas al navegar entre paginas
+- [ ] Full-text search con `tsvector` en PostgreSQL para busqueda mas precisa con soporte de acentos y sinonimos
+- [ ] Tests E2E con Playwright para el flujo critico (crear recordatorio → recibir notificacion)
