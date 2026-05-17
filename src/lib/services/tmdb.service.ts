@@ -36,15 +36,14 @@ function obtenerConfig() {
 }
 
 async function llamarTmdb<T>(ruta: string, params: Record<string, string> = {}): Promise<T | null> {
-  const { apiKey, baseUrl } = obtenerConfig()
-  const url = new URL(`${baseUrl}${ruta}`)
-  url.searchParams.set('api_key', apiKey)
-  url.searchParams.set('language', 'es-ES')
-  for (const [key, valor] of Object.entries(params)) {
-    url.searchParams.set(key, valor)
-  }
-
   try {
+    const { apiKey, baseUrl } = obtenerConfig()
+    const url = new URL(`${baseUrl}${ruta}`)
+    url.searchParams.set('api_key', apiKey)
+    url.searchParams.set('language', 'es-ES')
+    for (const [key, valor] of Object.entries(params)) {
+      url.searchParams.set(key, valor)
+    }
     const respuesta = await fetch(url.toString(), { cache: 'no-store' })
     if (!respuesta.ok) {
       console.error('TMDB error:', respuesta.status, await respuesta.text())

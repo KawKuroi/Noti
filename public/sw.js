@@ -94,7 +94,7 @@ self.addEventListener('fetch', (evento) => {
           }
           return respuesta
         })
-        .catch(() => caches.match(evento.request)),
+        .catch(() => caches.match(evento.request).then((r) => r ?? new Response('Sin conexion', { status: 503 }))),
     )
     return
   }

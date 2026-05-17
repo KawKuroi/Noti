@@ -27,14 +27,13 @@ function obtenerApiKey(): string {
 }
 
 async function llamarRawg<T>(ruta: string, params: Record<string, string> = {}): Promise<T | null> {
-  const apiKey = obtenerApiKey()
-  const url = new URL(`https://api.rawg.io/api${ruta}`)
-  url.searchParams.set('key', apiKey)
-  for (const [key, valor] of Object.entries(params)) {
-    url.searchParams.set(key, valor)
-  }
-
   try {
+    const apiKey = obtenerApiKey()
+    const url = new URL(`https://api.rawg.io/api${ruta}`)
+    url.searchParams.set('key', apiKey)
+    for (const [key, valor] of Object.entries(params)) {
+      url.searchParams.set(key, valor)
+    }
     const respuesta = await fetch(url.toString(), { cache: 'no-store' })
     if (!respuesta.ok) {
       console.error('RAWG error:', respuesta.status, await respuesta.text())
