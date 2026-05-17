@@ -189,7 +189,7 @@ export default function PaginaLanding() {
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-full mb-4">
                   <Sparkles size={12} />
-                  Powered by Google Gemini 2.0 Flash
+                  Powered by Groq Llama 3.3 70B
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">
                   Chat IA para agendar lanzamientos

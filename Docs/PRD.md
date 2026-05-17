@@ -34,7 +34,7 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 
 6. **Resumen diario** — Push notification matutina configurable con los recordatorios del día; el usuario elige la hora desde Settings
 
-7. **Chat IA para lanzamientos** — Asistente conversacional con Google Gemini 2.0 Flash que consulta TMDB (películas/series), RAWG (videojuegos) y MusicBrainz (álbumes). Fallback manual si la fuente no tiene la fecha. Anti-alucinación: nunca inventa fechas
+7. **Chat IA para lanzamientos** — Asistente conversacional con Groq Llama 3.3 70B Versatile que consulta TMDB (películas/series), RAWG (videojuegos) y MusicBrainz (álbumes). Fallback manual si la fuente no tiene la fecha. Anti-alucinación: nunca inventa fechas
 
 8. **Asistente IA general** — Input de lenguaje natural en el dashboard para crear cualquier tipo de recordatorio: "cumpleaños de María el 20 de junio", "clase de inglés los martes a las 7pm", "cita médica el viernes a las 3pm"
 

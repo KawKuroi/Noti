@@ -1,5 +1,5 @@
 import { generateObject, NoObjectGeneratedError } from 'ai'
-import { google } from '@ai-sdk/google'
+import { groq } from '@ai-sdk/groq'
 import { z } from 'zod'
 import { obtenerUsuario } from '@/lib/auth'
 import { verificarLimite } from '@/lib/utils/rate-limit'
@@ -40,8 +40,8 @@ export async function POST(req: Request) {
     })
   }
 
-  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    return Response.json({ error: 'GOOGLE_GENERATIVE_AI_API_KEY no configurada' }, { status: 500 })
+  if (!process.env.GROQ_API_KEY) {
+    return Response.json({ error: 'GROQ_API_KEY no configurada' }, { status: 500 })
   }
 
   const { texto, fechaHoy } = await req.json()
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
 
   try {
     const { object } = await generateObject({
-      model: google('gemini-2.0-flash'),
+      model: groq('llama-3.1-8b-instant'),
       schema: esquemaRecordatorioIA,
       prompt: `Fecha actual: ${fechaHoy ?? new Date().toISOString().split('T')[0]}
 

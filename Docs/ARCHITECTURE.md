@@ -16,8 +16,8 @@
 | API de películas/series | TMDB API | Gratis, 40 req/10s, soporta preferencia regional CO |
 | API de videojuegos | RAWG.io | Gratis, 20.000 req/mes, base de datos amplia |
 | API de música | MusicBrainz | Sin API key, 1 req/s, datos estructurados de releases |
-| IA para lanzamientos | Google Gemini 2.0 Flash via AI SDK v6 — streamText + tools | Tier gratuito 1500 req/día, streaming + tool calling |
-| IA para recordatorios | Google Gemini 2.0 Flash via AI SDK v6 — generateObject | Extrae estructura de lenguaje natural sin streaming |
+| IA para lanzamientos | Groq Llama 3.3 70B Versatile via AI SDK v6 — streamText + tools | Free tier 30 RPM / 1000 req/día, streaming + tool calling |
+| IA para recordatorios | Groq Llama 3.1 8B Instant via AI SDK v6 — generateObject | Extrae estructura desde lenguaje natural, free tier 30 RPM / 14.400 req/día |
 | Hosting | Vercel (Hobby) | Deploy automático, CDN global, gratis para uso personal |
 | Validación | Zod | Validación de schemas en runtime, integra con TypeScript |
 | Toasts | Sonner | Notificaciones UI globales |
@@ -289,15 +289,15 @@ CREATE INDEX idx_push_subscriptions_user ON push_subscriptions(user_id);
 
 ```
 [Usuario]      → escribe en /movies ("cuando sale GTA 6")
-[/api/chat]    → streamText() con Gemini 2.0 Flash + tools
-[Gemini]       → tool buscarLanzamiento({titulo, tipo})
+[/api/chat]    → streamText() con Groq Llama 3.3 70B + tools
+[LLM]          → tool buscarLanzamiento({titulo, tipo})
 [Tool]         → TMDB | RAWG | MusicBrainz según tipo
 [Tool]         → devuelve ResultadoLanzamiento o { encontrado: false }
-[Gemini]       → si false: tool pedirFechaManual (no inventa fecha)
+[LLM]          → si false: tool pedirFechaManual (no inventa fecha)
                → si true: responde con fecha y pide confirmación
 [UI]           → renderiza <TarjetaConfirmacion> o <FormularioFechaManual>
 [Usuario]      → confirma
-[Gemini]       → tool agregarRecordatorio
+[LLM]          → tool agregarRecordatorio
 [Tool]         → crearRecordatorioLanzamiento → INSERT con notify_at = 06:00 del día
 ```
 
@@ -306,8 +306,8 @@ CREATE INDEX idx_push_subscriptions_user ON push_subscriptions(user_id);
 ```
 [Usuario]      → escribe en el input del dashboard ("cita médica el viernes a las 3pm")
 [AsistenteIA]  → POST /api/ai/recordatorio con {texto, fechaHoy}
-[/api/ai/rec.] → generateObject() con Gemini 2.0 Flash
-[Gemini]       → extrae {titulo, categoriaSlug, fechaVencimiento, horaVencimiento,
+[/api/ai/rec.] → generateObject() con Groq Llama 3.1 8B Instant
+[LLM]          → extrae {titulo, categoriaSlug, fechaVencimiento, horaVencimiento,
                           descripcion, esRecurrente, reglaRecurrencia}
 [API]          → devuelve objeto estructurado (sin streaming)
 [AsistenteIA]  → muestra tarjeta de confirmación con los datos parseados
@@ -335,8 +335,8 @@ TMDB_API_KEY=xxx...
 RAWG_API_KEY=xxx...
 # MusicBrainz no requiere API key
 
-# Google AI (Gemini 2.0 Flash)
-GOOGLE_GENERATIVE_AI_API_KEY=xxx...
+# Groq (Llama 3.3 70B + Llama 3.1 8B)
+GROQ_API_KEY=gsk_...
 
 # App
 NEXT_PUBLIC_APP_URL=https://noti.vercel.app

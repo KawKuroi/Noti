@@ -1,5 +1,5 @@
 import { streamText, convertToModelMessages, stepCountIs, type UIMessage } from 'ai'
-import { google } from '@ai-sdk/google'
+import { groq } from '@ai-sdk/groq'
 import { obtenerUsuario } from '@/lib/auth'
 import { herramientasLanzamientos } from '@/lib/ai/tools'
 import { PROMPT_SISTEMA_LANZAMIENTOS } from '@/lib/ai/prompt'
@@ -21,8 +21,8 @@ export async function POST(req: Request) {
     })
   }
 
-  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    return new Response('GOOGLE_GENERATIVE_AI_API_KEY no configurada', { status: 500 })
+  if (!process.env.GROQ_API_KEY) {
+    return new Response('GROQ_API_KEY no configurada', { status: 500 })
   }
 
   const { messages }: { messages: UIMessage[] } = await req.json()
@@ -30,12 +30,22 @@ export async function POST(req: Request) {
   const modelMessages = await convertToModelMessages(messages)
 
   const resultado = streamText({
-    model: google('gemini-2.0-flash'),
+    model: groq('llama-3.3-70b-versatile'),
     system: PROMPT_SISTEMA_LANZAMIENTOS,
     messages: modelMessages,
     tools: herramientasLanzamientos,
     stopWhen: stepCountIs(5),
+    onError: ({ error }) => {
+      console.error('[chat]', error)
+    },
   })
 
-  return resultado.toUIMessageStreamResponse()
+  return resultado.toUIMessageStreamResponse({
+    onError: (error) => {
+      if (error == null) return 'El asistente no pudo procesar la solicitud. Intenta de nuevo.'
+      if (typeof error === 'string') return error
+      if (error instanceof Error) return error.message
+      return 'Error desconocido en el asistente.'
+    },
+  })
 }

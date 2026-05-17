@@ -66,7 +66,7 @@
 - Cuenta en [Supabase](https://supabase.com) (plan gratuito)
 - API key de [TMDB](https://www.themoviedb.org/settings/api) para películas y series
 - API key de [RAWG](https://rawg.io/apidocs) para videojuegos
-- API key de [Google AI Studio](https://aistudio.google.com/app/apikey) para Gemini 2.0 Flash
+- API key de [Groq](https://console.groq.com) para Llama 3.3 70B / 3.1 8B (free tier sin tarjeta)
 
 ## Instalación
 
@@ -93,7 +93,7 @@ cp .env.example .env.local
 | `VAPID_EMAIL` | Email de contacto VAPID (formato `mailto:`) | Sí |
 | `TMDB_API_KEY` | API key de TMDB | Sí |
 | `RAWG_API_KEY` | API key de RAWG | Sí |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | API key de Google AI Studio | Sí |
+| `GROQ_API_KEY` | API key de Groq (console.groq.com, free tier) | Sí |
 | `CRON_SECRET` | Token para proteger los endpoints de cron | Sí |
 | `NEXT_PUBLIC_APP_URL` | URL pública de la app (sin barra final) | Sí |
 
