@@ -55,7 +55,7 @@ async function enviarPushASuscripcion(
 
 export async function enviarPushAUsuario(
   usuarioId: string,
-  recordatorioId: string,
+  recordatorioId: string | null,
   payload: PayloadPush,
 ): Promise<{ enviados: number; fallidos: number }> {
   const suscripciones = await getSuscripcionesPorUsuario(usuarioId)

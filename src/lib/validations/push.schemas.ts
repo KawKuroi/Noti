@@ -17,5 +17,17 @@ export const esquemaAccionNotificacion = z.object({
   minutos: z.coerce.number().int().positive().optional(),
 })
 
+export const esquemaSonido = z.object({
+  activo: z.boolean(),
+})
+
+export const esquemaNotificacionPomodoro = z.object({
+  fase: z.enum(['trabajo', 'descanso_corto', 'descanso_largo']),
+  siguienteFase: z.enum(['trabajo', 'descanso_corto', 'descanso_largo']),
+  reminderId: z.string().uuid().optional(),
+  tituloReminder: z.string().max(100).optional(),
+})
+
 export type SuscripcionPushInput = z.infer<typeof esquemaSuscripcionPush>
 export type AccionNotificacionInput = z.infer<typeof esquemaAccionNotificacion>
+export type NotificacionPomodoroInput = z.infer<typeof esquemaNotificacionPomodoro>

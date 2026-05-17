@@ -3,8 +3,10 @@ import {
   isTomorrow,
   isThisWeek,
   startOfDay,
+  endOfDay,
   addWeeks,
   addYears,
+  addDays,
   setMonth,
   setDate,
   getMonth,
@@ -12,6 +14,8 @@ import {
   getDay,
   format,
   isBefore,
+  isAfter,
+  endOfWeek,
   parseISO,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -145,4 +149,64 @@ export function obtenerProximaFecha(recordatorio: Recordatorio): Date {
 
 export function combinarFechaHora(fecha: string, hora: string): Date {
   return parseISO(`${fecha}T${hora}:00`)
+}
+
+// Expande los recordatorios en ocurrencias concretas dentro del rango [inicio, fin].
+// Los no recurrentes se incluyen si su fechaVencimiento cae en el rango.
+// Los recurrentes se expanden en cada ocurrencia dentro del rango clonando el objeto.
+export function expandirOcurrenciasEnRango(
+  items: Recordatorio[],
+  inicio: Date,
+  fin: Date,
+): Recordatorio[] {
+  const resultado: Recordatorio[] = []
+
+  for (const rec of items) {
+    if (!rec.esRecurrente || !rec.reglaRecurrencia) {
+      const fecha = rec.fechaVencimiento instanceof Date
+        ? rec.fechaVencimiento
+        : new Date(rec.fechaVencimiento)
+      if (!isBefore(fecha, startOfDay(inicio)) && !isAfter(fecha, endOfDay(fin))) {
+        resultado.push(rec)
+      }
+      continue
+    }
+
+    const ancla = rec.fechaVencimiento instanceof Date
+      ? rec.fechaVencimiento
+      : new Date(rec.fechaVencimiento)
+
+    // Expandir desde el inicio del rango hasta el fin
+    let cursor = startOfDay(inicio)
+    let intentos = 0
+    const maxIteraciones = 400 // tope de seguridad
+
+    while (!isAfter(cursor, endOfDay(fin)) && intentos < maxIteraciones) {
+      intentos++
+      const ocurrencia = calcularProximaOcurrencia(rec.reglaRecurrencia, ancla, cursor)
+
+      if (isAfter(ocurrencia, endOfDay(fin))) break
+
+      if (!isBefore(ocurrencia, startOfDay(inicio))) {
+        resultado.push({ ...rec, fechaVencimiento: ocurrencia })
+      }
+
+      // Avanzar cursor al dia siguiente de la ocurrencia para buscar la siguiente
+      cursor = addDays(startOfDay(ocurrencia), 1)
+    }
+  }
+
+  return resultado
+}
+
+export function formatearMesAno(fecha: Date): string {
+  return format(fecha, "MMMM yyyy", { locale: es })
+}
+
+export function formatearRangoSemana(inicio: Date): string {
+  const fin = endOfWeek(inicio, { weekStartsOn: 1 })
+  if (getMonth(inicio) === getMonth(fin)) {
+    return format(inicio, "d") + "-" + format(fin, "d MMM yyyy", { locale: es })
+  }
+  return format(inicio, "d MMM", { locale: es }) + " - " + format(fin, "d MMM yyyy", { locale: es })
 }

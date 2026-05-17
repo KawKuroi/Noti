@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, count, lte, gte } from 'drizzle-orm'
+import { eq, and, desc, asc, count, lte, gte, or } from 'drizzle-orm'
 import { db } from '@/db'
 import { recordatorios, perfiles } from '@/db/schema'
 import type { Recordatorio } from '@/types/reminder.types'
@@ -104,6 +104,34 @@ export async function getRecordatoriosTodos(usuarioId: string): Promise<Recordat
     .from(recordatorios)
     .where(eq(recordatorios.usuarioId, usuarioId))
     .orderBy(desc(recordatorios.creadoEn))
+
+  return filas.map(mapearRecordatorio)
+}
+
+// Devuelve recordatorios no recurrentes cuya fechaVencimiento cae en [inicio, fin]
+// y TODOS los recurrentes del usuario para que el cliente expanda ocurrencias en el rango.
+export async function getRecordatoriosEnRango(
+  usuarioId: string,
+  inicio: Date,
+  fin: Date,
+): Promise<Recordatorio[]> {
+  const filas = await db
+    .select()
+    .from(recordatorios)
+    .where(
+      and(
+        eq(recordatorios.usuarioId, usuarioId),
+        eq(recordatorios.estaCompletado, false),
+        or(
+          eq(recordatorios.esRecurrente, true),
+          and(
+            gte(recordatorios.fechaVencimiento, inicio),
+            lte(recordatorios.fechaVencimiento, fin),
+          ),
+        ),
+      ),
+    )
+    .orderBy(asc(recordatorios.fechaVencimiento))
 
   return filas.map(mapearRecordatorio)
 }

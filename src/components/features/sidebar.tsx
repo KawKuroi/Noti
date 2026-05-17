@@ -11,6 +11,8 @@ import {
   MapPin,
   LayoutDashboard,
   Settings,
+  Calendar,
+  Timer,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import type { Categoria } from '@/types/category.types'
@@ -81,6 +83,37 @@ export function Sidebar({ categorias }: Props) {
             </Link>
           )
         })}
+        <div className="pt-3 pb-1 px-3">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+            Herramientas
+          </span>
+        </div>
+
+        <Link
+          href="/calendar"
+          className={cn(
+            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            ruta === '/calendar'
+              ? 'bg-gray-100 text-gray-900'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+          )}
+        >
+          <Calendar size={16} />
+          Calendario
+        </Link>
+
+        <Link
+          href="/pomodoro"
+          className={cn(
+            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            ruta === '/pomodoro'
+              ? 'bg-gray-100 text-gray-900'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+          )}
+        >
+          <Timer size={16} />
+          Pomodoro
+        </Link>
       </nav>
 
       <div className="px-3 py-3 border-t border-gray-100">

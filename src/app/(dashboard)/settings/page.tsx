@@ -3,6 +3,7 @@ import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { getSuscripcionesDelUsuarioActual } from '@/lib/queries/push.queries'
 import { FormularioAnticipacion } from '@/components/features/settings/formulario-anticipacion'
 import { ListaDispositivos } from '@/components/features/settings/lista-dispositivos'
+import { FormularioSonido } from '@/components/features/settings/formulario-sonido'
 
 export default async function PaginaSettings() {
   await requerirUsuario()
@@ -33,6 +34,14 @@ export default async function PaginaSettings() {
           Dispositivos que recibiran notificaciones push.
         </p>
         <ListaDispositivos suscripciones={suscripciones} />
+      </section>
+
+      <section className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+        <h2 className="text-base font-semibold text-gray-900">Sonido del pomodoro</h2>
+        <p className="text-sm text-gray-500">
+          Reproduce un beep al terminar cada sesion o descanso del pomodoro.
+        </p>
+        <FormularioSonido sonidoActual={perfil?.sonidoHabilitado ?? true} />
       </section>
     </div>
   )

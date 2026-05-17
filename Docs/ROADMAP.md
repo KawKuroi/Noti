@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Fase 4 — Chat IA para lanzamientos completada. Asistente conversacional con Google Gemini 2.0 Flash que consulta TMDB (peliculas/series), RAWG (videojuegos) y MusicBrainz (albumes) para encontrar fechas exactas sin alucinaciones. Confirmacion explicita antes de agendar; fallback manual cuando no se encuentra la fecha. Notificacion por defecto a las 06:00 del dia del lanzamiento.
+Fase 5 — Pomodoro + Calendario completada. Timer de pomodoro 25/5/15 min con notificacion push inmediata (a todos los dispositivos suscritos) al terminar cada sesion, beep Web Audio opcional y boton "Iniciar pomodoro" desde recordatorios de estudio. Vista de calendario mensual y semanal con dots de colores por categoria, expansion de recurrentes y dialog por dia.
 
 ---
 
@@ -115,17 +115,17 @@ Fase 4 — Chat IA para lanzamientos completada. Asistente conversacional con Go
 
 **Objetivo:** Timer de pomodoro funcional integrado con los recordatorios de estudio. Vista de calendario completa.
 
-- [ ] Componente `PomodoroTimer`: temporizador 25/5/15 min configurable
-- [ ] Estados del pomodoro: trabajo, descanso corto, descanso largo
-- [ ] Contador de sesiones completadas
-- [ ] Integración con recordatorios de estudio: al crear un reminder de estudio, opción de iniciar pomodoro
-- [ ] Notificación push al terminar cada sesión de pomodoro
-- [ ] Sonido de notificación (opcional, toggle en settings)
-- [ ] Vista de calendario mensual (`CalendarView`)
-- [ ] Vista de calendario semanal
-- [ ] Recordatorios visibles como dots/badges en los días del calendario
-- [ ] Click en un día → ver recordatorios de ese día
-- [ ] Navegación entre meses/semanas
+- [x] Componente `PomodoroTimer`: temporizador 25/5/15 min configurable
+- [x] Estados del pomodoro: trabajo, descanso corto, descanso largo
+- [x] Contador de sesiones completadas
+- [x] Integración con recordatorios de estudio: al crear un reminder de estudio, opción de iniciar pomodoro
+- [x] Notificación push al terminar cada sesión de pomodoro
+- [x] Sonido de notificación (opcional, toggle en settings)
+- [x] Vista de calendario mensual (`CalendarView`)
+- [x] Vista de calendario semanal
+- [x] Recordatorios visibles como dots/badges en los días del calendario
+- [x] Click en un día → ver recordatorios de ese día
+- [x] Navegación entre meses/semanas
 
 **Done when:** Puedo iniciar un pomodoro de 25 minutos vinculado a mi recordatorio "Estudiar Cálculo", recibir una notificación push al terminar, y ver todos mis recordatorios del mes en la vista de calendario.
 

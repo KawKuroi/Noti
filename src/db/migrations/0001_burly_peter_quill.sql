@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "sound_enabled" boolean DEFAULT true NOT NULL;
