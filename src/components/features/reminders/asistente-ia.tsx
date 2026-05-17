@@ -48,8 +48,12 @@ export function AsistenteIA() {
       })
 
       if (!res.ok) {
-        const msg = res.status === 429 ? 'Demasiadas peticiones, intenta en un momento' : 'Error al procesar'
-        setError(msg)
+        if (res.status === 429) {
+          setError('Demasiadas peticiones, intenta en un momento')
+          return
+        }
+        const data = await res.json().catch(() => null)
+        setError(data?.error ?? 'Error al procesar')
         return
       }
 

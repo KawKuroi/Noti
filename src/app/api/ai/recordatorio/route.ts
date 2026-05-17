@@ -1,4 +1,4 @@
-import { generateObject } from 'ai'
+import { generateObject, NoObjectGeneratedError } from 'ai'
 import { google } from '@ai-sdk/google'
 import { z } from 'zod'
 import { obtenerUsuario } from '@/lib/auth'
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   }
 
   if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    return new Response('GOOGLE_GENERATIVE_AI_API_KEY no configurada', { status: 500 })
+    return Response.json({ error: 'GOOGLE_GENERATIVE_AI_API_KEY no configurada' }, { status: 500 })
   }
 
   const { texto, fechaHoy } = await req.json()
@@ -50,17 +50,36 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Texto demasiado corto' }, { status: 400 })
   }
 
-  const { object } = await generateObject({
-    model: google('gemini-2.0-flash'),
-    schema: esquemaRecordatorioIA,
-    prompt: `Fecha actual: ${fechaHoy ?? new Date().toISOString().split('T')[0]}
+  try {
+    const { object } = await generateObject({
+      model: google('gemini-2.0-flash'),
+      schema: esquemaRecordatorioIA,
+      prompt: `Fecha actual: ${fechaHoy ?? new Date().toISOString().split('T')[0]}
 
 Extrae los datos del siguiente recordatorio en lenguaje natural y devuelve un objeto estructurado.
 Si la fecha es relativa (manana, el jueves, la proxima semana), calcula la fecha absoluta a partir de la fecha actual.
 Para cumpleanos y eventos anuales, usa el proximo aniversario a partir de hoy.
 
 Texto del usuario: ${texto.trim()}`,
-  })
+    })
 
-  return Response.json(object)
+    return Response.json(object)
+  } catch (error) {
+    console.error('[ai/recordatorio]', error)
+
+    if (NoObjectGeneratedError.isInstance(error)) {
+      return Response.json(
+        {
+          error:
+            'No pude extraer una fecha clara del texto. Se mas especifico (ej: "20 de junio", "el viernes a las 8pm").',
+        },
+        { status: 422 },
+      )
+    }
+
+    return Response.json(
+      { error: 'El asistente no pudo procesar la solicitud. Intenta de nuevo.' },
+      { status: 500 },
+    )
+  }
 }
