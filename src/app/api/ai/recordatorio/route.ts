@@ -16,15 +16,18 @@ const esquemaRecordatorioIA = z.object({
   horaVencimiento: z
     .string()
     .regex(/^\d{2}:\d{2}$/)
-    .optional()
-    .describe('Hora en formato HH:MM solo si se menciona hora especifica'),
-  descripcion: z.string().optional().describe('Detalle adicional si el usuario lo menciono'),
+    .nullable()
+    .describe('Hora en formato HH:MM si se menciona, sino null'),
+  descripcion: z
+    .string()
+    .nullable()
+    .describe('Detalle adicional si el usuario lo menciono, sino null'),
   esRecurrente: z.boolean().describe('True si el recordatorio se repite periodicamente'),
   reglaRecurrencia: z
     .string()
-    .optional()
+    .nullable()
     .describe(
-      'Regla RRULE si esRecurrente=true. Ejemplos: RRULE:FREQ=WEEKLY;BYDAY=MO para cada lunes, RRULE:FREQ=YEARLY para anual',
+      'Regla RRULE si esRecurrente=true (ej: RRULE:FREQ=WEEKLY;BYDAY=MO para cada lunes, RRULE:FREQ=YEARLY para anual). Si no es recurrente, null.',
     ),
 })
 
@@ -59,11 +62,20 @@ export async function POST(req: Request) {
 Extrae los datos del siguiente recordatorio en lenguaje natural y devuelve un objeto estructurado.
 Si la fecha es relativa (manana, el jueves, la proxima semana), calcula la fecha absoluta a partir de la fecha actual.
 Para cumpleanos y eventos anuales, usa el proximo aniversario a partir de hoy.
+Devuelve null en los campos opcionales (horaVencimiento, descripcion, reglaRecurrencia) cuando no apliquen.
 
 Texto del usuario: ${texto.trim()}`,
     })
 
-    return Response.json(object)
+    return Response.json({
+      titulo: object.titulo,
+      categoriaSlug: object.categoriaSlug,
+      fechaVencimiento: object.fechaVencimiento,
+      horaVencimiento: object.horaVencimiento ?? undefined,
+      descripcion: object.descripcion ?? undefined,
+      esRecurrente: object.esRecurrente,
+      reglaRecurrencia: object.reglaRecurrencia ?? undefined,
+    })
   } catch (error) {
     console.error('[ai/recordatorio]', error)
 
