@@ -101,6 +101,29 @@ export async function posponerRecordatorio(
   }
 }
 
+export async function actualizarResumenDiario(
+  activo: boolean,
+  hora: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const usuarioId = await obtenerUsuarioId()
+  if (!usuarioId) return { ok: false, error: 'No autenticado' }
+
+  if (!/^\d{2}:\d{2}$/.test(hora)) return { ok: false, error: 'Formato de hora invalido' }
+
+  try {
+    await db
+      .update(perfiles)
+      .set({ resumenDiario: activo, horaResumen: hora, actualizadoEn: new Date() })
+      .where(eq(perfiles.id, usuarioId))
+
+    revalidatePath('/settings')
+    return { ok: true }
+  } catch (e) {
+    console.error('Error al actualizar resumen diario:', e)
+    return { ok: false, error: 'Error al guardar la configuracion' }
+  }
+}
+
 export async function completarDesdeNotificacion(
   reminderId: string,
 ): Promise<{ ok: boolean; error?: string }> {

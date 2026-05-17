@@ -3,7 +3,7 @@ import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
 import { suscripcionesPush, logNotificaciones, recordatorios } from '@/db/schema'
 import { getSuscripcionesPorUsuario } from '@/lib/queries/push.queries'
-import { getRecordatoriosANotificar } from '@/lib/queries/reminder.queries'
+import { getRecordatoriosANotificar, getRecordatoriosEnRango } from '@/lib/queries/reminder.queries'
 import { calcularProximaOcurrencia } from '@/lib/utils/date.utils'
 
 let vapidConfigurado = false
@@ -91,6 +91,31 @@ export async function enviarPushAUsuario(
   })
 
   return { enviados, fallidos }
+}
+
+export async function enviarResumenDiario(usuarioId: string): Promise<void> {
+  const ahora = new Date()
+  const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0)
+  const finHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 59)
+
+  const pendientesHoy = await getRecordatoriosEnRango(usuarioId, inicioHoy, finHoy)
+  if (pendientesHoy.length === 0) return
+
+  const cuerpo =
+    pendientesHoy.length === 1
+      ? pendientesHoy[0].titulo
+      : `${pendientesHoy.slice(0, 2).map((r) => r.titulo).join(', ')}${pendientesHoy.length > 2 ? ` y ${pendientesHoy.length - 2} mas` : ''}`
+
+  const payload: PayloadPush = {
+    title: `Buenos dias - ${pendientesHoy.length} ${pendientesHoy.length === 1 ? 'recordatorio' : 'recordatorios'} hoy`,
+    body: cuerpo,
+    data: {
+      url: '/inicio',
+      reminderId: 'daily-summary',
+    },
+  }
+
+  await enviarPushAUsuario(usuarioId, null, payload)
 }
 
 export async function procesarRecordatoriosPendientes(): Promise<{ procesados: number }> {

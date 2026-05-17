@@ -1,5 +1,55 @@
-const CACHE_NOMBRE = 'noti-v2'
+const CACHE_NOMBRE = 'noti-v3'
 const URLS_CACHE = ['/']
+const DB_NOMBRE = 'noti-sync'
+const STORE_PENDIENTES = 'operaciones-pendientes'
+
+// --- IndexedDB helpers ---
+
+function abrirDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NOMBRE, 1)
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result
+      if (!db.objectStoreNames.contains(STORE_PENDIENTES)) {
+        db.createObjectStore(STORE_PENDIENTES, { autoIncrement: true })
+      }
+    }
+    req.onsuccess = (e) => resolve(e.target.result)
+    req.onerror = () => reject(req.error)
+  })
+}
+
+async function guardarOperacionPendiente(url, metodo, cuerpo) {
+  const db = await abrirDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_PENDIENTES, 'readwrite')
+    tx.objectStore(STORE_PENDIENTES).add({ url, metodo, cuerpo, timestamp: Date.now() })
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(tx.error)
+  })
+}
+
+async function obtenerOperacionesPendientes() {
+  const db = await abrirDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_PENDIENTES, 'readonly')
+    const req = tx.objectStore(STORE_PENDIENTES).getAll()
+    req.onsuccess = () => resolve(req.result)
+    req.onerror = () => reject(req.error)
+  })
+}
+
+async function limpiarOperacionesPendientes() {
+  const db = await abrirDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_PENDIENTES, 'readwrite')
+    tx.objectStore(STORE_PENDIENTES).clear()
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(tx.error)
+  })
+}
+
+// --- Lifecycle ---
 
 self.addEventListener('install', (evento) => {
   evento.waitUntil(
@@ -21,23 +71,85 @@ self.addEventListener('activate', (evento) => {
   self.clients.claim()
 })
 
-self.addEventListener('fetch', (evento) => {
-  if (evento.request.method !== 'GET') return
+// --- Fetch: network-first para GET, background sync para mutaciones ---
 
-  evento.respondWith(
-    fetch(evento.request)
-      .then((respuesta) => {
-        if (respuesta && respuesta.status === 200) {
-          const copiaRespuesta = respuesta.clone()
-          caches.open(CACHE_NOMBRE).then((cache) => {
-            cache.put(evento.request, copiaRespuesta)
-          })
+self.addEventListener('fetch', (evento) => {
+  const url = new URL(evento.request.url)
+
+  // Solo interceptar requests del mismo origen
+  if (url.origin !== self.location.origin) return
+
+  if (evento.request.method === 'GET') {
+    // Excluir API routes del cache para siempre obtener datos frescos
+    if (url.pathname.startsWith('/api/')) return
+
+    evento.respondWith(
+      fetch(evento.request)
+        .then((respuesta) => {
+          if (respuesta && respuesta.status === 200) {
+            const copiaRespuesta = respuesta.clone()
+            caches.open(CACHE_NOMBRE).then((cache) => {
+              cache.put(evento.request, copiaRespuesta)
+            })
+          }
+          return respuesta
+        })
+        .catch(() => caches.match(evento.request)),
+    )
+    return
+  }
+
+  // Para mutaciones en rutas de la app: guardar si falla la red
+  if (
+    evento.request.method === 'POST' &&
+    (url.pathname.startsWith('/api/') && !url.pathname.includes('/api/push/'))
+  ) {
+    evento.waitUntil(
+      fetch(evento.request.clone()).catch(async () => {
+        try {
+          const cuerpo = await evento.request.clone().text()
+          await guardarOperacionPendiente(url.pathname, 'POST', cuerpo)
+          self.registration.sync?.register('sync-recordatorios').catch(() => null)
+        } catch {
+          // ignorar errores de almacenamiento
         }
-        return respuesta
-      })
-      .catch(() => caches.match(evento.request)),
-  )
+      }),
+    )
+  }
 })
+
+// --- Background Sync ---
+
+self.addEventListener('sync', (evento) => {
+  if (evento.tag === 'sync-recordatorios') {
+    evento.waitUntil(reintentarOperacionesPendientes())
+  }
+})
+
+async function reintentarOperacionesPendientes() {
+  const pendientes = await obtenerOperacionesPendientes()
+  if (!pendientes.length) return
+
+  let todoExitoso = true
+  for (const op of pendientes) {
+    try {
+      const res = await fetch(op.url, {
+        method: op.metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: op.cuerpo,
+      })
+      if (!res.ok) todoExitoso = false
+    } catch {
+      todoExitoso = false
+    }
+  }
+
+  if (todoExitoso) {
+    await limpiarOperacionesPendientes()
+  }
+}
+
+// --- Push notifications ---
 
 self.addEventListener('push', (evento) => {
   if (!evento.data) return
@@ -51,11 +163,13 @@ self.addEventListener('push', (evento) => {
     data: datos.data,
     tag: datos.data?.reminderId ?? 'noti-general',
     renotify: true,
-    actions: [
-      { action: 'ver', title: 'Ver' },
-      { action: 'posponer', title: 'Posponer 15min' },
-      { action: 'completar', title: 'Completar' },
-    ],
+    actions: datos.data?.reminderId === 'daily-summary'
+      ? [{ action: 'ver', title: 'Ver recordatorios' }]
+      : [
+          { action: 'ver', title: 'Ver' },
+          { action: 'posponer', title: 'Posponer 15min' },
+          { action: 'completar', title: 'Completar' },
+        ],
   }
 
   evento.waitUntil(
@@ -79,7 +193,6 @@ self.addEventListener('notificationclick', (evento) => {
     return
   }
 
-  // accion === 'ver' o click directo en la notificacion
   const url = datos.url ?? '/'
   evento.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((listaClientes) => {

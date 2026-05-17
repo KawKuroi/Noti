@@ -4,6 +4,8 @@ export interface Perfil {
   zonaHoraria: string
   anticipacionNotificacion: number
   sonidoHabilitado: boolean
+  resumenDiario: boolean
+  horaResumen: string
   creadoEn: Date
   actualizadoEn: Date
 }

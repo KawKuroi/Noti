@@ -4,6 +4,12 @@ import { perfiles } from '@/db/schema'
 import { requerirUsuario } from '@/lib/auth'
 import type { Perfil } from '@/types/user.types'
 
+export interface PerfilResumen {
+  id: string
+  zonaHoraria: string
+  horaResumen: string
+}
+
 function mapearPerfil(fila: typeof perfiles.$inferSelect): Perfil {
   return {
     id: fila.id,
@@ -11,9 +17,24 @@ function mapearPerfil(fila: typeof perfiles.$inferSelect): Perfil {
     zonaHoraria: fila.zonaHoraria,
     anticipacionNotificacion: fila.anticipacionNotificacion,
     sonidoHabilitado: fila.sonidoHabilitado,
+    resumenDiario: fila.resumenDiario,
+    horaResumen: fila.horaResumen,
     creadoEn: fila.creadoEn,
     actualizadoEn: fila.actualizadoEn,
   }
+}
+
+export async function getPerfilesConResumenDiario(horaUTC: string): Promise<PerfilResumen[]> {
+  const filas = await db
+    .select({
+      id: perfiles.id,
+      zonaHoraria: perfiles.zonaHoraria,
+      horaResumen: perfiles.horaResumen,
+    })
+    .from(perfiles)
+    .where(eq(perfiles.resumenDiario, true))
+
+  return filas.filter((f) => f.horaResumen === horaUTC)
 }
 
 export async function getPerfilDelUsuarioActual(): Promise<Perfil | null> {

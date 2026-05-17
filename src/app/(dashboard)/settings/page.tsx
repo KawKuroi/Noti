@@ -6,6 +6,7 @@ import { FormularioAnticipacion } from '@/components/features/settings/formulari
 import { ListaDispositivos } from '@/components/features/settings/lista-dispositivos'
 import { FormularioSonido } from '@/components/features/settings/formulario-sonido'
 import { FormularioPerfil } from '@/components/features/settings/formulario-perfil'
+import { FormularioResumenDiario } from '@/components/features/settings/formulario-resumen-diario'
 
 export const metadata: Metadata = { title: 'Configuracion | Noti' }
 
@@ -57,6 +58,17 @@ export default async function PaginaSettings() {
           Reproduce un beep al terminar cada sesion o descanso del pomodoro.
         </p>
         <FormularioSonido sonidoActual={perfil?.sonidoHabilitado ?? true} />
+      </section>
+
+      <section className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+        <h2 className="text-base font-semibold text-gray-900">Resumen diario</h2>
+        <p className="text-sm text-gray-500">
+          Recibe una notificacion push cada manana con el resumen de tus recordatorios del dia.
+        </p>
+        <FormularioResumenDiario
+          activoActual={perfil?.resumenDiario ?? false}
+          horaActual={perfil?.horaResumen ?? '07:00'}
+        />
       </section>
     </div>
   )

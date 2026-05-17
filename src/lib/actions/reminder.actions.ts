@@ -206,6 +206,60 @@ export async function alternarCompletado(
   }
 }
 
+export interface EntradaRecordatorioIA {
+  titulo: string
+  categoriaSlug: string
+  fechaVencimiento: string
+  horaVencimiento?: string
+  descripcion?: string
+  esRecurrente?: boolean
+  reglaRecurrencia?: string
+}
+
+export async function crearRecordatorioDesdeIA(
+  input: EntradaRecordatorioIA,
+): Promise<EstadoAccionRecordatorio> {
+  const usuarioId = await obtenerUsuarioId()
+  if (!usuarioId) return { ok: false, error: 'No autenticado' }
+
+  const categorias = await getCategorias()
+  const categoria = categorias.find((c) => c.slug === input.categoriaSlug)
+  if (!categoria) return { ok: false, error: 'Categoria invalida' }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.fechaVencimiento)) {
+    return { ok: false, error: 'Formato de fecha invalido' }
+  }
+
+  const hora = input.horaVencimiento ?? '09:00'
+  const fechaVencimiento = combinarFechaHora(input.fechaVencimiento, hora)
+  const anticipacionMs = 15 * 60 * 1000
+  const notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+
+  try {
+    const [fila] = await db
+      .insert(recordatorios)
+      .values({
+        usuarioId,
+        categoriaId: categoria.id,
+        titulo: input.titulo,
+        descripcion: input.descripcion ?? null,
+        fechaVencimiento,
+        notificarEn,
+        esRecurrente: Boolean(input.esRecurrente),
+        reglaRecurrencia: input.reglaRecurrencia ?? null,
+        estaCompletado: false,
+        metadatos: null,
+      })
+      .returning()
+
+    revalidarRutas(input.categoriaSlug)
+    return { ok: true, data: fila as unknown as Recordatorio }
+  } catch (e) {
+    console.error('Error al crear recordatorio desde IA:', e)
+    return { ok: false, error: 'Error al guardar el recordatorio' }
+  }
+}
+
 export interface EntradaCrearLanzamiento {
   titulo: string
   tipo: TipoLanzamiento

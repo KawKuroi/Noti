@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, count, lte, gte, or } from 'drizzle-orm'
+import { eq, and, desc, asc, count, lte, gte, or, ilike } from 'drizzle-orm'
 import { db } from '@/db'
 import { recordatorios, perfiles } from '@/db/schema'
 import type { Recordatorio } from '@/types/reminder.types'
@@ -132,6 +132,31 @@ export async function getRecordatoriosEnRango(
       ),
     )
     .orderBy(asc(recordatorios.fechaVencimiento))
+
+  return filas.map(mapearRecordatorio)
+}
+
+export async function buscarRecordatorios(
+  usuarioId: string,
+  texto: string,
+  limite = 10,
+): Promise<Recordatorio[]> {
+  const termino = `%${texto}%`
+  const filas = await db
+    .select()
+    .from(recordatorios)
+    .where(
+      and(
+        eq(recordatorios.usuarioId, usuarioId),
+        eq(recordatorios.estaCompletado, false),
+        or(
+          ilike(recordatorios.titulo, termino),
+          ilike(recordatorios.descripcion, termino),
+        ),
+      ),
+    )
+    .orderBy(asc(recordatorios.fechaVencimiento))
+    .limit(limite)
 
   return filas.map(mapearRecordatorio)
 }

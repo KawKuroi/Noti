@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import { LogOut, User as UserIcon } from 'lucide-react'
 import { crearClienteNavegador } from '@/lib/supabase/client'
+import { BusquedaGlobal } from '@/components/features/busqueda-global'
 
 interface Props {
   usuario: User
@@ -32,7 +33,7 @@ export function Header({ usuario }: Props) {
 
   return (
     <header className="h-14 border-b border-gray-100 bg-white flex items-center justify-between px-6">
-      <div />
+      <BusquedaGlobal />
       <div className="relative group">
         <button className="flex items-center gap-2 hover:bg-gray-50 rounded-lg px-2 py-1.5 transition-colors">
           <div className="w-7 h-7 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
