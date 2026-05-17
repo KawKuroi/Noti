@@ -20,14 +20,14 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 2. **Dashboard principal** — Vista general de recordatorios próximos con filtros por categoría
 3. **CRUD de recordatorios** — Crear, editar, eliminar y marcar como completado
 4. **Sistema de categorías:**
-   - 🎬 Películas/series (con integración automática de TMDB)
+   - 🎬 Lanzamientos (películas, series, videojuegos y álbumes, agendados vía chat IA)
    - 📚 Estudio/pomodoro (temporizador integrado)
    - 🏫 Horario de clases (recurrencia semanal)
    - 🎂 Cumpleaños (recurrencia anual)
    - ✅ Tareas/pendientes (fecha límite)
    - 📌 Eventos personales (fecha y hora específica)
 5. **Notificaciones push** — Web Push API con VAPID, funciona en Android y Windows
-6. **Scraping automático de estrenos** — Integración con TMDB API para películas próximas
+6. **Chat IA para lanzamientos** — Asistente conversacional con Google Gemini 2.0 Flash que consulta TMDB (películas/series), RAWG (videojuegos) y MusicBrainz (álbumes) para encontrar la fecha exacta de un lanzamiento y agendarlo al calendario tras confirmación. Fallback manual si la fuente no tiene la fecha.
 7. **Vista de calendario** — Visualización mensual/semanal de todos los recordatorios
 8. **Instalación como PWA** — Instalable desde Chrome en Android y Windows
 9. **Perfil de usuario** — Configuración de zona horaria, preferencias de notificación
@@ -42,7 +42,6 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 - Modo offline completo (solo lectura offline básica del Service Worker)
 - Integraciones con Slack, WhatsApp o Telegram
 - Sistema de hábitos o streaks
-- Asistente de IA para crear recordatorios por lenguaje natural
 - Temas personalizables (solo light mode minimalista en MVP)
 
 ## Success criteria
@@ -50,7 +49,7 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 - La app se puede instalar como PWA en Android y Windows
 - Las notificaciones push llegan correctamente en ambas plataformas
 - Un usuario puede crear recordatorios en las 6 categorías
-- Los estrenos de TMDB se cargan automáticamente y se pueden "seguir"
+- El chat IA encuentra fechas exactas de lanzamientos (peliculas, series, videojuegos y albumes) y las agenda al calendario
 - El timer de pomodoro funciona correctamente
 - Al menos 5 usuarios externos pueden registrarse y usar la app
 - Lighthouse PWA score > 90
@@ -65,4 +64,5 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 - **Sin onboarding largo:** Login directo, dashboard vacío con CTA para crear primer recordatorio
 - **Notificaciones configurables:** El usuario elige cuánto antes quiere ser notificado (5min, 15min, 30min, 1h, 1 día)
 - **Categorías fijas en MVP:** No se pueden crear categorías custom (fase 2)
-- **TMDB como única fuente automática en MVP:** Otras fuentes (series, eventos deportivos) en fase 2
+- **TMDB + RAWG + MusicBrainz como fuentes verificadas:** El chat IA solo reporta fechas devueltas por estas fuentes. Si no encuentra, pregunta al usuario por la fecha (fallback manual). Nunca inventa fechas.
+- **Lanzamientos se notifican a las 06:00 hora local del día del lanzamiento por defecto** (en lugar de la anticipación habitual de minutos antes).

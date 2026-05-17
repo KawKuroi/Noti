@@ -68,3 +68,22 @@ export const OPCIONES_ANTICIPACION: { valor: number; etiqueta: string }[] = [
 
 export const SLUGS_VALIDOS = ['movies', 'study', 'classes', 'birthdays', 'tasks', 'events'] as const
 export type SlugCategoria = (typeof SLUGS_VALIDOS)[number]
+
+export const HORA_NOTIFICACION_LANZAMIENTO = '06:00'
+
+export const TIPOS_LANZAMIENTO = ['movie', 'tv', 'game', 'album'] as const
+export const FUENTES_LANZAMIENTO = ['tmdb', 'rawg', 'musicbrainz', 'manual'] as const
+
+export const ETIQUETAS_TIPO_LANZAMIENTO: Record<(typeof TIPOS_LANZAMIENTO)[number], string> = {
+  movie: 'Pelicula',
+  tv: 'Serie',
+  game: 'Videojuego',
+  album: 'Album',
+}
+
+export const ETIQUETAS_FUENTE_LANZAMIENTO: Record<(typeof FUENTES_LANZAMIENTO)[number], string> = {
+  tmdb: 'TMDB',
+  rawg: 'RAWG',
+  musicbrainz: 'MusicBrainz',
+  manual: 'Manual',
+}

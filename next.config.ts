@@ -1,6 +1,14 @@
 import type { NextConfig } from 'next'
 
 const config: NextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'image.tmdb.org' },
+      { protocol: 'https', hostname: 'media.rawg.io' },
+      { protocol: 'https', hostname: 'coverartarchive.org' },
+      { protocol: 'https', hostname: 'archive.org' },
+    ],
+  },
   async headers() {
     return [
       {

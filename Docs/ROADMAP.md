@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Fase 3 — Notificaciones push completadas. Sistema completo de Web Push con VAPID: suscripción por dispositivo, cron de Vercel cada minuto, acciones desde la notificación (Ver, Posponer 15min, Completar), reprogramación automática de recurrentes. Página /settings para gestionar anticipación y dispositivos.
+Fase 4 — Chat IA para lanzamientos completada. Asistente conversacional con Google Gemini 2.0 Flash que consulta TMDB (peliculas/series), RAWG (videojuegos) y MusicBrainz (albumes) para encontrar fechas exactas sin alucinaciones. Confirmacion explicita antes de agendar; fallback manual cuando no se encuentra la fecha. Notificacion por defecto a las 06:00 del dia del lanzamiento.
 
 ---
 
@@ -89,24 +89,25 @@ Fase 3 — Notificaciones push completadas. Sistema completo de Web Push con VAP
 
 ---
 
-## Fase 4: Integración TMDB (semana 4)
+## Fase 4: Chat IA para lanzamientos (semana 4)
 
-**Objetivo:** Los estrenos de cine se cargan automáticamente. El usuario puede explorar y "seguir" películas para recibir notificaciones.
+**Objetivo:** Asistente conversacional que busca fechas exactas de lanzamientos en TMDB, RAWG y MusicBrainz, y las agrega al calendario tras confirmacion del usuario.
 
-- [ ] Servicio `tmdb.service.ts`: llamadas a TMDB API
-  - `getUpcomingMovies(region: 'CO')` — próximos estrenos en Colombia
-  - `getMovieDetails(tmdbId)` — detalles de una película
-  - `searchMovies(query)` — búsqueda
-- [ ] Edge Function diaria: fetch de estrenos y almacenamiento en DB
-- [ ] Deduplicación por `tmdb_id` (no insertar películas ya existentes)
-- [ ] Página `/movies`: explorar estrenos próximos con pósters
-- [ ] Componente `MovieCard`: póster, título, fecha de estreno, botón "Seguir"
-- [ ] Al seguir película: crear reminder personal con categoría "movies"
-- [ ] Notificación configurada por defecto: 1 día antes del estreno
-- [ ] Búsqueda de películas por título
-- [ ] Atribución TMDB (logo + disclaimer requerido por sus ToS)
+- [x] Servicio `tmdb.service.ts`: busqueda de peliculas y series con preferencia de estreno en Colombia
+- [x] Servicio `rawg.service.ts`: busqueda de videojuegos por nombre
+- [x] Servicio `musicbrainz.service.ts`: busqueda de albumes (sin API key, User-Agent identificable)
+- [x] Servicio orquestador `release-search.service.ts`: selecciona la fuente correcta por tipo
+- [x] Capa AI con `tools.ts` y `prompt.ts`: tres herramientas (`buscarLanzamiento`, `pedirFechaManual`, `agregarRecordatorio`) con AI SDK v6
+- [x] Endpoint `POST /api/chat`: streaming con Google Gemini 2.0 Flash
+- [x] Pagina `/movies`: chat + lista de lanzamientos seguidos + atribuciones
+- [x] Componente `ChatLanzamientos` con `useChat` y renderizado de partes por herramienta
+- [x] Componente `TarjetaConfirmacion`: poster, fecha, badge de fuente, botones Si/Cancelar
+- [x] Componente `FormularioFechaManual`: fallback cuando ninguna fuente tiene la fecha
+- [x] Server action `crearRecordatorioLanzamiento`: crea recordatorio con `notify_at = 06:00 del dia del lanzamiento`
+- [x] Atribucion TMDB + RAWG + MusicBrainz (requisito de TMDB ToS)
+- [x] Anti-alucinacion: el modelo solo reporta fechas devueltas por herramientas verificadas
 
-**Done when:** Puedo ver estrenos próximos en Colombia, seguir "Dune 3", y recibir una notificación push el día antes de su estreno.
+**Done when:** Puedo preguntar al chat "cuando sale Avatar 4", "agenda GTA 6" o "nuevo album de Bad Bunny", recibir la fecha exacta desde la fuente correspondiente, confirmar con un boton y obtener una notificacion push a las 06:00 del dia del lanzamiento.
 
 ---
 

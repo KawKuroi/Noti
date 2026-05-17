@@ -8,7 +8,9 @@ import { obtenerUsuario } from '@/lib/auth'
 import { validarRecordatorio } from '@/lib/validations/reminder.schemas'
 import { calcularProximaOcurrencia, combinarFechaHora } from '@/lib/utils/date.utils'
 import { getCategorias } from '@/lib/queries/category.queries'
+import { HORA_NOTIFICACION_LANZAMIENTO } from '@/lib/utils/constants'
 import type { EstadoAccionRecordatorio, Recordatorio } from '@/types/reminder.types'
+import type { FuenteLanzamiento, TipoLanzamiento } from '@/types/release.types'
 
 async function obtenerUsuarioId(): Promise<string | null> {
   const user = await obtenerUsuario()
@@ -201,5 +203,69 @@ export async function alternarCompletado(
   } catch (e) {
     console.error('Error al alternar completado:', e)
     return { ok: false, error: 'Error al actualizar el recordatorio' }
+  }
+}
+
+export interface EntradaCrearLanzamiento {
+  titulo: string
+  tipo: TipoLanzamiento
+  fechaLanzamiento: string
+  fuente: FuenteLanzamiento
+  tmdbId?: number
+  rawgId?: number
+  musicbrainzId?: string
+  posterUrl?: string
+  descripcion?: string
+}
+
+export async function crearRecordatorioLanzamiento(
+  input: EntradaCrearLanzamiento,
+): Promise<EstadoAccionRecordatorio> {
+  const usuarioId = await obtenerUsuarioId()
+  if (!usuarioId) return { ok: false, error: 'No autenticado' }
+
+  const categorias = await getCategorias()
+  const categoriaMovies = categorias.find((c) => c.slug === 'movies')
+  if (!categoriaMovies) return { ok: false, error: 'Categoria movies no disponible' }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.fechaLanzamiento)) {
+    return { ok: false, error: 'Formato de fecha invalido' }
+  }
+
+  const fechaVencimiento = combinarFechaHora(input.fechaLanzamiento, HORA_NOTIFICACION_LANZAMIENTO)
+  const notificarEn = fechaVencimiento
+
+  const metadatos = {
+    tipo: input.tipo,
+    fuente: input.fuente,
+    fechaEstreno: input.fechaLanzamiento,
+    ...(input.posterUrl ? { posterUrl: input.posterUrl } : {}),
+    ...(input.rawgId ? { rawgId: input.rawgId } : {}),
+    ...(input.musicbrainzId ? { musicbrainzId: input.musicbrainzId } : {}),
+  }
+
+  try {
+    const [fila] = await db
+      .insert(recordatorios)
+      .values({
+        usuarioId,
+        categoriaId: categoriaMovies.id,
+        titulo: input.titulo,
+        descripcion: input.descripcion ?? null,
+        fechaVencimiento,
+        notificarEn,
+        esRecurrente: false,
+        reglaRecurrencia: null,
+        estaCompletado: false,
+        tmdbId: input.tmdbId ?? null,
+        metadatos,
+      })
+      .returning()
+
+    revalidarRutas('movies')
+    return { ok: true, data: fila as unknown as Recordatorio }
+  } catch (e) {
+    console.error('Error al crear recordatorio de lanzamiento:', e)
+    return { ok: false, error: 'Error al guardar el lanzamiento' }
   }
 }

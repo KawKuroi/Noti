@@ -14,7 +14,10 @@
 | Cron Jobs | pg_cron (Supabase) | Ejecución cada minuto, gratis, sin servidor externo |
 | Edge Functions | Supabase Edge Functions | Procesamiento de notificaciones, scraping TMDB |
 | Notificaciones | Web Push API + VAPID | Push nativo en Android y Windows, $0 |
-| API de películas | TMDB API | Gratis, 40 req/10s, datos completos de estrenos |
+| API de películas/series | TMDB API | Gratis, 40 req/10s, soporta preferencia regional CO |
+| API de videojuegos | RAWG.io | Gratis, 20.000 req/mes, base de datos amplia |
+| API de música | MusicBrainz | Sin API key, 1 req/s, datos estructurados de releases |
+| Chat IA | Google Gemini 2.0 Flash via AI SDK v6 | Tier gratuito 1500 req/día, streaming + tools |
 | Hosting | Vercel (Hobby) | Deploy automático, CDN global, gratis para uso personal |
 | Validación | Zod | Validación de schemas en runtime, integra con TypeScript |
 | Estado cliente | Zustand | Solo si se necesita estado global (mínimo uso) |
@@ -51,11 +54,10 @@ noti/
 │   │   │   ├── push/
 │   │   │   │   ├── subscribe/
 │   │   │   │   │   └── route.ts   # Registrar suscripción push
-│   │   │   │   └── send/
-│   │   │   │       └── route.ts   # Enviar notificación (llamado por cron)
-│   │   │   ├── tmdb/
-│   │   │   │   └── upcoming/
-│   │   │   │       └── route.ts   # Proxy a TMDB API
+│   │   │   │   └── action/
+│   │   │   │       └── route.ts   # Acciones desde notificación push
+│   │   │   ├── chat/
+│   │   │   │   └── route.ts       # Endpoint streaming AI SDK + Gemini Flash
 │   │   │   └── cron/
 │   │   │       └── check-reminders/
 │   │   │           └── route.ts   # Endpoint que revisa recordatorios pendientes
@@ -71,13 +73,16 @@ noti/
 │   │   │   ├── badge.tsx
 │   │   │   └── ...
 │   │   └── features/          # Componentes con lógica de negocio
-│   │       ├── reminder-card.tsx
-│   │       ├── reminder-form.tsx
-│   │       ├── reminder-list.tsx
-│   │       ├── category-filter.tsx
-│   │       ├── movie-card.tsx
-│   │       ├── pomodoro-timer.tsx
-│   │       ├── calendar-view.tsx
+│   │       ├── reminders/
+│   │       │   ├── tarjeta-recordatorio.tsx
+│   │       │   ├── formulario-recordatorio.tsx
+│   │       │   └── lista-recordatorios.tsx
+│   │       ├── movies/
+│   │       │   ├── chat-lanzamientos.tsx
+│   │       │   ├── tarjeta-confirmacion.tsx
+│   │       │   ├── formulario-fecha-manual.tsx
+│   │       │   └── atribucion-fuentes.tsx
+│   │       ├── settings/
 │   │       ├── notification-prompt.tsx
 │   │       ├── sidebar.tsx
 │   │       └── header.tsx
@@ -85,16 +90,21 @@ noti/
 │   │   ├── actions/           # Server actions (mutaciones)
 │   │   │   ├── reminder.actions.ts
 │   │   │   ├── category.actions.ts
-│   │   │   ├── push-subscription.actions.ts
-│   │   │   └── user.actions.ts
+│   │   │   └── push-subscription.actions.ts
 │   │   ├── queries/           # Lectura desde DB (solo lectura)
 │   │   │   ├── reminder.queries.ts
 │   │   │   ├── category.queries.ts
+│   │   │   ├── push.queries.ts
 │   │   │   └── user.queries.ts
+│   │   ├── ai/                # Capa AI (tools + prompt para el chat)
+│   │   │   ├── tools.ts
+│   │   │   └── prompt.ts
 │   │   ├── services/          # Lógica externa
 │   │   │   ├── tmdb.service.ts
-│   │   │   ├── push.service.ts
-│   │   │   └── cron.service.ts
+│   │   │   ├── rawg.service.ts
+│   │   │   ├── musicbrainz.service.ts
+│   │   │   ├── release-search.service.ts
+│   │   │   └── push.service.ts
 │   │   ├── utils/             # Helpers puros
 │   │   │   ├── date.utils.ts
 │   │   │   ├── cn.ts          # Tailwind class merge helper
@@ -143,7 +153,8 @@ components/ui/       → solo importa de sí mismo y lib/utils
 components/features/ → puede importar de ui/, lib/queries, lib/utils, hooks/, types/
 lib/actions/         → única capa que puede mutar DB (INSERT, UPDATE, DELETE)
 lib/queries/         → solo lectura de DB (SELECT)
-lib/services/        → lógica de integración externa (TMDB, Web Push)
+lib/services/        → lógica de integración externa (TMDB, RAWG, MusicBrainz, Web Push)
+lib/ai/              → tools + prompt para el chat; puede importar de lib/services y lib/actions
 lib/supabase/        → configuración de cliente, no importa nada de la app
 db/                  → no importa nada de la app, solo Drizzle + tipos SQL
 types/               → no importa nada, solo exporta interfaces
@@ -287,15 +298,23 @@ export async function createReminder(input: unknown) {
 [Browser] → Service Worker recibe push → muestra notificación nativa
 ```
 
-### Flujo de estrenos TMDB
+### Flujo de chat IA para lanzamientos
 
 ```
-[pg_cron]  → Diariamente ejecuta Edge Function
-[Edge Fn]  → Llama a TMDB API /movie/upcoming?region=CO
-[Edge Fn]  → Almacena resultados en tabla reminders con category='movies'
-[Edge Fn]  → Solo inserta películas nuevas (evita duplicados por tmdb_id)
-[Usuario]  → Ve estrenos en sección "Películas" → puede "seguir" una película
-[Sistema]  → Al seguir, se crea un reminder personal con notificación configurada
+[Usuario]      → escribe en lenguaje natural en /movies (ej: "cuando sale GTA 6")
+[/api/chat]    → recibe UIMessage[], llama streamText() con Gemini 2.0 Flash
+[Gemini]       → invoca tool buscarLanzamiento({titulo, tipo, artista?})
+[Tool server]  → orquesta TMDB | RAWG | MusicBrainz segun tipo
+[Tool server]  → devuelve ResultadoLanzamiento o { encontrado: false }
+[Gemini]       → si encontrado=false: llama tool pedirFechaManual (no inventa)
+              → si encontrado=true: responde con fecha y pide confirmacion
+[Cliente UI]   → renderiza <TarjetaConfirmacion> con poster + botones Si/Cancelar
+              → o renderiza <FormularioFechaManual> con input date
+[Usuario]      → confirma o ingresa fecha manual
+[Gemini]       → invoca tool agregarRecordatorio con datos estructurados
+[Tool server]  → llama crearRecordatorioLanzamiento (server action)
+[Server action]→ INSERT en reminders con notify_at = 06:00 del dia del lanzamiento
+[pg_cron]      → /api/cron/check-reminders detecta notify_at <= now() y envia push
 ```
 
 ## Variables de entorno
@@ -311,9 +330,15 @@ NEXT_PUBLIC_VAPID_PUBLIC_KEY=BNx...
 VAPID_PRIVATE_KEY=xxx...
 VAPID_EMAIL=mailto:tu@email.com
 
-# TMDB
+# TMDB (peliculas y series)
 TMDB_API_KEY=xxx...
 TMDB_API_BASE_URL=https://api.themoviedb.org/3
+
+# RAWG (videojuegos)
+RAWG_API_KEY=xxx...
+
+# Google Generative AI (chat IA con Gemini 2.0 Flash)
+GOOGLE_GENERATIVE_AI_API_KEY=xxx...
 
 # App
 NEXT_PUBLIC_APP_URL=https://noti.vercel.app
