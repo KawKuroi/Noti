@@ -167,7 +167,7 @@ noti/
 ├── tailwind.config.ts
 ├── tsconfig.json
 ├── package.json
-└── vercel.json                # Cron jobs: check-reminders (cada minuto), resumen-diario (cada hora)
+└── vercel.json                # Cron jobs: check-reminders (cada minuto), resumen-diario (cada hora), limpiar-tareas (diario 03:00 UTC, Fase 13)
 ```
 
 ## Capas y reglas de imports

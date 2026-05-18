@@ -6,7 +6,7 @@ Las personas olvidan constantemente cosas importantes de su vida diaria — estr
 
 ## Usuario objetivo
 
-- **Persona 1 — Estudiante universitario:** Tiene horarios de clase variables, necesita gestionar tiempos de estudio con técnica pomodoro, quiere enterarse de estrenos de cine, y olvida cumpleaños frecuentemente. Usa el celular Android y un PC con Windows. No revisa Google Calendar.
+- **Persona 1 — Estudiante universitario:** Tiene horarios de clase variables, necesita gestionar tiempos de estudio, quiere enterarse de estrenos de cine, y olvida cumpleaños frecuentemente. Usa el celular Android y un PC con Windows. No revisa Google Calendar.
 - **Persona 2 — Profesional joven:** Tiene múltiples pendientes personales y laborales, quiere una app limpia y rápida que le recuerde todo sin ruido. Busca algo más personal que un calendario corporativo.
 - **Persona 3 — Cualquier persona organizada:** Quiere centralizar todos sus recordatorios en un solo lugar con categorías claras y notificaciones que realmente lleguen.
 
@@ -41,23 +41,21 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 
 9. **Búsqueda global** — Modal Ctrl+K con búsqueda por título y descripción, badge de categoría y fecha relativa en los resultados
 
-10. **Vista de calendario** — Visualización mensual/semanal de todos los recordatorios
+10. **Calendario** — Vistas mes y semana sincronizadas, filtro multi-select por categoría, click en día para ver recordatorios de esa fecha
 
-11. **Vista calendario con filtros** — Vistas mes y semana sincronizadas, filtro multi-select por categoría para ver solo el subconjunto que interesa
+11. **PWA instalable** — Instalable desde Chrome en Android y Windows; shortcuts en el icono (Nuevo, Calendario); `window-controls-overlay` en Windows
 
-12. **PWA instalable** — Instalable desde Chrome en Android y Windows; shortcuts en el icono instalado (Nuevo, Pomodoro, Calendario); `window-controls-overlay` en Windows
+12. **Background Sync** — El Service Worker guarda mutaciones fallidas en IndexedDB y las reintenta automáticamente al recuperar la conexión
 
-13. **Background Sync** — El Service Worker guarda mutaciones fallidas en IndexedDB y las reintenta automáticamente al recuperar la conexión
+13. **Perfil de usuario** — Zona horaria, anticipación de notificación, resumen diario, auto-eliminación de tareas
 
-14. **Perfil de usuario** — Zona horaria, anticipación de notificación, sonido del pomodoro, resumen diario
+14. **Seguridad** — RLS en todas las tablas de Supabase; rate limiting en todas las API routes
 
-15. **Seguridad** — RLS en todas las tablas de Supabase; rate limiting en todas las API routes
+15. **Notas como historial de archivos** — Cada nota es un archivo individual (estilo Google Keep / Apple Notes) con su propio título, cuerpo y fecha opcional. Vista de grid con tarjetas; cada nota se abre en su propia vista detalle para leer o editar. Evolucionable a baúl multimedia con imágenes, audio, documentos y video
 
-16. **Notas como historial de archivos** — Cada nota es un archivo individual (estilo Google Keep / Apple Notes) con su propio título, cuerpo y fecha opcional. Vista de grid con tarjetas; cada nota se abre en su propia vista detalle para leer o editar. Evolucionable a baúl multimedia con imágenes, audio, documentos y video
+16. **Entrada por audio en el asistente IA** — Botón de micrófono que graba con el navegador, transcribe con Groq Whisper Large v3 Turbo y rellena el input para que el usuario revise antes de enviar
 
-17. **Entrada por audio en el asistente IA** — Botón de micrófono que graba con el navegador, transcribe con Groq Whisper Large v3 Turbo y rellena el input para que el usuario revise antes de enviar
-
-18. **Auto-eliminación de tareas completadas** — Configuración opcional en `/settings` para borrar tareas marcadas como completadas tras 7, 30 o 90 días. Cron diario en Vercel; preserva el historial si se elige "Nunca"
+17. **Auto-eliminación de tareas completadas** — Configuración opcional en `/settings` para borrar tareas marcadas como completadas tras 7, 30 o 90 días. Cron diario en Vercel; preserva el historial si se elige "Nunca"
 
 ## Out of scope (actualmente)
 
