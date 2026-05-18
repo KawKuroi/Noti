@@ -8,6 +8,7 @@ export interface ResultadoLanzamiento {
   tipo: TipoLanzamiento
   titulo: string
   fechaLanzamiento: string
+  tba?: boolean
   tmdbId?: number
   rawgId?: number
   musicbrainzId?: string

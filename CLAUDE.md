@@ -20,3 +20,16 @@ Lee `context/DECISIONS.md` → cuando evalúas cambiar algo que ya fue decidido 
 - Agregar dependencias de pago — todo debe funcionar en tier gratuito
 - No utilices emojis en el código o documentación.
 - Genera todo el código en **español** (comentarios, documentación, commit messages).
+
+## Regla: cambios de tipos con impacto global
+
+Antes de modificar cualquier interfaz, tipo o schema que otros archivos consuman
+(ej: volver un campo nullable, cambiar un tipo, renombrar una propiedad), debes:
+
+1. Buscar todos los consumidores:
+   grep -r "NombreDeLaInterfaz\|nombreDelCampo" src/ --include="*.ts" --include="*.tsx" -l
+
+2. Listar los archivos encontrados en tu plan antes de escribir código.
+
+3. Incluir las correcciones de todos esos archivos en el mismo PR/commit,
+   no en un paso posterior.

@@ -26,12 +26,24 @@ interface TmdbReleaseDates {
   }>
 }
 
+interface TmdbSerieDetalle {
+  id: number
+  name?: string
+  original_name?: string
+  first_air_date?: string
+  poster_path?: string | null
+  overview?: string
+  next_episode_to_air?: {
+    air_date: string
+    episode_number: number
+    season_number: number
+  } | null
+}
+
 function obtenerConfig() {
   const apiKey = process.env.TMDB_API_KEY
   const baseUrl = process.env.TMDB_API_BASE_URL ?? 'https://api.themoviedb.org/3'
-  if (!apiKey) {
-    throw new Error('TMDB_API_KEY no configurada')
-  }
+  if (!apiKey) throw new Error('TMDB_API_KEY no configurada')
   return { apiKey, baseUrl }
 }
 
@@ -56,29 +68,49 @@ async function llamarTmdb<T>(ruta: string, params: Record<string, string> = {}):
   }
 }
 
-function elegirMejorResultado(resultados: TmdbSearchResult[]): TmdbSearchResult | null {
+function elegirMejorResultado(resultados: TmdbSearchResult[], campoFecha: 'release_date' | 'first_air_date'): TmdbSearchResult | null {
   if (resultados.length === 0) return null
+  const hoy = new Date().toISOString().slice(0, 10)
+
+  const futuros = resultados.filter((r) => {
+    const fecha = r[campoFecha]
+    return fecha && fecha >= hoy
+  })
+
+  if (futuros.length > 0) {
+    return futuros.sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0))[0]
+  }
+
   return [...resultados].sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0))[0]
 }
 
-async function obtenerFechaPeliculaEnCo(tmdbId: number): Promise<string | null> {
+async function obtenerFechaPeliculaLocalizada(tmdbId: number): Promise<string | null> {
   const datos = await llamarTmdb<TmdbReleaseDates>(`/movie/${tmdbId}/release_dates`)
   if (!datos) return null
-  const co = datos.results.find((r) => r.iso_3166_1 === 'CO')
-  const teatral = co?.release_dates.find((rd) => rd.type === 3) ?? co?.release_dates[0]
-  return teatral?.release_date?.slice(0, 10) ?? null
+
+  for (const pais of ['CO', 'US']) {
+    const entrada = datos.results.find((r) => r.iso_3166_1 === pais)
+    const teatral = entrada?.release_dates.find((rd) => rd.type === 3)
+    const cualquiera = entrada?.release_dates[0]
+    const fecha = (teatral ?? cualquiera)?.release_date
+    if (fecha) return fecha.slice(0, 10)
+  }
+
+  return null
 }
 
 export async function buscarPelicula(titulo: string): Promise<ResultadoLanzamiento | null> {
   const busqueda = await llamarTmdb<TmdbSearchResponse>('/search/movie', { query: titulo })
   if (!busqueda || busqueda.results.length === 0) return null
 
-  const mejor = elegirMejorResultado(busqueda.results)
+  const mejor = elegirMejorResultado(busqueda.results, 'release_date')
   if (!mejor) return null
 
-  const fechaCo = await obtenerFechaPeliculaEnCo(mejor.id)
-  const fecha = fechaCo ?? mejor.release_date
+  const fechaLocalizada = await obtenerFechaPeliculaLocalizada(mejor.id)
+  const fecha = fechaLocalizada ?? mejor.release_date
   if (!fecha) return null
+
+  console.log('[TMDB/movie]', { titulo, encontrado: mejor.title, fecha })
 
   return {
     fuente: 'tmdb',
@@ -95,14 +127,29 @@ export async function buscarSerie(titulo: string): Promise<ResultadoLanzamiento 
   const busqueda = await llamarTmdb<TmdbSearchResponse>('/search/tv', { query: titulo })
   if (!busqueda || busqueda.results.length === 0) return null
 
-  const mejor = elegirMejorResultado(busqueda.results)
-  if (!mejor || !mejor.first_air_date) return null
+  const mejor = elegirMejorResultado(busqueda.results, 'first_air_date')
+  if (!mejor) return null
+
+  const detalle = await llamarTmdb<TmdbSerieDetalle>(`/tv/${mejor.id}`)
+
+  // Preferir la fecha del proximo episodio si ya esta emitida
+  const fechaProximoEp = detalle?.next_episode_to_air?.air_date
+  const fechaPrimera = mejor.first_air_date ?? detalle?.first_air_date
+  const fecha = fechaProximoEp ?? fechaPrimera
+  if (!fecha) return null
+
+  console.log('[TMDB/tv]', {
+    titulo,
+    encontrado: mejor.name,
+    fechaProximoEp,
+    fecha,
+  })
 
   return {
     fuente: 'tmdb',
     tipo: 'tv',
     titulo: mejor.name ?? mejor.original_name ?? titulo,
-    fechaLanzamiento: mejor.first_air_date.slice(0, 10),
+    fechaLanzamiento: fecha.slice(0, 10),
     tmdbId: mejor.id,
     posterUrl: mejor.poster_path ? `${POSTER_BASE}${mejor.poster_path}` : undefined,
     descripcion: mejor.overview || undefined,

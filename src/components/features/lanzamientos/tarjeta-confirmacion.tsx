@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,7 +18,20 @@ interface Props {
 }
 
 export function TarjetaConfirmacion({ resultado, onConfirmar, onRechazar }: Props) {
+  const [usado, setUsado] = useState(false)
   const fechaFormateada = formatearFechaLanzamiento(resultado.fechaLanzamiento)
+
+  function handleConfirmar() {
+    if (usado) return
+    setUsado(true)
+    onConfirmar()
+  }
+
+  function handleRechazar() {
+    if (usado) return
+    setUsado(true)
+    onRechazar()
+  }
 
   return (
     <div className="mt-2 rounded-xl border border-gray-200 bg-white overflow-hidden">
@@ -48,7 +62,12 @@ export function TarjetaConfirmacion({ resultado, onConfirmar, onRechazar }: Prop
             {ETIQUETAS_TIPO_LANZAMIENTO[resultado.tipo]}
             {resultado.autor ? ` · ${resultado.autor}` : ''}
           </p>
-          <p className="text-sm text-gray-700 mt-1.5">{fechaFormateada}</p>
+          <p className="text-sm text-gray-700 mt-1.5">
+            {fechaFormateada}
+            {resultado.tba && (
+              <span className="ml-1.5 text-xs text-amber-600 font-medium">(fecha aproximada)</span>
+            )}
+          </p>
           <div className="mt-1.5">
             <span className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 uppercase tracking-wider">
               {ETIQUETAS_FUENTE_LANZAMIENTO[resultado.fuente]}
@@ -57,10 +76,21 @@ export function TarjetaConfirmacion({ resultado, onConfirmar, onRechazar }: Prop
         </div>
       </div>
       <div className="flex gap-2 p-2 border-t border-gray-100 bg-gray-50">
-        <Button variante="primario" tamano="sm" onClick={onConfirmar} className="flex-1">
+        <Button
+          variante="primario"
+          tamano="sm"
+          onClick={handleConfirmar}
+          disabled={usado}
+          className="flex-1"
+        >
           <Check size={14} /> Si, agregar
         </Button>
-        <Button variante="contorno" tamano="sm" onClick={onRechazar}>
+        <Button
+          variante="contorno"
+          tamano="sm"
+          onClick={handleRechazar}
+          disabled={usado}
+        >
           <X size={14} /> Cancelar
         </Button>
       </div>

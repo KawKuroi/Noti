@@ -66,3 +66,8 @@ _Razón:_ Defensa en profundidad. Si una server action filtra mal, RLS es la úl
 **Retirar Pomodoro en Fase 15**
 _Alternativa:_ mantenerlo como feature de "estudio"
 _Razón:_ El Pomodoro se aleja del objetivo del producto (gestión de recordatorios) y agrega complejidad de mantenimiento. La categoría `Estudio` se mantiene desacoplada.
+
+**Regla de búsqueda de consumidores antes de cambiar tipos globales**
+_Alternativa:_ cambiar la interfaz y dejar que tsc encuentre los errores después
+_Razón:_ En Fase 9 el cambio de `Date` a `Date | null` generó una cascada de
+12 errores TS2769 en 4 archivos que no estaban en el plan inicial.

@@ -15,6 +15,11 @@ interface MbSearchResponse {
   'release-groups': MbReleaseGroup[]
 }
 
+// Escapa caracteres especiales de la sintaxis Lucene que usa MusicBrainz
+function escaparLucene(texto: string): string {
+  return texto.replace(/[+\-&|!(){}[\]^"~*?:\\]/g, '\\$&')
+}
+
 async function llamarMusicBrainz<T>(
   ruta: string,
   params: Record<string, string>,
@@ -54,41 +59,72 @@ async function obtenerPortada(releaseGroupId: string): Promise<string | undefine
   return undefined
 }
 
+function elegirCandidato(grupos: MbReleaseGroup[]): MbReleaseGroup | null {
+  if (grupos.length === 0) return null
+
+  const hoy = new Date().toISOString().slice(0, 10)
+  const tipos = ['Album', 'EP', 'Single']
+  const filtradoPorTipo = grupos.filter((g) => tipos.includes(g['primary-type'] ?? ''))
+  const candidatos = filtradoPorTipo.length > 0 ? filtradoPorTipo : grupos
+
+  // Priorizar releases con fecha futura
+  const futuros = candidatos.filter((g) => {
+    const fecha = g['first-release-date']
+    return fecha && fecha >= hoy
+  })
+  const pool = futuros.length > 0 ? futuros : candidatos
+
+  return pool.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))[0] ?? null
+}
+
 export async function buscarAlbum(
   titulo: string,
   artista?: string,
 ): Promise<ResultadoLanzamiento | null> {
-  const consulta = artista ? `release:"${titulo}" AND artist:"${artista}"` : `release:"${titulo}"`
-  const datos = await llamarMusicBrainz<MbSearchResponse>('/release-group/', {
-    query: consulta,
+  const tituloEsc = escaparLucene(titulo)
+  const artistaEsc = artista ? escaparLucene(artista) : null
+
+  // Primera pasada: consulta exacta con comillas
+  const consultaPrecisa = artistaEsc
+    ? `release:"${tituloEsc}" AND artist:"${artistaEsc}"`
+    : `release:"${tituloEsc}"`
+
+  let datos = await llamarMusicBrainz<MbSearchResponse>('/release-group/', {
+    query: consultaPrecisa,
     limit: '10',
   })
+  let grupos = datos?.['release-groups'] ?? []
 
-  const grupos = datos?.['release-groups'] ?? []
+  // Segunda pasada: fuzzy sin comillas si la primera fue vacía
+  if (grupos.length === 0) {
+    const consultaFuzzy = artistaEsc
+      ? `${tituloEsc} AND artist:${artistaEsc}`
+      : tituloEsc
+
+    datos = await llamarMusicBrainz<MbSearchResponse>('/release-group/', {
+      query: consultaFuzzy,
+      limit: '10',
+    })
+    grupos = datos?.['release-groups'] ?? []
+  }
+
   if (grupos.length === 0) return null
 
-  const albumes = grupos.filter(
-    (g) => g['primary-type'] === 'Album' || g['primary-type'] === 'EP' || g['primary-type'] === 'Single',
-  )
-  const candidatos = albumes.length > 0 ? albumes : grupos
-  const conFecha = candidatos.filter((g) => g['first-release-date'])
-  const elegido = (conFecha.length > 0 ? conFecha : candidatos).sort(
-    (a, b) => (b.score ?? 0) - (a.score ?? 0),
-  )[0]
+  const elegido = elegirCandidato(grupos)
   if (!elegido || !elegido['first-release-date']) return null
 
   const fechaCruda = elegido['first-release-date']
-  const fechaCompleta = fechaCruda.length === 4
-    ? `${fechaCruda}-01-01`
-    : fechaCruda.length === 7
-      ? `${fechaCruda}-01`
-      : fechaCruda
+  const fechaCompleta =
+    fechaCruda.length === 4
+      ? `${fechaCruda}-01-01`
+      : fechaCruda.length === 7
+        ? `${fechaCruda}-01`
+        : fechaCruda
 
   const artistaCredito = elegido['artist-credit']?.[0]?.name
   const posterUrl = await obtenerPortada(elegido.id)
-  const descripcion = artistaCredito
-    ? `Album de ${artistaCredito}${elegido['primary-type'] ? ` (${elegido['primary-type']})` : ''}`
-    : undefined
+
+  console.log('[MusicBrainz]', { titulo, artista, encontrado: elegido.title, fecha: fechaCompleta })
 
   return {
     fuente: 'musicbrainz',
@@ -97,6 +133,8 @@ export async function buscarAlbum(
     fechaLanzamiento: fechaCompleta.slice(0, 10),
     musicbrainzId: elegido.id,
     posterUrl,
-    descripcion,
+    descripcion: artistaCredito
+      ? `Album de ${artistaCredito}${elegido['primary-type'] ? ` (${elegido['primary-type']})` : ''}`
+      : undefined,
   }
 }

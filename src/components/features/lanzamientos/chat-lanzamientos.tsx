@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { Send, Sparkles } from 'lucide-react'
@@ -29,7 +30,44 @@ interface SalidaAgregar {
   fechaLanzamiento?: string
 }
 
+interface PropsResultadoAgregado {
+  salida: SalidaAgregar
+  idUnico: string
+  onAgregado: () => void
+}
+
+function ResultadoAgregado({ salida, idUnico, onAgregado }: PropsResultadoAgregado) {
+  const notificadoRef = useRef(false)
+
+  useEffect(() => {
+    if (notificadoRef.current) return
+    notificadoRef.current = true
+    if (salida.agregado) {
+      toast.success('Lanzamiento agregado al calendario')
+      onAgregado()
+    } else {
+      toast.error(salida.error ?? 'No se pudo agregar el lanzamiento')
+    }
+  // idUnico garantiza que el efecto no re-dispara si el componente se re-monta con los mismos datos
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idUnico])
+
+  if (salida.agregado) {
+    return (
+      <p className="text-xs text-emerald-600 italic">
+        Lanzamiento agregado al calendario.
+      </p>
+    )
+  }
+  return (
+    <p className="text-xs text-red-600 italic">
+      Error: {salida.error ?? 'no se pudo agregar'}
+    </p>
+  )
+}
+
 export function ChatLanzamientos() {
+  const router = useRouter()
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
   })
@@ -77,6 +115,10 @@ export function ChatLanzamientos() {
     sendMessage({
       text: `Conozco la fecha exacta: ${fecha}. Agregalo con titulo="${titulo}", tipo=${tipo}, fechaLanzamiento=${fecha}, fuente=manual.`,
     })
+  }
+
+  function manejarAgregado() {
+    router.refresh()
   }
 
   return (
@@ -151,19 +193,13 @@ export function ChatLanzamientos() {
                 if (parte.type === 'tool-agregarRecordatorio') {
                   if (parte.state === 'output-available') {
                     const salida = parte.output as SalidaAgregar
-                    if (salida.agregado) {
-                      toast.success('Lanzamiento agregado al calendario')
-                      return (
-                        <p key={idx} className="text-xs text-emerald-600 italic">
-                          Lanzamiento agregado al calendario.
-                        </p>
-                      )
-                    }
-                    toast.error(salida.error ?? 'No se pudo agregar el lanzamiento')
                     return (
-                      <p key={idx} className="text-xs text-red-600 italic">
-                        Error: {salida.error ?? 'no se pudo agregar'}
-                      </p>
+                      <ResultadoAgregado
+                        key={`${mensaje.id}-${idx}`}
+                        idUnico={`${mensaje.id}-${idx}`}
+                        salida={salida}
+                        onAgregado={manejarAgregado}
+                      />
                     )
                   }
                   if (parte.state === 'input-streaming' || parte.state === 'input-available') {

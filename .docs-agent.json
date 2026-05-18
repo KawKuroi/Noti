@@ -1,0 +1,16 @@
+{
+  "backend": "claude-code",
+  "router": "CLAUDE.md",
+  "files": {
+    "CURRENT.md":      "Docs/CURRENT.md",
+    "PRD.md":          "Docs/PRD.md",
+    "ROADMAP.md":      "Docs/ROADMAP.md",
+    "ARCHITECTURE.md": "Docs/ARCHITECTURE.md"
+  },
+  "descriptions": {
+    "CURRENT.md":      "tarea activa, bugs conocidos, bloqueantes inmediatos",
+    "PRD.md":          "features, decisiones de producto, out of scope",
+    "ROADMAP.md":      "fases completadas, checklist de la fase actual, proximas fases",
+    "ARCHITECTURE.md": "stack, estructura de carpetas, flujos de datos, schema DB"
+  }
+}

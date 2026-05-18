@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     system: PROMPT_SISTEMA_LANZAMIENTOS,
     messages: modelMessages,
     tools: herramientasLanzamientos,
-    stopWhen: stepCountIs(5),
+    stopWhen: stepCountIs(8),
     onError: ({ error }) => {
       console.error('[chat]', error)
     },

@@ -2,13 +2,13 @@
 
 ## Estado actual
 
-Fases 0-8 completadas. Pendiente manual: aplicar migracion de BD en Supabase dashboard (`src/db/migrations/0003_lanzamientos.sql`).
+Fases 0-9 completadas. Pendiente manual: aplicar migracion de BD en Supabase dashboard (`src/db/migrations/0003_lanzamientos.sql`).
 
-Las fases 9-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
+Las fases 10-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
 
 ---
 
-## Historico de fases completadas (0-8)
+## Historico de fases completadas (0-9)
 
 - **Fase 0 — Setup inicial:** PRD, Arquitectura, Roadmap, CLAUDE.md, .gitignore, .env.example, .editorconfig.
 - **Fase 1 — Foundation:** Next.js 15 + App Router + TypeScript + Tailwind, Supabase (DB + Auth), Drizzle, Google OAuth + email/password, middleware de proteccion, layouts auth/dashboard, seed de 6 categorias, PWA basica, primer deploy a Vercel.
@@ -19,32 +19,7 @@ Las fases 9-16 estan ordenadas por importancia descendente: las primeras son las
 - **Fase 6 — Pulido + deploy publico:** landing, perfil, gestion de dispositivos, empty states, skeletons, error handling con toasts, meta tags, favicon, README, RLS y rate limiting. *Pendientes manuales:* Lighthouse audit, testing manual multi-browser, screenshots para portafolio.
 - **Fase 7 — Busqueda, IA general y segundo plano:** Ctrl+K con debounce, asistente IA en dashboard (`/api/ai/recordatorio` con `generateObject`), `crearRecordatorioDesdeIA`, resumen diario por push (cron `resumen-diario` cada hora), Background Sync en Service Worker, shortcuts y `window-controls-overlay` en manifest.
 - **Fase 8 — Reestructuracion de Lanzamientos:** categoria `movies` dividida en 5 (`movies`, `tv`, `games`, `music`, `books`), hub `/lanzamientos` con tabs y formulario manual, Google Books para libros, `SLUGS_LANZAMIENTO`, sidebar con entrada unica "Lanzamientos", mapeo tipo→slug en `crearRecordatorioLanzamiento`. *Pendiente manual:* aplicar `0003_lanzamientos.sql` en Supabase.
-
----
-
-## Fase 9: Categoria Notas (historial de archivos individuales)
-
-**Objetivo:** las notas se manejan como archivos individuales en un historial (estilo Google Keep / Apple Notes), no como un unico documento. Cada nota tiene su propio titulo, cuerpo y opcionalmente fecha de recordatorio. La vista principal es un grid/lista de tarjetas; clic en una nota abre su contenido completo. Cambia el schema (`due_date` y `notify_at` se vuelven nullable), introduce nuevos patrones de UI (vista detalle, editor dedicado) y abre la puerta a la Fase 16 (multimedia).
-
-Cuando creo un evento a cierta hora, el evento cuando es creado me aparece otra hora, hay una desincronización en los horarios para los eventos que se crean con fecha. Habria que arreglar esto antes de pasar a la Fase 9.
-
-- [ ] Migracion `0004_notas.sql`: INSERT categoria `notes`; `ALTER COLUMN due_date DROP NOT NULL` y `notify_at DROP NOT NULL`
-- [ ] Actualizar `src/db/schema.ts` (quitar `.notNull()` de `fechaVencimiento` y `notificarEn`)
-- [ ] Actualizar `src/types/reminder.types.ts` (Date -> Date | null en los campos correspondientes)
-- [ ] Agregar `notes` a `CATEGORIAS` y `SLUGS_VALIDOS` en constants y seed
-- [ ] Nueva entrada `esquemaMetadatosNotas` (campo `recordarme: boolean`) en `reminder.schemas.ts`
-- [ ] Ajustar `crearRecordatorio` para aceptar fecha vacia cuando `slug==='notes'`
-- [ ] Ajustar `getUpcomingReminders` para excluir notas sin `due_date`; nueva query `getNotas` ordenadas por `creadoEn DESC`
-- [ ] Ajustar `src/app/api/cron/check-reminders/route.ts` para ignorar `notify_at IS NULL`
-- [ ] Nueva ruta `src/app/(dashboard)/notes/page.tsx`: grid/lista de tarjetas (cada nota = una tarjeta) con titulo, preview de las primeras lineas, fecha de creacion y badge si tiene recordatorio activo
-- [ ] Boton prominente `Nueva nota` que abre un editor (dialog o panel) con titulo + textarea grande para el cuerpo
-- [ ] Nueva ruta `src/app/(dashboard)/notes/[id]/page.tsx` (o dialog modal) para ver/editar una nota completa
-- [ ] Toggle `Recordarme` dentro del editor que muestra campos de fecha/hora cuando se activa
-- [ ] Acciones por nota: editar, eliminar, duplicar
-- [ ] Las notas aparecen en la busqueda global Ctrl+K como cualquier otro recordatorio
-- [ ] Agregar icono `StickyNote` en el map de `sidebar.tsx`
-
-**Done when:** Puedo crear muchas notas independientes, verlas como tarjetas en `/notes`, abrir cualquiera para leerla o editarla en una vista dedicada, y opcionalmente convertir una nota en recordatorio activando una fecha. Las notas sin fecha no aparecen en el dashboard ni disparan notificacion.
+- **Fase 9 — Categoria Notas:** schema nullable para `due_date` y `notify_at`, migracion `0004_notas.sql`, categoria `notes` en constantes y seed, grid de tarjetas en `/notes`, editor con titulo y cuerpo, vista detalle `/notes/[id]`, toggle `Recordarme` con fecha opcional, acciones editar/eliminar/duplicar, integracion en busqueda global Ctrl+K.
 
 ---
 
