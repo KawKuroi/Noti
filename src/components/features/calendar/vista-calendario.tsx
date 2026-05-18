@@ -35,6 +35,7 @@ export function VistaCalendario({
 
   const recordatoriosDeDia = diaAbierto
     ? recordatorios.filter((rec) => {
+        if (!rec.fechaVencimiento) return false
         const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento)
         return isSameDay(fecha, diaAbierto)
       })

@@ -137,7 +137,7 @@ export async function procesarRecordatoriosPendientes(): Promise<{ procesados: n
     await enviarPushAUsuario(recordatorio.usuarioId, recordatorio.id, payload)
     procesados++
 
-    if (recordatorio.esRecurrente && recordatorio.reglaRecurrencia) {
+    if (recordatorio.esRecurrente && recordatorio.reglaRecurrencia && recordatorio.fechaVencimiento && recordatorio.notificarEn) {
       // Avanzar a la proxima ocurrencia
       const ancla = recordatorio.fechaVencimiento instanceof Date
         ? recordatorio.fechaVencimiento

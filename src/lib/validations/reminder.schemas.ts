@@ -34,6 +34,14 @@ export const esquemaMetadatosPelicula = z.object({
   fechaEstreno: z.string().optional(),
 })
 
+export const esquemaMetadatosNotas = z.object({
+  recordarme: z
+    .string()
+    .transform((v) => v === 'true')
+    .or(z.boolean())
+    .default(false),
+})
+
 const esquemasMetadatosPorSlug = {
   classes: esquemaMetadatosClases,
   tasks: esquemaMetadatosTareas,
@@ -41,6 +49,7 @@ const esquemasMetadatosPorSlug = {
   events: esquemaMetadatosEventos,
   study: esquemaMetadatosEstudio,
   movies: esquemaMetadatosPelicula,
+  notes: esquemaMetadatosNotas,
 } as const
 
 export type SlugConSchema = keyof typeof esquemasMetadatosPorSlug
@@ -62,13 +71,20 @@ export const esquemaRecordatorioBase = z
     reglaRecurrencia: z.string().optional(),
   })
 
+// Para notas: fecha opcional y descripcion con limite mayor (es el cuerpo)
+export const esquemaRecordatorioBaseNotas = esquemaRecordatorioBase.extend({
+  fechaVencimiento: z.string().optional().default(''),
+  descripcion: z.string().max(10000, 'Maximo 10000 caracteres').optional(),
+})
+
 export function obtenerEsquemaMetadatos(slug: string) {
   return esquemasMetadatosPorSlug[slug as SlugConSchema] ?? z.object({}).passthrough()
 }
 
 export function validarRecordatorio(slug: string, datos: FormData | Record<string, unknown>) {
   const raw = datos instanceof FormData ? Object.fromEntries(datos.entries()) : datos
-  const baseResult = esquemaRecordatorioBase.safeParse(raw)
+  const esquemaBase = slug === 'notes' ? esquemaRecordatorioBaseNotas : esquemaRecordatorioBase
+  const baseResult = esquemaBase.safeParse(raw)
 
   if (!baseResult.success) {
     return { ok: false as const, errores: baseResult.error.flatten().fieldErrors }

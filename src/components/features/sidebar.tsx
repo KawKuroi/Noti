@@ -8,6 +8,7 @@ import {
   Cake,
   CheckSquare,
   MapPin,
+  StickyNote,
   LayoutDashboard,
   Settings,
   Calendar,
@@ -24,6 +25,7 @@ const ICONOS: Record<string, React.ComponentType<{ size?: number; className?: st
   Cake,
   CheckSquare,
   MapPin,
+  StickyNote,
 }
 
 interface Props {
@@ -78,7 +80,7 @@ export function Sidebar({ categorias }: Props) {
 
         {categoriasGenerales.map((cat) => {
           const Icono = ICONOS[cat.icono]
-          const estaActiva = ruta === `/${cat.slug}`
+          const estaActiva = ruta === `/${cat.slug}` || ruta.startsWith(`/${cat.slug}/`)
 
           return (
             <Link

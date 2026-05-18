@@ -43,8 +43,8 @@ export interface Recordatorio {
   categoriaId: number
   titulo: string
   descripcion: string | null
-  fechaVencimiento: Date
-  notificarEn: Date
+  fechaVencimiento: Date | null
+  notificarEn: Date | null
   esRecurrente: boolean
   reglaRecurrencia: string | null
   estaCompletado: boolean

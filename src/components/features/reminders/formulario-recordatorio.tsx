@@ -207,10 +207,10 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
     }
   }
 
-  const fechaVencimientoInicial = recordatorio
+  const fechaVencimientoInicial = recordatorio?.fechaVencimiento
     ? format(new Date(recordatorio.fechaVencimiento), 'yyyy-MM-dd')
     : ''
-  const horaVencimientoInicial = recordatorio
+  const horaVencimientoInicial = recordatorio?.fechaVencimiento
     ? format(new Date(recordatorio.fechaVencimiento), 'HH:mm')
     : ''
 

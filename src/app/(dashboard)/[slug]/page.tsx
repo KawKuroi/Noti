@@ -28,7 +28,7 @@ interface Props {
 export default async function PaginaCategoria({ params }: Props) {
   const { slug } = await params
 
-  if (!SLUGS_VALIDOS.includes(slug as (typeof SLUGS_VALIDOS)[number])) {
+  if (!SLUGS_VALIDOS.includes(slug as (typeof SLUGS_VALIDOS)[number]) || slug === 'notes') {
     notFound()
   }
 

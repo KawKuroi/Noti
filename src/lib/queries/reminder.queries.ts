@@ -1,6 +1,6 @@
-import { eq, and, desc, asc, count, lte, gte, or, ilike } from 'drizzle-orm'
+import { eq, and, desc, asc, count, lte, gte, or, ilike, isNotNull } from 'drizzle-orm'
 import { db } from '@/db'
-import { recordatorios, perfiles } from '@/db/schema'
+import { recordatorios, categorias, perfiles } from '@/db/schema'
 import type { Recordatorio } from '@/types/reminder.types'
 
 function mapearRecordatorio(fila: typeof recordatorios.$inferSelect): Recordatorio {
@@ -33,12 +33,29 @@ export async function getRecordatoriosProximos(
       and(
         eq(recordatorios.usuarioId, usuarioId),
         eq(recordatorios.estaCompletado, false),
+        isNotNull(recordatorios.fechaVencimiento),
       ),
     )
     .orderBy(asc(recordatorios.fechaVencimiento))
     .limit(limite ?? 50)
 
   return filas.map(mapearRecordatorio)
+}
+
+export async function getNotas(usuarioId: string): Promise<Recordatorio[]> {
+  const filas = await db
+    .select()
+    .from(recordatorios)
+    .innerJoin(categorias, eq(recordatorios.categoriaId, categorias.id))
+    .where(
+      and(
+        eq(recordatorios.usuarioId, usuarioId),
+        eq(categorias.slug, 'notes'),
+      ),
+    )
+    .orderBy(desc(recordatorios.creadoEn))
+
+  return filas.map((f) => mapearRecordatorio(f.reminders))
 }
 
 export async function getRecordatoriosPorCategoria(
@@ -195,6 +212,7 @@ export async function getRecordatoriosANotificar(
     .innerJoin(perfiles, eq(recordatorios.usuarioId, perfiles.id))
     .where(
       and(
+        isNotNull(recordatorios.notificarEn),
         lte(recordatorios.notificarEn, ahora),
         gte(recordatorios.notificarEn, limiteInferior),
         eq(recordatorios.estaCompletado, false),

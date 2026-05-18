@@ -32,6 +32,7 @@ export function agruparPorDia(recordatorios: Recordatorio[]): GruposRecordatorio
   const grupos: GruposRecordatorios = { hoy: [], manana: [], estaSemana: [], masAdelante: [] }
 
   for (const rec of recordatorios) {
+    if (!rec.fechaVencimiento) continue
     const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento)
 
     if (isToday(fecha)) {
@@ -133,7 +134,9 @@ export function calcularProximaOcurrencia(regla: string, ancla: Date, ahora: Dat
   return ancla
 }
 
-export function obtenerProximaFecha(recordatorio: Recordatorio): Date {
+export function obtenerProximaFecha(recordatorio: Recordatorio): Date | null {
+  if (!recordatorio.fechaVencimiento) return null
+
   if (!recordatorio.esRecurrente || !recordatorio.reglaRecurrencia) {
     return recordatorio.fechaVencimiento instanceof Date
       ? recordatorio.fechaVencimiento
@@ -162,6 +165,8 @@ export function expandirOcurrenciasEnRango(
   const resultado: Recordatorio[] = []
 
   for (const rec of items) {
+    if (!rec.fechaVencimiento) continue
+
     if (!rec.esRecurrente || !rec.reglaRecurrencia) {
       const fecha = rec.fechaVencimiento instanceof Date
         ? rec.fechaVencimiento

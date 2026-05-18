@@ -61,6 +61,12 @@ export const CATEGORIAS: DefinicionCategoria[] = [
     icono: 'MapPin',
     color: '#DC2626',
   },
+  {
+    slug: 'notes',
+    nombre: 'Notas',
+    icono: 'StickyNote',
+    color: '#6366F1',
+  },
 ]
 
 export const ZONA_HORARIA_DEFECTO = 'America/Bogota'
@@ -93,7 +99,7 @@ export const OPCIONES_ANTICIPACION: { valor: number; etiqueta: string }[] = [
 export const SLUGS_LANZAMIENTO = ['movies', 'tv', 'games', 'music', 'books'] as const
 export type SlugLanzamiento = (typeof SLUGS_LANZAMIENTO)[number]
 
-export const SLUGS_VALIDOS = ['study', 'classes', 'birthdays', 'tasks', 'events'] as const
+export const SLUGS_VALIDOS = ['study', 'classes', 'birthdays', 'tasks', 'events', 'notes'] as const
 export type SlugCategoria = (typeof SLUGS_VALIDOS)[number]
 
 export const HORA_NOTIFICACION_LANZAMIENTO = '06:00'

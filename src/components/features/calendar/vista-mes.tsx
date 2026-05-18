@@ -31,6 +31,7 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
 
   function getDotInfo(dia: Date): { dots: { color: string; id: string }[]; total: number } {
     const delDia = recordatorios.filter((rec) => {
+      if (!rec.fechaVencimiento) return false
       const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento)
       return isSameDay(fecha, dia)
     })

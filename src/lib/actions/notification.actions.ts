@@ -78,6 +78,7 @@ export async function posponerRecordatorio(
       .limit(1)
 
     if (!actual) return { ok: false, error: 'Recordatorio no encontrado' }
+    if (!actual.notificarEn) return { ok: false, error: 'Recordatorio sin fecha de notificacion' }
 
     const nuevoNotificarEn = new Date(
       actual.notificarEn.getTime() + minutos * 60 * 1000,

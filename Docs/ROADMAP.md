@@ -61,7 +61,9 @@ Tipos de lanzamientos y campos asociados:
 - Serie: titulo, fecha de lanzamiento, temporada
 - Libro: titulo, fecha de lanzamiento, autor
 
-Tambien me gustaria que se asignara una imagen con respecto al lanzamiento, por ejemplo para un album de musica una imagen de la portada, para un videojuego la portada, para una pelicula la portada, para una serie la portada y para un libro la portada, todas estas imagenes se guardarian en la base de datos junto con la información del lanzamiento (Preguntar viabilidad de esta peticion)
+Tambien me gustaria que se asignara una imagen con respecto al lanzamiento, por ejemplo para un album de musica una imagen de la portada, para un videojuego la portada, para una pelicula la portada, para una serie la portada y para un libro la portada, todas estas imagenes se guardarian en la base de datos junto con la información del lanzamiento (Preguntar viabilidad de esta peticion).
+
+Cuando acepto la creacion del recordatorio, el evento se clona muchas veces, hay que limitar esto a que se cree solo un evento. Además, cuando se acepta la creación del evento, debería de verse en tiempo real dentro de la pestaña de lanzamientos, no es necesario esperar a que se recargue la página.
 
 ### Bugs identificados a corregir
 
@@ -120,7 +122,7 @@ Validar al menos 10 consultas reales que hoy fallan:
 
 **Objetivo:** corregir el bug de navegacion en vista semana (no trae los recordatorios correctos) y permitir filtrar el calendario por categoria.
 
-Además, hay un error grafico en el que se ven los dias de la semana. pues aparece semana del 17-17 de mayo, cuando deberia ser del 11-17 de mayo.
+Además, hay un error grafico en el que se ven los dias de la semana. pues aparece semana del 17-17 de mayo, cuando deberia ser del 11-17 de mayo. Esto sucede cuando navego por el menú de meses y posteriormente presiono "semana".
 
 - [ ] Cambiar query param de `/calendar` de `?mes=YYYY-MM` a `?fecha=YYYY-MM-DD` para que vista semana fetchee el rango correcto
 - [ ] Actualizar `src/app/(dashboard)/calendar/page.tsx` para parsear `fecha`; mantener fallback con `mes`

@@ -15,6 +15,7 @@ const CATEGORIAS = [
   { slug: 'birthdays', nombre: 'Cumpleanos', icono: 'Cake', color: '#DB2777' },
   { slug: 'tasks', nombre: 'Tareas', icono: 'CheckSquare', color: '#D97706' },
   { slug: 'events', nombre: 'Eventos', icono: 'MapPin', color: '#DC2626' },
+  { slug: 'notes', nombre: 'Notas', icono: 'StickyNote', color: '#6366F1' },
 ]
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })

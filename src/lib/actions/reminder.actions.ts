@@ -42,14 +42,24 @@ export async function crearRecordatorio(
   if (!resultado.ok) return { ok: false, error: resultado.errores as Record<string, string[]> }
 
   const { datos, metadatos } = resultado
-  const fechaHoraUtc = formData.get('fechaHoraUtc') as string | null
-  const fechaVencimiento =
-    fechaHoraUtc && !isNaN(new Date(fechaHoraUtc).getTime())
-      ? new Date(fechaHoraUtc)
-      : combinarFechaHora(datos.fechaVencimiento, datos.horaVencimiento ?? '00:00')
+  const esNota = slug === 'notes'
+  const recordarme = esNota && Boolean((metadatos as { recordarme?: boolean }).recordarme)
 
-  const anticipacionMs = (datos.anticipacionMin ?? 15) * 60 * 1000
-  const notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+  let fechaVencimiento: Date | null = null
+  let notificarEn: Date | null = null
+
+  if (!esNota || recordarme) {
+    const fechaHoraUtc = formData.get('fechaHoraUtc') as string | null
+    if (fechaHoraUtc && !isNaN(new Date(fechaHoraUtc).getTime())) {
+      fechaVencimiento = new Date(fechaHoraUtc)
+    } else if (datos.fechaVencimiento) {
+      fechaVencimiento = combinarFechaHora(datos.fechaVencimiento, datos.horaVencimiento ?? '00:00')
+    } else {
+      return { ok: false, error: 'La fecha es requerida' }
+    }
+    const anticipacionMs = (datos.anticipacionMin ?? 15) * 60 * 1000
+    notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+  }
 
   try {
     const [fila] = await db
@@ -95,14 +105,24 @@ export async function actualizarRecordatorio(
   if (!resultado.ok) return { ok: false, error: resultado.errores as Record<string, string[]> }
 
   const { datos, metadatos } = resultado
-  const fechaHoraUtc = formData.get('fechaHoraUtc') as string | null
-  const fechaVencimiento =
-    fechaHoraUtc && !isNaN(new Date(fechaHoraUtc).getTime())
-      ? new Date(fechaHoraUtc)
-      : combinarFechaHora(datos.fechaVencimiento, datos.horaVencimiento ?? '00:00')
+  const esNota = slug === 'notes'
+  const recordarme = esNota && Boolean((metadatos as { recordarme?: boolean }).recordarme)
 
-  const anticipacionMs = (datos.anticipacionMin ?? 15) * 60 * 1000
-  const notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+  let fechaVencimiento: Date | null = null
+  let notificarEn: Date | null = null
+
+  if (!esNota || recordarme) {
+    const fechaHoraUtc = formData.get('fechaHoraUtc') as string | null
+    if (fechaHoraUtc && !isNaN(new Date(fechaHoraUtc).getTime())) {
+      fechaVencimiento = new Date(fechaHoraUtc)
+    } else if (datos.fechaVencimiento) {
+      fechaVencimiento = combinarFechaHora(datos.fechaVencimiento, datos.horaVencimiento ?? '00:00')
+    } else {
+      return { ok: false, error: 'La fecha es requerida' }
+    }
+    const anticipacionMs = (datos.anticipacionMin ?? 15) * 60 * 1000
+    notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+  }
 
   try {
     const [fila] = await db
@@ -171,7 +191,7 @@ export async function alternarCompletado(
 
     if (!actual) return { ok: false, error: 'Recordatorio no encontrado' }
 
-    if (actual.esRecurrente && actual.reglaRecurrencia) {
+    if (actual.esRecurrente && actual.reglaRecurrencia && actual.fechaVencimiento && actual.notificarEn) {
       // Para recurrentes: avanzar a la proxima ocurrencia en lugar de marcar completado
       const proxima = calcularProximaOcurrencia(
         actual.reglaRecurrencia,
@@ -343,5 +363,44 @@ export async function crearRecordatorioLanzamiento(
   } catch (e) {
     console.error('Error al crear recordatorio de lanzamiento:', e)
     return { ok: false, error: 'Error al guardar el lanzamiento' }
+  }
+}
+
+export async function duplicarNota(
+  id: string,
+): Promise<{ ok: boolean; nuevoId?: string; error?: string }> {
+  const usuarioId = await obtenerUsuarioId()
+  if (!usuarioId) return { ok: false, error: 'No autenticado' }
+
+  try {
+    const [original] = await db
+      .select()
+      .from(recordatorios)
+      .where(and(eq(recordatorios.id, id), eq(recordatorios.usuarioId, usuarioId)))
+      .limit(1)
+
+    if (!original) return { ok: false, error: 'Nota no encontrada' }
+
+    const [copia] = await db
+      .insert(recordatorios)
+      .values({
+        usuarioId,
+        categoriaId: original.categoriaId,
+        titulo: `${original.titulo} (copia)`,
+        descripcion: original.descripcion,
+        fechaVencimiento: null,
+        notificarEn: null,
+        esRecurrente: false,
+        reglaRecurrencia: null,
+        estaCompletado: false,
+        metadatos: { recordarme: false },
+      })
+      .returning({ id: recordatorios.id })
+
+    revalidatePath('/notes')
+    return { ok: true, nuevoId: copia.id }
+  } catch (e) {
+    console.error('Error al duplicar nota:', e)
+    return { ok: false, error: 'Error al duplicar la nota' }
   }
 }

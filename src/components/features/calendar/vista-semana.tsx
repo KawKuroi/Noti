@@ -34,12 +34,13 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
   function recordatoriosDelDia(dia: Date): Recordatorio[] {
     return recordatorios
       .filter((rec) => {
+        if (!rec.fechaVencimiento) return false
         const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento)
         return isSameDay(fecha, dia)
       })
       .sort((a, b) => {
-        const fa = a.fechaVencimiento instanceof Date ? a.fechaVencimiento : new Date(a.fechaVencimiento)
-        const fb = b.fechaVencimiento instanceof Date ? b.fechaVencimiento : new Date(b.fechaVencimiento)
+        const fa = a.fechaVencimiento instanceof Date ? a.fechaVencimiento : new Date(a.fechaVencimiento!)
+        const fb = b.fechaVencimiento instanceof Date ? b.fechaVencimiento : new Date(b.fechaVencimiento!)
         return fa.getTime() - fb.getTime()
       })
   }
@@ -70,7 +71,7 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
             {/* Recordatorios del dia */}
             <div className="flex-1 p-1.5 space-y-1 overflow-y-auto max-h-64">
               {items.map((rec) => {
-                const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento)
+                const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento!)
                 const color = coloresPorCategoria.get(rec.categoriaId) ?? '#6b7280'
 
                 return (
