@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import {
-  Film,
   BookOpen,
   CalendarDays,
   Cake,
@@ -15,7 +14,6 @@ import { ListaRecordatorios } from '@/components/features/reminders/lista-record
 import { SLUGS_VALIDOS } from '@/lib/utils/constants'
 
 const ICONOS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  Film,
   BookOpen,
   CalendarDays,
   Cake,
@@ -30,7 +28,6 @@ interface Props {
 export default async function PaginaCategoria({ params }: Props) {
   const { slug } = await params
 
-  // Validar slug contra los slugs permitidos
   if (!SLUGS_VALIDOS.includes(slug as (typeof SLUGS_VALIDOS)[number])) {
     notFound()
   }

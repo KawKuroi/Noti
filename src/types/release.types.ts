@@ -11,8 +11,10 @@ export interface ResultadoLanzamiento {
   tmdbId?: number
   rawgId?: number
   musicbrainzId?: string
+  googleBooksId?: string
   posterUrl?: string
   descripcion?: string
+  autor?: string
 }
 
 export interface MetadatosLanzamiento {
@@ -22,4 +24,6 @@ export interface MetadatosLanzamiento {
   posterUrl?: string
   rawgId?: number
   musicbrainzId?: string
+  googleBooksId?: string
+  autor?: string
 }

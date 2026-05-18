@@ -5,7 +5,11 @@ import { Pool } from 'pg'
 import { categorias } from './schema'
 
 const CATEGORIAS = [
-  { slug: 'movies', nombre: 'Peliculas y series', icono: 'Film', color: '#7C3AED' },
+  { slug: 'movies', nombre: 'Peliculas', icono: 'Film', color: '#7C3AED' },
+  { slug: 'tv', nombre: 'Series', icono: 'Tv', color: '#0EA5E9' },
+  { slug: 'games', nombre: 'Videojuegos', icono: 'Gamepad2', color: '#16A34A' },
+  { slug: 'music', nombre: 'Musica', icono: 'Music', color: '#EA580C' },
+  { slug: 'books', nombre: 'Libros', icono: 'BookMarked', color: '#8B5CF6' },
   { slug: 'study', nombre: 'Estudio', icono: 'BookOpen', color: '#0284C7' },
   { slug: 'classes', nombre: 'Clases', icono: 'CalendarDays', color: '#059669' },
   { slug: 'birthdays', nombre: 'Cumpleanos', icono: 'Cake', color: '#DB2777' },

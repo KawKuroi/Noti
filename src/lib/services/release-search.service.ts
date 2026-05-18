@@ -1,6 +1,7 @@
 import { buscarPelicula, buscarSerie } from './tmdb.service'
 import { buscarJuego } from './rawg.service'
 import { buscarAlbum } from './musicbrainz.service'
+import { buscarLibro } from './google-books.service'
 import type { ResultadoLanzamiento, TipoLanzamiento } from '@/types/release.types'
 
 export async function buscarLanzamiento(
@@ -20,6 +21,8 @@ export async function buscarLanzamiento(
       return buscarJuego(tituloLimpio)
     case 'album':
       return buscarAlbum(tituloLimpio, artista)
+    case 'book':
+      return buscarLibro(tituloLimpio, artista)
     default:
       return null
   }

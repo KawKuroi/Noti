@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Film,
   BookOpen,
   CalendarDays,
   Cake,
@@ -13,12 +12,13 @@ import {
   Settings,
   Calendar,
   Timer,
+  Clapperboard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { SLUGS_LANZAMIENTO } from '@/lib/utils/constants'
 import type { Categoria } from '@/types/category.types'
 
 const ICONOS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  Film,
   BookOpen,
   CalendarDays,
   Cake,
@@ -32,6 +32,10 @@ interface Props {
 
 export function Sidebar({ categorias }: Props) {
   const ruta = usePathname()
+
+  const categoriasGenerales = categorias.filter(
+    (c) => !(SLUGS_LANZAMIENTO as readonly string[]).includes(c.slug),
+  )
 
   return (
     <aside className="w-60 h-screen bg-white border-r border-gray-100 flex flex-col sticky top-0">
@@ -59,7 +63,20 @@ export function Sidebar({ categorias }: Props) {
           </span>
         </div>
 
-        {categorias.map((cat) => {
+        <Link
+          href="/lanzamientos"
+          className={cn(
+            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            ruta === '/lanzamientos'
+              ? 'bg-gray-100 text-gray-900'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+          )}
+        >
+          <Clapperboard size={16} />
+          Lanzamientos
+        </Link>
+
+        {categoriasGenerales.map((cat) => {
           const Icono = ICONOS[cat.icono]
           const estaActiva = ruta === `/${cat.slug}`
 
@@ -83,6 +100,7 @@ export function Sidebar({ categorias }: Props) {
             </Link>
           )
         })}
+
         <div className="pt-3 pb-1 px-3">
           <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
             Herramientas

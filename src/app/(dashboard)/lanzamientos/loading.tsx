@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function CargandoMovies() {
+export default function CargandoLanzamientos() {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="flex items-center gap-3">

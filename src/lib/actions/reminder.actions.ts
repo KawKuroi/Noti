@@ -260,6 +260,14 @@ export async function crearRecordatorioDesdeIA(
   }
 }
 
+const TIPO_A_SLUG: Record<TipoLanzamiento, string> = {
+  movie: 'movies',
+  tv: 'tv',
+  game: 'games',
+  album: 'music',
+  book: 'books',
+}
+
 export interface EntradaCrearLanzamiento {
   titulo: string
   tipo: TipoLanzamiento
@@ -268,8 +276,10 @@ export interface EntradaCrearLanzamiento {
   tmdbId?: number
   rawgId?: number
   musicbrainzId?: string
+  googleBooksId?: string
   posterUrl?: string
   descripcion?: string
+  autor?: string
 }
 
 export async function crearRecordatorioLanzamiento(
@@ -279,8 +289,9 @@ export async function crearRecordatorioLanzamiento(
   if (!usuarioId) return { ok: false, error: 'No autenticado' }
 
   const categorias = await getCategorias()
-  const categoriaMovies = categorias.find((c) => c.slug === 'movies')
-  if (!categoriaMovies) return { ok: false, error: 'Categoria movies no disponible' }
+  const slugCategoria = TIPO_A_SLUG[input.tipo]
+  const categoria = categorias.find((c) => c.slug === slugCategoria)
+  if (!categoria) return { ok: false, error: `Categoria ${slugCategoria} no disponible` }
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.fechaLanzamiento)) {
     return { ok: false, error: 'Formato de fecha invalido' }
@@ -296,6 +307,8 @@ export async function crearRecordatorioLanzamiento(
     ...(input.posterUrl ? { posterUrl: input.posterUrl } : {}),
     ...(input.rawgId ? { rawgId: input.rawgId } : {}),
     ...(input.musicbrainzId ? { musicbrainzId: input.musicbrainzId } : {}),
+    ...(input.googleBooksId ? { googleBooksId: input.googleBooksId } : {}),
+    ...(input.autor ? { autor: input.autor } : {}),
   }
 
   try {
@@ -303,7 +316,7 @@ export async function crearRecordatorioLanzamiento(
       .insert(recordatorios)
       .values({
         usuarioId,
-        categoriaId: categoriaMovies.id,
+        categoriaId: categoria.id,
         titulo: input.titulo,
         descripcion: input.descripcion ?? null,
         fechaVencimiento,
@@ -316,7 +329,8 @@ export async function crearRecordatorioLanzamiento(
       })
       .returning()
 
-    revalidarRutas('movies')
+    revalidarRutas(slugCategoria)
+    revalidatePath('/lanzamientos')
     return { ok: true, data: fila as unknown as Recordatorio }
   } catch (e) {
     console.error('Error al crear recordatorio de lanzamiento:', e)

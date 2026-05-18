@@ -9,19 +9,21 @@ const fuenteSchema = z.enum(FUENTES_LANZAMIENTO)
 
 export const buscarLanzamientoTool = tool({
   description:
-    'Busca la fecha de lanzamiento real de una pelicula, serie, videojuego o album consultando fuentes verificadas (TMDB, RAWG, MusicBrainz). Devuelve null si no encuentra resultado. NUNCA inventes la fecha.',
+    'Busca la fecha de lanzamiento real de una pelicula, serie, videojuego, album o libro consultando fuentes verificadas (TMDB, RAWG, MusicBrainz, Google Books). Devuelve null si no encuentra resultado. NUNCA inventes la fecha.',
   inputSchema: z.object({
     titulo: z.string().min(1).describe('Titulo del lanzamiento a buscar'),
     tipo: tipoSchema.describe(
-      'Tipo de lanzamiento: movie (pelicula), tv (serie), game (videojuego), album (album musical)',
+      'Tipo de lanzamiento: movie (pelicula), tv (serie), game (videojuego), album (album musical), book (libro)',
     ),
     artista: z
       .string()
-      .optional()
-      .describe('Solo para tipo album: nombre del artista o banda, ayuda a desambiguar'),
+      .nullable()
+      .describe(
+        'Para tipo album: nombre del artista o banda. Para tipo book: nombre del autor. Ayuda a desambiguar.',
+      ),
   }),
   execute: async ({ titulo, tipo, artista }) => {
-    const resultado = await buscarLanzamientoServicio(titulo, tipo, artista)
+    const resultado = await buscarLanzamientoServicio(titulo, tipo, artista ?? undefined)
     if (!resultado) {
       return { encontrado: false as const }
     }
@@ -60,8 +62,10 @@ const inputAgregarSchema = z.object({
   tmdbId: z.number().int().optional(),
   rawgId: z.number().int().optional(),
   musicbrainzId: z.string().optional(),
+  googleBooksId: z.string().optional(),
   posterUrl: z.string().url().optional(),
   descripcion: z.string().optional(),
+  autor: z.string().optional(),
 })
 
 export const agregarRecordatorioTool = tool({

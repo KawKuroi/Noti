@@ -3,9 +3,33 @@ import type { DefinicionCategoria } from '@/types/category.types'
 export const CATEGORIAS: DefinicionCategoria[] = [
   {
     slug: 'movies',
-    nombre: 'Peliculas y series',
+    nombre: 'Peliculas',
     icono: 'Film',
     color: '#7C3AED',
+  },
+  {
+    slug: 'tv',
+    nombre: 'Series',
+    icono: 'Tv',
+    color: '#0EA5E9',
+  },
+  {
+    slug: 'games',
+    nombre: 'Videojuegos',
+    icono: 'Gamepad2',
+    color: '#16A34A',
+  },
+  {
+    slug: 'music',
+    nombre: 'Musica',
+    icono: 'Music',
+    color: '#EA580C',
+  },
+  {
+    slug: 'books',
+    nombre: 'Libros',
+    icono: 'BookMarked',
+    color: '#8B5CF6',
   },
   {
     slug: 'study',
@@ -66,24 +90,29 @@ export const OPCIONES_ANTICIPACION: { valor: number; etiqueta: string }[] = [
   { valor: 1440, etiqueta: '1 dia antes' },
 ]
 
-export const SLUGS_VALIDOS = ['movies', 'study', 'classes', 'birthdays', 'tasks', 'events'] as const
+export const SLUGS_LANZAMIENTO = ['movies', 'tv', 'games', 'music', 'books'] as const
+export type SlugLanzamiento = (typeof SLUGS_LANZAMIENTO)[number]
+
+export const SLUGS_VALIDOS = ['study', 'classes', 'birthdays', 'tasks', 'events'] as const
 export type SlugCategoria = (typeof SLUGS_VALIDOS)[number]
 
 export const HORA_NOTIFICACION_LANZAMIENTO = '06:00'
 
-export const TIPOS_LANZAMIENTO = ['movie', 'tv', 'game', 'album'] as const
-export const FUENTES_LANZAMIENTO = ['tmdb', 'rawg', 'musicbrainz', 'manual'] as const
+export const TIPOS_LANZAMIENTO = ['movie', 'tv', 'game', 'album', 'book'] as const
+export const FUENTES_LANZAMIENTO = ['tmdb', 'rawg', 'musicbrainz', 'google_books', 'manual'] as const
 
 export const ETIQUETAS_TIPO_LANZAMIENTO: Record<(typeof TIPOS_LANZAMIENTO)[number], string> = {
   movie: 'Pelicula',
   tv: 'Serie',
   game: 'Videojuego',
   album: 'Album',
+  book: 'Libro',
 }
 
 export const ETIQUETAS_FUENTE_LANZAMIENTO: Record<(typeof FUENTES_LANZAMIENTO)[number], string> = {
   tmdb: 'TMDB',
   rawg: 'RAWG',
   musicbrainz: 'MusicBrainz',
+  google_books: 'Google Books',
   manual: 'Manual',
 }
