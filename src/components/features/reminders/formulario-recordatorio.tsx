@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useEffect, useMemo, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { crearRecordatorio, actualizarRecordatorio } from '@/lib/actions/reminder.actions'
 import { PRIORIDADES, DIAS_SEMANA, OPCIONES_ANTICIPACION } from '@/lib/utils/constants'
+import { format } from 'date-fns'
 import { serializarReglaRecurrencia } from '@/lib/utils/date.utils'
 import type { Categoria } from '@/types/category.types'
 import type { Recordatorio, EstadoAccionRecordatorio } from '@/types/reminder.types'
@@ -207,11 +208,20 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
   }
 
   const fechaVencimientoInicial = recordatorio
-    ? new Date(recordatorio.fechaVencimiento).toISOString().split('T')[0]
+    ? format(new Date(recordatorio.fechaVencimiento), 'yyyy-MM-dd')
     : ''
   const horaVencimientoInicial = recordatorio
-    ? new Date(recordatorio.fechaVencimiento).toTimeString().slice(0, 5)
+    ? format(new Date(recordatorio.fechaVencimiento), 'HH:mm')
     : ''
+
+  const [fecha, setFecha] = useState(fechaVencimientoInicial)
+  const [hora, setHora] = useState(horaVencimientoInicial)
+
+  const fechaHoraUtc = useMemo(() => {
+    if (!fecha || !hora) return ''
+    const d = new Date(`${fecha}T${hora}:00`)
+    return isNaN(d.getTime()) ? '' : d.toISOString()
+  }, [fecha, hora])
 
   const tieneError = !estado.ok && estado.error && typeof estado.error === 'string'
 
@@ -219,6 +229,7 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
     <form action={dispatch} className="space-y-4">
       <input type="hidden" name="slug" value={slugActual} />
       <input type="hidden" name="categoriaId" value={categoriaIdActual} />
+      <input type="hidden" name="fechaHoraUtc" value={fechaHoraUtc} />
 
       {/* Selector de categoria */}
       {!esEdicion && (
@@ -278,7 +289,8 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
             id="fechaVencimiento"
             name="fechaVencimiento"
             type="date"
-            defaultValue={fechaVencimientoInicial}
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
             required
           />
         </div>
@@ -289,7 +301,8 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
               id="horaVencimiento"
               name="horaVencimiento"
               type="time"
-              defaultValue={horaVencimientoInicial}
+              value={hora}
+              onChange={(e) => setHora(e.target.value)}
             />
           </div>
         )}

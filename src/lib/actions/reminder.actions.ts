@@ -42,9 +42,11 @@ export async function crearRecordatorio(
   if (!resultado.ok) return { ok: false, error: resultado.errores as Record<string, string[]> }
 
   const { datos, metadatos } = resultado
-  const fecha = datos.fechaVencimiento
-  const hora = datos.horaVencimiento ?? '00:00'
-  const fechaVencimiento = combinarFechaHora(fecha, hora)
+  const fechaHoraUtc = formData.get('fechaHoraUtc') as string | null
+  const fechaVencimiento =
+    fechaHoraUtc && !isNaN(new Date(fechaHoraUtc).getTime())
+      ? new Date(fechaHoraUtc)
+      : combinarFechaHora(datos.fechaVencimiento, datos.horaVencimiento ?? '00:00')
 
   const anticipacionMs = (datos.anticipacionMin ?? 15) * 60 * 1000
   const notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
@@ -93,9 +95,11 @@ export async function actualizarRecordatorio(
   if (!resultado.ok) return { ok: false, error: resultado.errores as Record<string, string[]> }
 
   const { datos, metadatos } = resultado
-  const fecha = datos.fechaVencimiento
-  const hora = datos.horaVencimiento ?? '00:00'
-  const fechaVencimiento = combinarFechaHora(fecha, hora)
+  const fechaHoraUtc = formData.get('fechaHoraUtc') as string | null
+  const fechaVencimiento =
+    fechaHoraUtc && !isNaN(new Date(fechaHoraUtc).getTime())
+      ? new Date(fechaHoraUtc)
+      : combinarFechaHora(datos.fechaVencimiento, datos.horaVencimiento ?? '00:00')
 
   const anticipacionMs = (datos.anticipacionMin ?? 15) * 60 * 1000
   const notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
