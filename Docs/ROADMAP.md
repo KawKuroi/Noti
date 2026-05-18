@@ -2,13 +2,13 @@
 
 ## Estado actual
 
-Fases 0-7 completadas. Pendiente manual: aplicar migracion de BD en Supabase dashboard (`src/db/migrations/0002_magical_maddog.sql`).
+Fases 0-8 completadas. Pendiente manual: aplicar migracion de BD en Supabase dashboard (`src/db/migrations/0003_lanzamientos.sql`).
 
-Las fases 8-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
+Las fases 9-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
 
 ---
 
-## Historico de fases completadas (0-7)
+## Historico de fases completadas (0-8)
 
 - **Fase 0 — Setup inicial:** PRD, Arquitectura, Roadmap, CLAUDE.md, .gitignore, .env.example, .editorconfig.
 - **Fase 1 — Foundation:** Next.js 15 + App Router + TypeScript + Tailwind, Supabase (DB + Auth), Drizzle, Google OAuth + email/password, middleware de proteccion, layouts auth/dashboard, seed de 6 categorias, PWA basica, primer deploy a Vercel.
@@ -18,35 +18,15 @@ Las fases 8-16 estan ordenadas por importancia descendente: las primeras son las
 - **Fase 5 — Pomodoro + calendario:** PomodoroTimer 25/5/15, sonido opcional, integracion con estudio, vista calendario mensual y semanal con dots y dialog por dia. *(Pomodoro queda marcado para eliminacion en Fase 15.)*
 - **Fase 6 — Pulido + deploy publico:** landing, perfil, gestion de dispositivos, empty states, skeletons, error handling con toasts, meta tags, favicon, README, RLS y rate limiting. *Pendientes manuales:* Lighthouse audit, testing manual multi-browser, screenshots para portafolio.
 - **Fase 7 — Busqueda, IA general y segundo plano:** Ctrl+K con debounce, asistente IA en dashboard (`/api/ai/recordatorio` con `generateObject`), `crearRecordatorioDesdeIA`, resumen diario por push (cron `resumen-diario` cada hora), Background Sync en Service Worker, shortcuts y `window-controls-overlay` en manifest.
-
----
-
-## Fase 8: Reestructuracion de Lanzamientos
-
-**Objetivo:** dividir lanzamientos por tipo (pelicula, serie, videojuego, album, libro) con UI y prompts especificos, hub unificado en `/lanzamientos`, soporte para libros y formulario manual. Refactor mayor: cambia el modelo de datos (5 categorias en lugar de 1), la capa de IA (prompts y tools por tipo), las APIs externas (anade Google Books) y la navegacion (hub con tabs en sidebar).
-
-- [ ] Migracion `0003_lanzamientos.sql`: INSERT categorias `tv`, `games`, `music`, `books`; renombrar `movies` a "Peliculas"; reasignar `category_id` de recordatorios existentes segun `metadata->>'tipo'`
-- [ ] Actualizar `src/db/seed.ts` y `src/lib/utils/constants.ts` (`CATEGORIAS`, `SLUGS_VALIDOS`, nueva constante `SLUGS_LANZAMIENTO`)
-- [ ] Extender `TIPOS_LANZAMIENTO` con `book` y `FUENTES_LANZAMIENTO` con `google_books`; actualizar etiquetas
-- [ ] Agregar campo `autor?` opcional en `ResultadoLanzamiento` (`src/types/release.types.ts`)
-- [ ] Nuevo `src/lib/services/google-books.service.ts` con `buscarLibro(titulo, autor?)`
-- [ ] Extender `src/lib/services/release-search.service.ts` con routing para `book`
-- [ ] Actualizar `src/lib/ai/tools.ts` (`buscarLanzamientoTool` con `autor`, `inputAgregarSchema` con `book` y `googleBooksId`)
-- [ ] Enriquecer `PROMPT_SISTEMA_LANZAMIENTOS` con reglas por tipo (artista para album, autor para libro)
-- [ ] Renombrar `src/components/features/movies/` -> `src/components/features/lanzamientos/`
-- [ ] Nueva ruta `src/app/(dashboard)/lanzamientos/page.tsx` (hub con tabs Peliculas | Series | Videojuegos | Musica | Libros)
-- [ ] Nuevo componente `formulario-manual-lanzamiento.tsx` (dialog con campos por tipo)
-- [ ] Actualizar `src/components/features/sidebar.tsx`: filtrar slugs de lanzamiento y agregar entrada hardcoded `Lanzamientos`
-- [ ] Borrar `src/app/(dashboard)/movies/page.tsx`
-- [ ] Actualizar `AtribucionFuentes` con Google Books
-
-**Done when:** Puedo preguntar al chat IA por una pelicula, serie, videojuego, album o libro y agendar cada uno en su tab correcta. Puedo anadir manualmente cualquier tipo desde un boton. El sidebar muestra una unica entrada `Lanzamientos`.
+- **Fase 8 — Reestructuracion de Lanzamientos:** categoria `movies` dividida en 5 (`movies`, `tv`, `games`, `music`, `books`), hub `/lanzamientos` con tabs y formulario manual, Google Books para libros, `SLUGS_LANZAMIENTO`, sidebar con entrada unica "Lanzamientos", mapeo tipo→slug en `crearRecordatorioLanzamiento`. *Pendiente manual:* aplicar `0003_lanzamientos.sql` en Supabase.
 
 ---
 
 ## Fase 9: Categoria Notas (historial de archivos individuales)
 
 **Objetivo:** las notas se manejan como archivos individuales en un historial (estilo Google Keep / Apple Notes), no como un unico documento. Cada nota tiene su propio titulo, cuerpo y opcionalmente fecha de recordatorio. La vista principal es un grid/lista de tarjetas; clic en una nota abre su contenido completo. Cambia el schema (`due_date` y `notify_at` se vuelven nullable), introduce nuevos patrones de UI (vista detalle, editor dedicado) y abre la puerta a la Fase 16 (multimedia).
+
+Cuando creo un evento a cierta hora, el evento cuando es creado me aparece otra hora, hay una desincronización en los horarios para los eventos que se crean con fecha. Habria que arreglar esto antes de pasar a la Fase 9.
 
 - [ ] Migracion `0004_notas.sql`: INSERT categoria `notes`; `ALTER COLUMN due_date DROP NOT NULL` y `notify_at DROP NOT NULL`
 - [ ] Actualizar `src/db/schema.ts` (quitar `.notNull()` de `fechaVencimiento` y `notificarEn`)
@@ -71,6 +51,17 @@ Las fases 8-16 estan ordenadas por importancia descendente: las primeras son las
 ## Fase 10: Refinar busqueda y modelo de IA para lanzamientos
 
 **Objetivo:** corregir los bugs que hacen que consultas como "Cuando sale GTA 6" devuelvan sin resultado, aunque la informacion exista en RAWG / TMDB / MusicBrainz. Mejorar la robustez del prompt y el modelo para que encadene tools correctamente. Critico para que el chat de Lanzamientos funcione bien (hoy falla en una mayoria de consultas reales).
+
+La idea es escribir algo como "Cuando sale el nuevo Zelda" o "Nuevo album de The Weeknd" y que el sistema sea capaz de encontrar el lanzamiento correspondiente. Que devuelva la información concreta, como el titulo original, fecha de lanzamiento, director, autor, artista, dependiendo de la categoria y que yo pueda confirmar como se va a guardar la información y en base a esa información se cree el recordatorio.
+
+Tipos de lanzamientos y campos asociados:
+- Album de musica: titulo del album, el artista, la fecha de lanzamiento
+- Videojuego: titulo, fecha de lanzamiento, plataforma
+- Pelicula: titulo, fecha de lanzamiento, director
+- Serie: titulo, fecha de lanzamiento, temporada
+- Libro: titulo, fecha de lanzamiento, autor
+
+Tambien me gustaria que se asignara una imagen con respecto al lanzamiento, por ejemplo para un album de musica una imagen de la portada, para un videojuego la portada, para una pelicula la portada, para una serie la portada y para un libro la portada, todas estas imagenes se guardarian en la base de datos junto con la información del lanzamiento (Preguntar viabilidad de esta peticion)
 
 ### Bugs identificados a corregir
 
@@ -128,6 +119,8 @@ Validar al menos 10 consultas reales que hoy fallan:
 ## Fase 11: Calendario - bugfix vista semana y filtro por categoria
 
 **Objetivo:** corregir el bug de navegacion en vista semana (no trae los recordatorios correctos) y permitir filtrar el calendario por categoria.
+
+Además, hay un error grafico en el que se ven los dias de la semana. pues aparece semana del 17-17 de mayo, cuando deberia ser del 11-17 de mayo.
 
 - [ ] Cambiar query param de `/calendar` de `?mes=YYYY-MM` a `?fecha=YYYY-MM-DD` para que vista semana fetchee el rango correcto
 - [ ] Actualizar `src/app/(dashboard)/calendar/page.tsx` para parsear `fecha`; mantener fallback con `mes`

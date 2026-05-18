@@ -142,7 +142,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
           )}
 
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="flex items-center gap-1 text-xs text-gray-400">
+            <span suppressHydrationWarning className="flex items-center gap-1 text-xs text-gray-400">
               <Clock size={10} />
               {fechaFormateada}
             </span>
