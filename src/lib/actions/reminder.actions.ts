@@ -215,6 +215,7 @@ export interface EntradaRecordatorioIA {
   categoriaSlug: string
   fechaVencimiento: string
   horaVencimiento?: string
+  fechaHoraUtc?: string
   descripcion?: string
   esRecurrente?: boolean
   reglaRecurrencia?: string
@@ -235,7 +236,10 @@ export async function crearRecordatorioDesdeIA(
   }
 
   const hora = input.horaVencimiento ?? '09:00'
-  const fechaVencimiento = combinarFechaHora(input.fechaVencimiento, hora)
+  const fechaVencimiento =
+    input.fechaHoraUtc && !isNaN(new Date(input.fechaHoraUtc).getTime())
+      ? new Date(input.fechaHoraUtc)
+      : combinarFechaHora(input.fechaVencimiento, hora)
   const anticipacionMs = 15 * 60 * 1000
   const notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
 

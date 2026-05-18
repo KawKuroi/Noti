@@ -37,12 +37,19 @@ export function AsistenteIA() {
     setError(null)
 
     try {
+      const hoy = new Date()
+      const fechaHoy = [
+        hoy.getFullYear(),
+        String(hoy.getMonth() + 1).padStart(2, '0'),
+        String(hoy.getDate()).padStart(2, '0'),
+      ].join('-')
+
       const res = await fetch('/api/ai/recordatorio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           texto: texto.trim(),
-          fechaHoy: new Date().toISOString().split('T')[0],
+          fechaHoy,
         }),
       })
 
@@ -76,7 +83,10 @@ export function AsistenteIA() {
     setGuardando(true)
     setError(null)
 
-    const resultado = await crearRecordatorioDesdeIA(parseado)
+    const horaLocal = parseado.horaVencimiento ?? '09:00'
+    const fechaHoraUtc = new Date(`${parseado.fechaVencimiento}T${horaLocal}:00`).toISOString()
+
+    const resultado = await crearRecordatorioDesdeIA({ ...parseado, fechaHoraUtc })
 
     if (resultado.ok) {
       toast.success('Recordatorio creado correctamente')
