@@ -336,7 +336,6 @@ export async function crearRecordatorioLanzamiento(
     tipo: input.tipo,
     fuente: input.fuente,
     fechaEstreno: input.fechaLanzamiento,
-    ...(input.posterUrl ? { posterUrl: input.posterUrl } : {}),
     ...(input.rawgId ? { rawgId: input.rawgId } : {}),
     ...(input.musicbrainzId ? { musicbrainzId: input.musicbrainzId } : {}),
     ...(input.googleBooksId ? { googleBooksId: input.googleBooksId } : {}),

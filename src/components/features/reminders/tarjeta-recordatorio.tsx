@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
 import { toast } from 'sonner'
-import { Check, Pencil, Trash2, RotateCcw, Clock } from 'lucide-react'
+import { Check, Pencil, Trash2, RotateCcw, Clock, Film, Tv, Gamepad2, Music, BookMarked } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -16,13 +14,23 @@ import {
 import { FormularioRecordatorio } from './formulario-recordatorio'
 import { eliminarRecordatorio, alternarCompletado } from '@/lib/actions/reminder.actions'
 import { formatearFechaCorta, formatearFechaSinHora } from '@/lib/utils/date.utils'
+import { PALETA_LANZAMIENTOS } from '@/lib/utils/constants'
 import type { Recordatorio } from '@/types/reminder.types'
 import type { Categoria } from '@/types/category.types'
+import type { TipoLanzamiento } from '@/types/release.types'
 
 interface Props {
   recordatorio: Recordatorio
   categorias: Categoria[]
   mostrarCategoria?: boolean
+}
+
+const ICONOS_TIPO: Record<TipoLanzamiento, React.ElementType> = {
+  movie: Film,
+  tv: Tv,
+  game: Gamepad2,
+  album: Music,
+  book: BookMarked,
 }
 
 export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria }: Props) {
@@ -38,12 +46,15 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
       : formatearFechaCorta(new Date(recordatorio.fechaVencimiento))
     : null
 
-  const metadatos = recordatorio.metadatos as any
-  const posterUrl = metadatos?.posterUrl
-  const director = metadatos?.director
-  const artista = metadatos?.artista
-  const plataforma = metadatos?.plataforma
-  const temporada = metadatos?.temporada
+  const metadatos = recordatorio.metadatos as Record<string, unknown> | null
+  const tipoLanzamiento = metadatos?.tipo as TipoLanzamiento | undefined
+  const director = metadatos?.director as string | undefined
+  const artista = metadatos?.artista as string | undefined
+  const plataforma = metadatos?.plataforma as string | undefined
+  const temporada = metadatos?.temporada as number | undefined
+
+  const colorAcento = tipoLanzamiento ? PALETA_LANZAMIENTOS[tipoLanzamiento] : undefined
+  const IconoTipo = tipoLanzamiento ? ICONOS_TIPO[tipoLanzamiento] : undefined
 
   async function manejarCompletar() {
     setCargando(true)
@@ -83,6 +94,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
             ? 'border-gray-100 opacity-60'
             : 'border-gray-100 hover:border-gray-200'
         }`}
+        style={colorAcento ? { borderLeftColor: colorAcento, borderLeftWidth: '3px' } : undefined}
       >
         {/* Boton completar — solo para recordatorios no recurrentes */}
         {!recordatorio.esRecurrente && (
@@ -100,16 +112,12 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
           </button>
         )}
 
-        {posterUrl && (
-          <div className="relative w-12 h-16 flex-shrink-0 rounded overflow-hidden bg-gray-100 mt-1">
-            <Image
-              src={posterUrl}
-              alt={recordatorio.titulo}
-              fill
-              sizes="48px"
-              className="object-cover"
-              unoptimized
-            />
+        {IconoTipo && colorAcento && (
+          <div
+            className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5"
+            style={{ backgroundColor: `${colorAcento}15` }}
+          >
+            <IconoTipo size={16} style={{ color: colorAcento }} />
           </div>
         )}
 

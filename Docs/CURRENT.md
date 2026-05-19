@@ -5,7 +5,7 @@
 
 ## Fase activa
 
-**Activo:** Fase 16 (Lanzamientos - pestana Todos, paleta de color, formulario completo, portadas no persistentes).
+**Activo:** Fase 17 (Inicio - rediseno con saludo dinamico, input IA grande, proximos recordatorios, mini-calendario lateral y chips de categorias).
 **Estado general:** Fases 0–15 completadas. La nueva ola priorizada va de Fase 16 a Fase 19 (ver `ROADMAP.md`).
 
 ## Pendientes manuales bloqueantes
@@ -21,7 +21,7 @@
 - [x] **Fase 14 — Rename**: Donde decía "Tareas" ahora dice "Pendientes" (sidebar, filtros, formulario, asistente).
 - [x] **Fase 14 — Recurrentes sin checkbox**: Una clase semanal y un cumpleaños anual no muestran checkbox en su card; sí muestran botones editar/eliminar.
 - [x] **Fase 15 — Sidebar**: Grupo "Herramientas" agrupa Calendario + Notas. Icono de lupa en sidebar abre Ctrl+K. Footer muestra nombre del usuario + engranaje. Cerrar sesión vive en `/settings`.
-- [ ] **Fase 16 — Lanzamientos**: Pestaña "Todos" en `/lanzamientos`. Cards diferenciadas por color (negro/azul/verde/rojo/morado). Formulario manual pide artista/autor/descripción. Las portadas se ven en el palette IA pero la card guardada no muestra portada.
+- [x] **Fase 16 — Lanzamientos**: Pestaña "Todos" en `/lanzamientos`. Cards diferenciadas por color (negro/azul/verde/rojo/morado). Formulario manual pide artista/autor/descripción/director. Las portadas se ven en el palette IA pero la card guardada no muestra portada.
 - [ ] **Fase 17 — Inicio**: Saludo dinámico, input IA grande, próximos recordatorios, mini-calendario lateral y chips de categorías visibles al entrar a `/inicio`.
 - [ ] **Fase 18 — IA fechas**: "Lanzamiento de GTA 6 nov 19" → la card de candidatos muestra fecha 19 noviembre. La card de edición permite cambiar cualquier campo antes de confirmar.
 - [ ] **Fase 19 — Landing**: Botón "Ver en GitHub" en hero y link en footer abren el repo en nueva pestaña.

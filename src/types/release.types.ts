@@ -26,7 +26,6 @@ export interface MetadatosLanzamiento {
   tipo: TipoLanzamiento
   fuente: FuenteLanzamiento
   fechaEstreno: string
-  posterUrl?: string
   rawgId?: number
   musicbrainzId?: string
   googleBooksId?: string

@@ -17,18 +17,19 @@ interface DatosCategoria {
 
 interface Props {
   datos: DatosCategoria[]
+  todos: Recordatorio[]
   categorias: Categoria[]
 }
 
 const ORDEN_TABS: SlugLanzamiento[] = ['movies', 'tv', 'games', 'music', 'books']
 
-export function HubLanzamientos({ datos, categorias }: Props) {
+export function HubLanzamientos({ datos, todos, categorias }: Props) {
   const datosOrdenados = ORDEN_TABS.flatMap((slug) => {
     const encontrado = datos.find((d) => d.cat.slug === slug)
     return encontrado ? [encontrado] : []
   })
 
-  const [tabActiva, setTabActiva] = useState<string>(datosOrdenados[0]?.cat.slug ?? 'movies')
+  const [tabActiva, setTabActiva] = useState<string>('todos')
 
   const categoriaActiva = datosOrdenados.find((d) => d.cat.slug === tabActiva)
 
@@ -36,6 +37,17 @@ export function HubLanzamientos({ datos, categorias }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex gap-1 border-b border-gray-100 w-full">
+          <button
+            onClick={() => setTabActiva('todos')}
+            className={cn(
+              'px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap',
+              tabActiva === 'todos'
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700',
+            )}
+          >
+            Todos
+          </button>
           {datosOrdenados.map(({ cat }) => (
             <button
               key={cat.slug}
@@ -57,12 +69,21 @@ export function HubLanzamientos({ datos, categorias }: Props) {
         </div>
       </div>
 
-      {categoriaActiva && (
+      {tabActiva === 'todos' ? (
         <ListaRecordatorios
-          recordatorios={categoriaActiva.recordatorios}
+          recordatorios={todos}
           categorias={categorias}
-          mensajeVacio={`Sin lanzamientos en ${categoriaActiva.cat.nombre}. Usa el chat o agrega uno manualmente.`}
+          mostrarCategoria
+          mensajeVacio="Sin lanzamientos. Usa el chat o agrega uno manualmente."
         />
+      ) : (
+        categoriaActiva && (
+          <ListaRecordatorios
+            recordatorios={categoriaActiva.recordatorios}
+            categorias={categorias}
+            mensajeVacio={`Sin lanzamientos en ${categoriaActiva.cat.nombre}. Usa el chat o agrega uno manualmente.`}
+          />
+        )
       )}
     </div>
   )

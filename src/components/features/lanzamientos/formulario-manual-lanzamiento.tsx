@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,8 @@ export function FormularioManualLanzamiento() {
   const [titulo, setTitulo] = useState('')
   const [fecha, setFecha] = useState('')
   const [autor, setAutor] = useState('')
+  const [descripcion, setDescripcion] = useState('')
+  const [director, setDirector] = useState('')
   const [pending, startTransition] = useTransition()
 
   function resetear() {
@@ -37,6 +40,8 @@ export function FormularioManualLanzamiento() {
     setTitulo('')
     setFecha('')
     setAutor('')
+    setDescripcion('')
+    setDirector('')
   }
 
   function manejarEnvio(e: React.FormEvent) {
@@ -49,8 +54,12 @@ export function FormularioManualLanzamiento() {
         tipo,
         fechaLanzamiento: fecha,
         fuente: 'manual',
+        ...(descripcion.trim() ? { descripcion: descripcion.trim() } : {}),
         ...(tipo === 'book' && autor.trim() ? { autor: autor.trim() } : {}),
         ...(tipo === 'album' && autor.trim() ? { artista: autor.trim() } : {}),
+        ...((tipo === 'movie' || tipo === 'tv') && director.trim()
+          ? { director: director.trim() }
+          : {}),
       })
 
       if (resultado.ok) {
@@ -67,7 +76,9 @@ export function FormularioManualLanzamiento() {
 
   const mostrarAutor = tipo === 'book'
   const mostrarArtista = tipo === 'album'
+  const mostrarDirector = tipo === 'movie' || tipo === 'tv'
   const etiquetaExtra = mostrarAutor ? 'Autor' : mostrarArtista ? 'Artista / Banda' : null
+  const etiquetaDirector = tipo === 'tv' ? 'Showrunner' : 'Director'
 
   return (
     <>
@@ -124,6 +135,30 @@ export function FormularioManualLanzamiento() {
                 />
               </div>
             )}
+
+            {mostrarDirector && (
+              <div className="space-y-1.5">
+                <Label htmlFor="director-lanzamiento">{etiquetaDirector}</Label>
+                <Input
+                  id="director-lanzamiento"
+                  value={director}
+                  onChange={(e) => setDirector(e.target.value)}
+                  placeholder={tipo === 'tv' ? 'Ej: Vince Gilligan' : 'Ej: Denis Villeneuve'}
+                />
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="descripcion-lanzamiento">Descripcion (opcional)</Label>
+              <Textarea
+                id="descripcion-lanzamiento"
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                placeholder="Breve descripcion..."
+                rows={2}
+                className="resize-none"
+              />
+            </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="fecha-lanzamiento">Fecha de lanzamiento</Label>

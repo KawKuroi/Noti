@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Clapperboard } from 'lucide-react'
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
-import { getRecordatoriosPorCategoria } from '@/lib/queries/reminder.queries'
+import { getRecordatoriosPorCategoria, getLanzamientosTodos } from '@/lib/queries/reminder.queries'
 import { HubLanzamientos } from '@/components/features/lanzamientos/hub-lanzamientos'
 import { AtribucionFuentes } from '@/components/features/lanzamientos/atribucion-fuentes'
 import { BotonAbrirAsistente } from '@/components/features/lanzamientos/boton-abrir-asistente'
@@ -19,12 +19,15 @@ export default async function PaginaLanzamientos() {
     (SLUGS_LANZAMIENTO as readonly string[]).includes(c.slug),
   )
 
-  const datos = await Promise.all(
-    categoriasLanzamiento.map(async (cat) => ({
-      cat,
-      recordatorios: await getRecordatoriosPorCategoria(user.id, cat.id),
-    })),
-  )
+  const [datos, todos] = await Promise.all([
+    Promise.all(
+      categoriasLanzamiento.map(async (cat) => ({
+        cat,
+        recordatorios: await getRecordatoriosPorCategoria(user.id, cat.id),
+      })),
+    ),
+    getLanzamientosTodos(user.id),
+  ])
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -49,7 +52,7 @@ export default async function PaginaLanzamientos() {
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
           Mis lanzamientos seguidos
         </h2>
-        <HubLanzamientos datos={datos} categorias={categorias} />
+        <HubLanzamientos datos={datos} todos={todos} categorias={categorias} />
       </section>
 
       <AtribucionFuentes />
