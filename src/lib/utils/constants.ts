@@ -131,3 +131,11 @@ export const TIPO_LANZAMIENTO_A_SLUG: Record<
   album: 'music',
   book: 'books',
 }
+
+export const PALETA_LANZAMIENTOS: Record<(typeof TIPOS_LANZAMIENTO)[number], string> = {
+  movie: '#0A0A0A',
+  tv: '#2563EB',
+  game: '#16A34A',
+  album: '#DC2626',
+  book: '#7C3AED',
+}

@@ -26,7 +26,10 @@ export const esquemaMetadatosEventos = z.object({
 })
 
 export const esquemaMetadatosEstudio = z.object({
-  duracionMin: z.coerce.number().int().min(1).max(480).optional(),
+  duracionMin: z.preprocess(
+    (v) => (v === '' || v === undefined || v === null ? undefined : Number(v)),
+    z.number().int().min(1).max(480).optional(),
+  ),
 })
 
 export const esquemaMetadatosPelicula = z.object({

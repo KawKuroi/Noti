@@ -125,6 +125,23 @@ export async function getRecordatoriosTodos(usuarioId: string): Promise<Recordat
   return filas.map(mapearRecordatorio)
 }
 
+export async function getLanzamientosTodos(usuarioId: string): Promise<Recordatorio[]> {
+  const SLUGS = ['movies', 'tv', 'games', 'music', 'books']
+  const filas = await db
+    .select({ recordatorio: recordatorios })
+    .from(recordatorios)
+    .innerJoin(categorias, eq(recordatorios.categoriaId, categorias.id))
+    .where(
+      and(
+        eq(recordatorios.usuarioId, usuarioId),
+        or(...SLUGS.map((slug) => eq(categorias.slug, slug))),
+      ),
+    )
+    .orderBy(asc(recordatorios.fechaVencimiento))
+
+  return filas.map((f) => mapearRecordatorio(f.recordatorio))
+}
+
 // Devuelve recordatorios no recurrentes cuya fechaVencimiento cae en [inicio, fin]
 // y TODOS los recurrentes del usuario para que el cliente expanda ocurrencias en el rango.
 export async function getRecordatoriosEnRango(

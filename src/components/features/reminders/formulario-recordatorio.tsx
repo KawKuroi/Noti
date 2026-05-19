@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useMemo, useState } from 'react'
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -134,14 +134,19 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
   const [slugActual, setSlugActual] = useState(categoriaInicial?.slug ?? 'events')
   const [categoriaIdActual, setCategoriaId] = useState(categoriaInicial?.id ?? categorias[0]?.id)
 
+  const onExitoRef = useRef(onExito)
+  onExitoRef.current = onExito
+
   useEffect(() => {
     if (estado.ok) {
       toast.success(esEdicion ? 'Recordatorio actualizado' : 'Recordatorio creado')
-      if (onExito) onExito()
+      onExitoRef.current?.()
     } else if (typeof estado.error === 'string') {
       toast.error(estado.error)
+    } else if (estado.error && typeof estado.error === 'object') {
+      toast.error('Revisa los campos del formulario')
     }
-  }, [estado.ok, estado.error, esEdicion, onExito])
+  }, [estado.ok, estado.error, esEdicion])
 
   function alCambiarCategoria(slug: string) {
     const cat = categorias.find((c) => c.slug === slug)
