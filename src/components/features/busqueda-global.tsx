@@ -69,19 +69,7 @@ export function BusquedaGlobal() {
   }
 
   if (!abierto) {
-    return (
-      <button
-        onClick={() => setAbierto(true)}
-        className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg px-3 py-1.5 transition-colors"
-        aria-label="Buscar recordatorios"
-      >
-        <Search size={14} />
-        <span className="hidden sm:inline">Buscar</span>
-        <kbd className="hidden sm:inline text-xs bg-white border border-gray-200 rounded px-1 py-0.5 text-gray-400">
-          Ctrl+K
-        </kbd>
-      </button>
-    )
+    return null
   }
 
   return (

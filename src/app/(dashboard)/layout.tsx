@@ -1,7 +1,7 @@
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { Sidebar } from '@/components/features/sidebar'
-import { Header } from '@/components/features/header'
+import { BusquedaGlobal } from '@/components/features/busqueda-global'
 import {
   AsistenteProvider,
   FabAsistente,
@@ -20,12 +20,10 @@ export default async function LayoutDashboard({ children }: Props) {
   return (
     <AsistenteProvider>
       <div className="flex h-screen overflow-hidden bg-gray-50">
-        <Sidebar categorias={categorias} />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header usuario={user} />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
-        </div>
+        <Sidebar categorias={categorias} usuario={user} />
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
+      <BusquedaGlobal />
       <FabAsistente />
       <CommandPalette />
     </AsistenteProvider>
