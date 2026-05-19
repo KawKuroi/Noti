@@ -78,7 +78,7 @@ export function BusquedaGlobal() {
         className="absolute inset-0 bg-black/30"
         onClick={() => setAbierto(false)}
       />
-      <div className="relative w-full max-w-md bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
+      <div className="relative w-full max-w-xl bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
           <Search size={16} className="text-gray-400 shrink-0" />
           <input

@@ -37,9 +37,10 @@ const SLUGS_HERRAMIENTAS = ['notes'] as const
 interface Props {
   categorias: Categoria[]
   usuario: User
+  nombrePerfil?: string | null
 }
 
-export function Sidebar({ categorias, usuario }: Props) {
+export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
   const ruta = usePathname()
   const [herramientasAbiertas, setHerramientasAbiertas] = useState(true)
 
@@ -49,9 +50,11 @@ export function Sidebar({ categorias, usuario }: Props) {
       !(SLUGS_HERRAMIENTAS as readonly string[]).includes(c.slug),
   )
 
-  const nombre = usuario.user_metadata?.full_name
-    ? (usuario.user_metadata.full_name as string).split(' ')[0]
-    : usuario.email?.split('@')[0] ?? 'Usuario'
+  const nombre =
+    nombrePerfil ??
+    (usuario.user_metadata?.full_name
+      ? (usuario.user_metadata.full_name as string).split(' ')[0]
+      : usuario.email?.split('@')[0] ?? 'Usuario')
 
   function abrirBusqueda() {
     document.dispatchEvent(
