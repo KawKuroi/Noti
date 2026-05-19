@@ -1,8 +1,8 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport, type UIMessage } from 'ai'
+import { DefaultChatTransport } from 'ai'
 
 const CLAVE_STORAGE = 'noti:chat:messages'
 
@@ -25,44 +25,28 @@ interface Props {
 }
 
 export function ChatProvider({ children }: Props) {
-  const [mensajesIniciales, setMensajesIniciales] = useState<UIMessage[]>([])
-  const [hidratado, setHidratado] = useState(false)
-
-  useEffect(() => {
-    try {
-      const guardado = sessionStorage.getItem(CLAVE_STORAGE)
-      if (guardado) {
-        const parsed = JSON.parse(guardado) as UIMessage[]
-        if (Array.isArray(parsed)) {
-          setMensajesIniciales(parsed)
-        }
-      }
-    } catch {}
-    setHidratado(true)
-  }, [])
-
-  return hidratado ? (
-    <ChatProviderInterno mensajesIniciales={mensajesIniciales}>{children}</ChatProviderInterno>
-  ) : (
-    <>{children}</>
-  )
-}
-
-function ChatProviderInterno({
-  mensajesIniciales,
-  children,
-}: {
-  mensajesIniciales: UIMessage[]
-  children: React.ReactNode
-}) {
   const [abierto, setAbierto] = useState(false)
+  const hidratadoRef = useRef(false)
 
   const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
-    messages: mensajesIniciales,
   })
 
   useEffect(() => {
+    if (hidratadoRef.current) return
+    hidratadoRef.current = true
+    try {
+      const guardado = sessionStorage.getItem(CLAVE_STORAGE)
+      if (!guardado) return
+      const parsed = JSON.parse(guardado)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        setMessages(parsed)
+      }
+    } catch {}
+  }, [setMessages])
+
+  useEffect(() => {
+    if (!hidratadoRef.current) return
     try {
       if (messages.length === 0) {
         sessionStorage.removeItem(CLAVE_STORAGE)
