@@ -2,13 +2,11 @@
 
 ## Estado actual
 
-Fases 0-11 completadas. Pendiente manual: aplicar migracion de BD en Supabase dashboard (`src/db/migrations/0003_lanzamientos.sql`) y pruebas manuales de Fase 10.
-
-Las fases 12-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
+Las fases 14-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
 
 ---
 
-## Historico de fases completadas (0-11)
+## Historico de fases completadas (0-13)
 
 - **Fase 0 — Setup inicial:** PRD, Arquitectura, Roadmap, CLAUDE.md, .gitignore, .env.example, .editorconfig.
 - **Fase 1 — Foundation:** Next.js 15 + App Router + TypeScript + Tailwind, Supabase (DB + Auth), Drizzle, Google OAuth + email/password, middleware de proteccion, layouts auth/dashboard, seed de 6 categorias, PWA basica, primer deploy a Vercel.
@@ -22,12 +20,13 @@ Las fases 12-16 estan ordenadas por importancia descendente: las primeras son la
 - **Fase 9 — Categoria Notas:** schema nullable para `due_date` y `notify_at`, migracion `0004_notas.sql`, categoria `notes` en constantes y seed, grid de tarjetas en `/notes`, editor con titulo y cuerpo, vista detalle `/notes/[id]`, toggle `Recordarme` con fecha opcional, acciones editar/eliminar/duplicar, integracion en busqueda global Ctrl+K.
 - **Fase 10 — Refinar busqueda y modelo de IA para lanzamientos:** Mejoras en RAWG, TMDB, MusicBrainz, y prompts para IA. *Pendiente:* Pruebas manuales.
 - **Fase 11 — Calendario:** Bugfix vista semana, filtro por categoria, corrección del error gráfico de las fechas.
-- **Fase 12 — Refactor IA lanzamientos + chat unificado:** Bug critico de RAWG resuelto (ya no inventa fechas TBA como `${año+1}-12-31`). Nueva tool `buscarProximoLanzamiento` para prompts genericos ("nuevo album de X", "proximo Zelda"). Chat de lanzamientos y asistente IA general consolidados en un unico chat global con FAB sparkles + bottom sheet y atajo Ctrl+I, persistido via sessionStorage para sobrevivir navegacion entre rutas. Validacion de match de titulo en todos los servicios via `coincidencia-titulo.ts`. TarjetaConfirmacion permite editar fecha inline cuando es tentativa.
-- **Fase 12b — Pipeline deterministico + command palette:** El chat conversacional con tool calling se reemplaza por un pipeline de 3 pasos para subir la precision al ~95%. (1) Extraccion estructurada con generateObject + Zod usando `openai/gpt-oss-120b` via Groq — un solo modelo decide intencion y rellena campos. (2) Busqueda multi-candidato: cada servicio ahora expone `candidatos<X>()` que devuelve hasta 5 resultados; `obtenerCandidatos()` paraleliza fuentes cuando el tipo es desconocido y re-rankea por fecha confirmada, futuro, coincidencia y tipo. (3) UI: command palette estilo Raycast (Ctrl+I) que muestra al usuario 3-5 candidatos como cards seleccionables; el usuario es el arbitro final. Eliminado todo lo conversacional (chat-provider, bottom-sheet, tools.ts, prompt.ts, /api/chat).
+- **Fase 12 — Refactor IA lanzamientos:** Bug RAWG resuelto, chat unificado con bottom sheet y Ctrl+I, validacion de coincidencia de titulo, edicion inline de fecha tentativa.
+- **Fase 12b — Pipeline deterministico + command palette:** Reemplazo del chat conversacional por pipeline de 3 pasos (extraccion estructurada, busqueda multi-candidato, UI de seleccion estilo Raycast). Precision ~95%.
+- **Fase 13 — Eliminar Pomodoro:** Retirado del producto todo lo relacionado con el temporizador Pomodoro.
 
 ---
 
-## Fase 13: Auto-eliminacion de tareas completadas
+## Fase 14: Auto-eliminacion de tareas completadas
 
 **Objetivo:** el usuario configura cada cuanto se borran sus tareas completadas (7 / 30 / 90 dias o Nunca). Alcance limitado a la categoria `tasks`.
 
@@ -45,7 +44,7 @@ Las fases 12-16 estan ordenadas por importancia descendente: las primeras son la
 
 ---
 
-## Fase 14: Entrada por audio en el asistente IA
+## Fase 15: Entrada por audio en el asistente IA
 
 **Objetivo:** boton de microfono que graba, transcribe con Groq Whisper y rellena el input para que el usuario revise.
 
@@ -59,29 +58,14 @@ Las fases 12-16 estan ordenadas por importancia descendente: las primeras son la
 
 ---
 
-## Fase 15: Eliminar herramienta Pomodoro
-
-**Objetivo:** retirar Pomodoro del producto porque se aleja del objetivo (gestion de recordatorios). La categoria `Estudio` se mantiene desacoplada del pomodoro.
-
-- [ ] Borrar `src/app/(dashboard)/pomodoro/page.tsx` y `loading.tsx`
-- [ ] Borrar `src/app/api/pomodoro/notify/route.ts`
-- [ ] Borrar carpeta `src/components/features/pomodoro/`
-- [ ] Borrar `src/hooks/use-pomodoro.ts`
-- [ ] Borrar `src/lib/utils/pomodoro.utils.ts`
-- [ ] Eliminar link y icono `Timer` de `src/components/features/sidebar.tsx`
-- [ ] Quitar shortcut `Pomodoro` de `public/manifest.json`
-- [ ] Revisar `src/components/features/settings/formulario-sonido.tsx`: si era exclusivo del pomodoro, eliminarlo; si se usa para notificaciones generales, ajustar copy
-- [ ] Limpiar constantes y action `actualizarSonido` si quedan huerfanas
-- [ ] Verificar que el form de categoria `Estudio` no tenga campos especificos de pomodoro
-- [ ] Dejar columna `sound_enabled` en `profiles` por ahora (housekeeping futuro)
-
-**Done when:** `/pomodoro` devuelve 404, el sidebar no muestra la entrada, el shortcut PWA desaparece tras update del Service Worker, y `npm run build` no rompe.
-
----
 
 ## Fase 16: Notas multimedia (multi-iteracion)
 
 **Objetivo:** convertir las notas en un baul de cosas - texto, imagenes, audio, documentos y video - implementado en sub-fases progresivas. Depende de la Fase 9.
+
+
+### Fase 16.0: Reestructuracion de notas
+Antes de cualquier cambio, quiero que las notas se parezcan a chats de whatsapp, que cada "chat" funcione como un "archivo" que se puede modificar su nombre y eliminar, dentro de cada "archivo" se puede guardar cualquier tipo de información, primero texto, luego el resto de caracteristicas que aparecen en la lista de las fases 
 
 Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mime, tamano, creado_en)` (creada en 16.A) y la UI; cada una es un PR independiente.
 

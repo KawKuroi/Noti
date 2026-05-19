@@ -5,8 +5,8 @@
 
 ## Fase activa
 
-**Activo:** Próxima — Fase 13 (auto-eliminación de tareas, ya parcialmente implementada) o Fase 14 (audio en asistente).
-**Estado general:** Fases 0–12b completadas. La 12b reemplazó el chat conversacional por un pipeline determinístico (extracción → búsqueda multi-fuente → candidatos seleccionables) presentado como command palette.
+**Activo:** Próxima — Fase 14 (auto-eliminación de tareas completadas) o Fase 15 (audio en asistente).
+**Estado general:** Fases 0–13 completadas. La Fase 13 eliminó Pomodoro del producto (sidebar, manifest, settings, landing, componentes, hooks, utils, API route).
 
 ## Pendientes manuales bloqueantes
 
@@ -27,6 +27,6 @@
 
 ## Deuda técnica conocida
 
-- Pomodoro sigue en el codebase — se elimina en Fase 15 (baja prioridad ahora)
+- La columna `sound_enabled` en `profiles` queda huérfana tras eliminar Pomodoro — housekeeping futuro
 - La migración `0003_lanzamientos.sql` requiere aplicación manual en Supabase
 - `/api/ai/recordatorio` ya no lo invoca el cliente. Mantener por compatibilidad; eliminarlo en una iteración futura tras confirmar que nada lo usa.

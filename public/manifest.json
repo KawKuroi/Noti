@@ -32,12 +32,6 @@
       "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }]
     },
     {
-      "name": "Pomodoro",
-      "short_name": "Pomodoro",
-      "url": "/pomodoro",
-      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }]
-    },
-    {
       "name": "Calendario",
       "short_name": "Calendario",
       "url": "/calendar",

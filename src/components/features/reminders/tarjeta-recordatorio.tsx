@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { toast } from 'sonner'
-import { Check, Pencil, Trash2, RotateCcw, Clock, Timer } from 'lucide-react'
+import { Check, Pencil, Trash2, RotateCcw, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -127,18 +127,6 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
 
             {/* Acciones — visibles al hover */}
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-              {slug === 'study' && !recordatorio.estaCompletado && (
-                <Button
-                  variante="fantasma"
-                  tamano="icono"
-                  asChild
-                  title="Iniciar pomodoro"
-                >
-                  <Link href={`/pomodoro?reminderId=${recordatorio.id}`}>
-                    <Timer size={13} />
-                  </Link>
-                </Button>
-              )}
               <Button
                 variante="fantasma"
                 tamano="icono"

@@ -12,17 +12,16 @@ import {
   Smartphone,
   ShieldCheck,
   Calendar,
-  Timer,
 } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Noti - Recordatorios inteligentes',
-  description: 'Recordatorios inteligentes para todo lo que importa. Notificaciones push reales, chat IA para lanzamientos, pomodoro y calendario en una sola PWA.',
+  description: 'Recordatorios inteligentes para todo lo que importa. Notificaciones push reales, chat IA para lanzamientos y calendario en una sola PWA.',
 }
 
 const CATEGORIAS = [
   { icono: Film, nombre: 'Peliculas y series', descripcion: 'El chat IA busca fechas exactas de estrenos en TMDB y te notifica el dia del lanzamiento.', color: '#7C3AED' },
-  { icono: BookOpen, nombre: 'Estudio', descripcion: 'Sesiones de trabajo con temporizador pomodoro integrado. Nunca mas olvides estudiar.', color: '#0284C7' },
+  { icono: BookOpen, nombre: 'Estudio', descripcion: 'Recordatorios para sesiones de estudio y trabajo. Nunca mas olvides estudiar.', color: '#0284C7' },
   { icono: CalendarDays, nombre: 'Clases', descripcion: 'Horarios recurrentes semanales. Configura una vez, recibe el aviso cada semana.', color: '#059669' },
   { icono: Cake, nombre: 'Cumpleanos', descripcion: 'Recordatorios anuales automaticos para que nunca olvides felicitar a alguien.', color: '#DB2777' },
   { icono: CheckSquare, nombre: 'Tareas', descripcion: 'Lista de pendientes con prioridad baja, media o alta y fecha limite.', color: '#D97706' },
@@ -39,11 +38,6 @@ const BENEFICIOS = [
     icono: Sparkles,
     titulo: 'Chat IA contra alucinaciones',
     descripcion: 'El asistente solo reporta fechas de fuentes verificadas (TMDB, RAWG, MusicBrainz). Si no la encuentra, te pide la fecha manualmente.',
-  },
-  {
-    icono: Timer,
-    titulo: 'Pomodoro integrado',
-    descripcion: 'Inicia un temporizador 25/5 min directamente desde tu recordatorio de estudio. Notificacion push al terminar cada sesion.',
   },
   {
     icono: Calendar,
@@ -137,7 +131,7 @@ export default function PaginaLanding() {
         {/* Capturas placeholder */}
         <section className="max-w-5xl mx-auto px-6 pb-20">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {['Dashboard', 'Calendario', 'Chat de lanzamientos', 'Pomodoro'].map((label) => (
+            {['Dashboard', 'Calendario', 'Chat de lanzamientos'].map((label) => (
               <div
                 key={label}
                 className="aspect-video bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center"

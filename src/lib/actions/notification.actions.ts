@@ -5,7 +5,7 @@ import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
 import { perfiles, recordatorios } from '@/db/schema'
 import { obtenerUsuario } from '@/lib/auth'
-import { esquemaAnticipacion, esquemaSonido } from '@/lib/validations/push.schemas'
+import { esquemaAnticipacion } from '@/lib/validations/push.schemas'
 
 async function obtenerUsuarioId(): Promise<string | null> {
   const user = await obtenerUsuario()
@@ -35,28 +35,6 @@ export async function actualizarAnticipacion(
   }
 }
 
-export async function actualizarSonido(
-  activo: boolean,
-): Promise<{ ok: boolean; error?: string }> {
-  const usuarioId = await obtenerUsuarioId()
-  if (!usuarioId) return { ok: false, error: 'No autenticado' }
-
-  const resultado = esquemaSonido.safeParse({ activo })
-  if (!resultado.success) return { ok: false, error: 'Valor invalido' }
-
-  try {
-    await db
-      .update(perfiles)
-      .set({ sonidoHabilitado: resultado.data.activo, actualizadoEn: new Date() })
-      .where(eq(perfiles.id, usuarioId))
-
-    revalidatePath('/settings')
-    return { ok: true }
-  } catch (e) {
-    console.error('Error al actualizar sonido:', e)
-    return { ok: false, error: 'Error al guardar la configuracion' }
-  }
-}
 
 export async function posponerRecordatorio(
   reminderId: string,

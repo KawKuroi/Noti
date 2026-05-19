@@ -12,7 +12,6 @@ import {
   LayoutDashboard,
   Settings,
   Calendar,
-  Timer,
   Clapperboard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -122,18 +121,6 @@ export function Sidebar({ categorias }: Props) {
           Calendario
         </Link>
 
-        <Link
-          href="/pomodoro"
-          className={cn(
-            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-            ruta === '/pomodoro'
-              ? 'bg-gray-100 text-gray-900'
-              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-          )}
-        >
-          <Timer size={16} />
-          Pomodoro
-        </Link>
       </nav>
 
       <div className="px-3 py-3 border-t border-gray-100">
