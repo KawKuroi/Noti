@@ -8,7 +8,7 @@ import { obtenerUsuario } from '@/lib/auth'
 import { validarRecordatorio } from '@/lib/validations/reminder.schemas'
 import { calcularProximaOcurrencia, combinarFechaHora } from '@/lib/utils/date.utils'
 import { getCategorias } from '@/lib/queries/category.queries'
-import { HORA_NOTIFICACION_LANZAMIENTO } from '@/lib/utils/constants'
+import { HORA_NOTIFICACION_LANZAMIENTO, TIPO_LANZAMIENTO_A_SLUG } from '@/lib/utils/constants'
 import type { EstadoAccionRecordatorio, Recordatorio } from '@/types/reminder.types'
 import type { FuenteLanzamiento, TipoLanzamiento } from '@/types/release.types'
 
@@ -296,14 +296,6 @@ export async function crearRecordatorioDesdeIA(
   }
 }
 
-const TIPO_A_SLUG: Record<TipoLanzamiento, string> = {
-  movie: 'movies',
-  tv: 'tv',
-  game: 'games',
-  album: 'music',
-  book: 'books',
-}
-
 export interface EntradaCrearLanzamiento {
   titulo: string
   tipo: TipoLanzamiento
@@ -329,7 +321,7 @@ export async function crearRecordatorioLanzamiento(
   if (!usuarioId) return { ok: false, error: 'No autenticado' }
 
   const categorias = await getCategorias()
-  const slugCategoria = TIPO_A_SLUG[input.tipo]
+  const slugCategoria = TIPO_LANZAMIENTO_A_SLUG[input.tipo]
   const categoria = categorias.find((c) => c.slug === slugCategoria)
   if (!categoria) return { ok: false, error: `Categoria ${slugCategoria} no disponible` }
 

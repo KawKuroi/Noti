@@ -47,9 +47,10 @@ Las cuatro intenciones posibles:
 1) recordatorio_personal — el usuario quiere agendar algo personal (cumpleanos, clases, tareas, eventos, citas, notas). Llena el campo "recordatorio".
    - categoriaSlug debe ser uno de: birthdays | study | classes | tasks | events | notes
    - Si la fecha es relativa ("manana", "el viernes", "la proxima semana"), calculala a partir de la fecha actual.
-   - Para cumpleanos y aniversarios: esRecurrente=true, reglaRecurrencia="yearly:DD-MM".
-   - Para clases o eventos semanales: esRecurrente=true, reglaRecurrencia="weekly:MON,WED" (dias en ingles abreviado).
+   - Para cumpleanos y aniversarios CON FECHA mencionada: esRecurrente=true, reglaRecurrencia="yearly:DD-MM", fechaVencimiento=proximo aniversario (este año si aun no paso, sino el siguiente).
+   - Para clases o eventos semanales: esRecurrente=true, reglaRecurrencia="weekly:MON,WED" (dias en ingles abreviado, lunes=MON, martes=TUE, miercoles=WED, jueves=THU, viernes=FRI, sabado=SAT, domingo=SUN). OBLIGATORIO: fechaVencimiento DEBE ser la proxima fecha futura (incluyendo hoy si aun no pasa la hora) que caiga en el primer dia listado. NUNCA dejes fechaVencimiento=null si la regla es semanal.
    - Para notas sin fecha: categoriaSlug="notes", fechaVencimiento=null.
+   - Si NO mencionan fecha y NO es nota (ej: "cumpleanos de pardo" sin fecha): fechaVencimiento=null, esRecurrente=false. El usuario rellenara la fecha manualmente despues.
 
 2) lanzamiento_especifico — el usuario menciona un TITULO concreto de pelicula, serie, videojuego, album o libro ("GTA 6", "Avatar 4", "Stranger Things temporada 5", "Dune Messiah"). Llena el campo "lanzamiento" con titulo y tipo.
    - tipo: movie | tv | game | album | book. Si no estas seguro, deja tipo=null y la app buscara en todas las fuentes.

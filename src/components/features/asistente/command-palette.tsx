@@ -1,10 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Sparkles, X, Loader2 } from 'lucide-react'
+import { Loader2, Search, Sparkles, X } from 'lucide-react'
 import { useAsistente } from './asistente-provider'
 import { CandidatoCard } from './candidato-card'
-import { RecordatorioExtraidoCard } from './recordatorio-extraido-card'
+import { RecordatorioFormCard } from './recordatorio-form-card'
 
 const EJEMPLOS = [
   'Cumpleaños de Marta el 21 de junio',
@@ -26,13 +26,14 @@ export function CommandPalette() {
     error,
     procesar,
     confirmarCandidato,
-    confirmarRecordatorio,
+    confirmarRecordatorioEditado,
+    construirInicialFormulario,
     limpiar,
   } = useAsistente()
 
   const inputRef = useRef<HTMLInputElement | null>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [indiceSeleccionado, setIndiceSeleccionado] = useState(0)
+  const [mostrarFormManual, setMostrarFormManual] = useState(false)
 
   useEffect(() => {
     if (abierto) {
@@ -43,7 +44,8 @@ export function CommandPalette() {
 
   useEffect(() => {
     setIndiceSeleccionado(0)
-  }, [candidatos])
+    setMostrarFormManual(false)
+  }, [candidatos, extraccion])
 
   useEffect(() => {
     if (!abierto) return
@@ -54,22 +56,10 @@ export function CommandPalette() {
     }
   }, [abierto])
 
-  const ejecutarDebounce = useCallback(
-    (texto: string) => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-      if (texto.trim().length < 3) return
-      debounceRef.current = setTimeout(() => {
-        procesar(texto)
-      }, 600)
-    },
-    [procesar],
-  )
-
-  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = e.target.value
-    setQuery(v)
-    ejecutarDebounce(v)
-  }
+  const ejecutarBusqueda = useCallback(() => {
+    if (query.trim().length < 3) return
+    procesar(query)
+  }, [query, procesar])
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Escape') {
@@ -77,24 +67,26 @@ export function CommandPalette() {
       cerrar()
       return
     }
-    if (e.key === 'Enter' && candidatos.length === 0 && extraccion?.intencion === 'recordatorio_personal') {
+    if (e.key === 'Enter') {
+      if (candidatos.length > 0 && !mostrarFormManual) {
+        e.preventDefault()
+        const c = candidatos[indiceSeleccionado]
+        if (c && c.fechaLanzamiento && !c.tba) {
+          confirmarCandidato(c, c.fechaLanzamiento, c.fuente)
+        }
+        return
+      }
       e.preventDefault()
-      confirmarRecordatorio()
+      ejecutarBusqueda()
       return
     }
-    if (candidatos.length === 0) return
+    if (candidatos.length === 0 || mostrarFormManual) return
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       setIndiceSeleccionado((i) => Math.min(i + 1, candidatos.length - 1))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setIndiceSeleccionado((i) => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter') {
-      e.preventDefault()
-      const c = candidatos[indiceSeleccionado]
-      if (c && c.fechaLanzamiento && !c.tba) {
-        confirmarCandidato(c, c.fechaLanzamiento, c.fuente)
-      }
     }
   }
 
@@ -103,10 +95,30 @@ export function CommandPalette() {
   const cargando = estado === 'extrayendo' || estado === 'buscando'
   const creando = estado === 'creando'
   const hayResultado = !!extraccion || candidatos.length > 0
+  const puedeBuscar = query.trim().length >= 3 && !cargando && !creando
+
   const usarEjemplo = (texto: string) => {
     setQuery(texto)
     procesar(texto)
   }
+
+  const intencion = extraccion?.intencion
+  const esLanzamiento =
+    intencion === 'lanzamiento_especifico' || intencion === 'lanzamiento_generico'
+
+  const mostrarFormPersonal = intencion === 'recordatorio_personal'
+  const mostrarFormFallbackLanzamiento =
+    esLanzamiento && estado === 'listo' && candidatos.length === 0
+  const mostrarFormDesconocido = intencion === 'desconocido'
+  const mostrarFormVoluntario = esLanzamiento && candidatos.length > 0 && mostrarFormManual
+
+  const mostrarForm =
+    mostrarFormPersonal ||
+    mostrarFormFallbackLanzamiento ||
+    mostrarFormDesconocido ||
+    mostrarFormVoluntario
+
+  const modoForm: 'personal' | 'lanzamiento' = esLanzamiento ? 'lanzamiento' : 'personal'
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4">
@@ -117,12 +129,23 @@ export function CommandPalette() {
           <input
             ref={inputRef}
             value={query}
-            onChange={onChange}
+            onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="¿Qué te recuerdo o agendo?"
             className="flex-1 text-sm outline-none text-gray-900 placeholder:text-gray-400"
           />
           {cargando && <Loader2 size={14} className="text-gray-400 animate-spin shrink-0" />}
+          <button
+            type="button"
+            onClick={ejecutarBusqueda}
+            disabled={!puedeBuscar}
+            className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+            aria-label="Buscar"
+            title="Buscar (Enter)"
+          >
+            <Search size={12} />
+            Buscar
+          </button>
           {hayResultado && !cargando && (
             <button
               type="button"
@@ -159,7 +182,7 @@ export function CommandPalette() {
                 ))}
               </div>
               <p className="text-[11px] text-gray-400 mt-4">
-                Atajo: Ctrl+I · Esc cierra
+                Atajo: Ctrl+I para abrir/cerrar · Enter o botón Buscar para procesar
               </p>
             </div>
           )}
@@ -171,39 +194,30 @@ export function CommandPalette() {
             </div>
           )}
 
-          {!cargando && extraccion?.intencion === 'desconocido' && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-              <p className="text-sm text-amber-900">
-                {extraccion.aclaracion ?? 'No entendí del todo. Intenta ser más específico.'}
-              </p>
+          {!cargando && mostrarFormDesconocido && extraccion?.aclaracion && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              {extraccion.aclaracion}
             </div>
           )}
 
-          {!cargando && extraccion?.intencion === 'recordatorio_personal' && extraccion.recordatorio && (
-            <RecordatorioExtraidoCard
-              recordatorio={extraccion.recordatorio}
+          {!cargando && mostrarFormFallbackLanzamiento && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              No encontré candidatos en las fuentes. Puedes crearlo manualmente con la info
+              que tengamos hasta ahora.
+            </div>
+          )}
+
+          {!cargando && mostrarForm && (
+            <RecordatorioFormCard
+              inicial={construirInicialFormulario()}
+              modo={modoForm}
               creando={creando}
-              onConfirmar={confirmarRecordatorio}
+              onGuardar={confirmarRecordatorioEditado}
               onCancelar={limpiar}
             />
           )}
 
-          {!cargando &&
-            extraccion?.intencion !== 'recordatorio_personal' &&
-            extraccion?.intencion !== 'desconocido' &&
-            candidatos.length === 0 &&
-            estado === 'listo' && (
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center">
-                <p className="text-sm text-gray-700">
-                  No encontré candidatos en las fuentes consultadas.
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Intenta con otro título o usa el formulario manual en /lanzamientos.
-                </p>
-              </div>
-            )}
-
-          {!cargando && candidatos.length > 0 && (
+          {!cargando && esLanzamiento && candidatos.length > 0 && !mostrarFormManual && (
             <>
               <p className="text-xs text-gray-400 uppercase tracking-wider">
                 {candidatos.length} {candidatos.length === 1 ? 'candidato' : 'candidatos'} · elige
@@ -221,6 +235,13 @@ export function CommandPalette() {
                   />
                 ))}
               </div>
+              <button
+                type="button"
+                onClick={() => setMostrarFormManual(true)}
+                className="w-full text-xs text-gray-500 hover:text-gray-900 underline underline-offset-2 py-2 transition-colors"
+              >
+                ¿No es ninguno? Crear manualmente
+              </button>
             </>
           )}
 
@@ -232,8 +253,14 @@ export function CommandPalette() {
         </div>
 
         {hayResultado && (
-          <footer className="border-t border-gray-100 px-4 py-2 text-[11px] text-gray-400 flex items-center justify-between">
-            <span>↑↓ navega · Enter selecciona · Esc cierra</span>
+          <footer className="border-t border-gray-100 px-4 py-2 text-[11px] text-gray-400">
+            {mostrarForm ? (
+              <span>Esc cancela · completa los campos y guarda</span>
+            ) : esLanzamiento && candidatos.length > 0 ? (
+              <span>↑↓ navega · Enter selecciona · Esc cierra</span>
+            ) : (
+              <span>Esc cierra</span>
+            )}
           </footer>
         )}
       </div>

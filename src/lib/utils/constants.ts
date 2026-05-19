@@ -126,3 +126,14 @@ export const ETIQUETAS_FUENTE_LANZAMIENTO: Record<(typeof FUENTES_LANZAMIENTO)[n
 export const ETIQUETAS_CATEGORIA: Record<string, string> = Object.fromEntries(
   CATEGORIAS.map((c) => [c.slug, c.nombre]),
 )
+
+export const TIPO_LANZAMIENTO_A_SLUG: Record<
+  (typeof TIPOS_LANZAMIENTO)[number],
+  SlugLanzamiento
+> = {
+  movie: 'movies',
+  tv: 'tv',
+  game: 'games',
+  album: 'music',
+  book: 'books',
+}

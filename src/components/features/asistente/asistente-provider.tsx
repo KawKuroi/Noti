@@ -8,6 +8,8 @@ import {
   crearRecordatorioDesdeIA,
   crearRecordatorioLanzamiento,
 } from '@/lib/actions/reminder.actions'
+import { TIPO_LANZAMIENTO_A_SLUG } from '@/lib/utils/constants'
+import type { DatosFormulario } from './recordatorio-form-card'
 
 const CLAVE_STORAGE = 'noti:asistente:ultimo'
 
@@ -38,7 +40,8 @@ interface AsistenteContextValue {
     fechaConfirmada: string,
     fuente: FuenteLanzamiento,
   ) => Promise<boolean>
-  confirmarRecordatorio: () => Promise<boolean>
+  confirmarRecordatorioEditado: (datos: DatosFormulario) => Promise<boolean>
+  construirInicialFormulario: () => DatosFormulario
   limpiar: () => void
 }
 
@@ -46,6 +49,57 @@ const AsistenteContext = createContext<AsistenteContextValue | null>(null)
 
 interface Props {
   children: React.ReactNode
+}
+
+function inicialVacia(query: string): DatosFormulario {
+  return {
+    titulo: query.trim(),
+    categoriaSlug: 'events',
+    fechaVencimiento: null,
+    horaVencimiento: null,
+    esRecurrente: false,
+    reglaRecurrencia: null,
+    descripcion: null,
+  }
+}
+
+function inicialDesdeExtraccion(extraccion: Extraccion, query: string): DatosFormulario {
+  if (extraccion.intencion === 'recordatorio_personal' && extraccion.recordatorio) {
+    const r = extraccion.recordatorio
+    return {
+      titulo: r.titulo,
+      categoriaSlug: r.categoriaSlug,
+      fechaVencimiento: r.fechaVencimiento,
+      horaVencimiento: r.horaVencimiento,
+      esRecurrente: r.esRecurrente,
+      reglaRecurrencia: r.reglaRecurrencia,
+      descripcion: r.descripcion,
+    }
+  }
+
+  if (
+    (extraccion.intencion === 'lanzamiento_especifico' ||
+      extraccion.intencion === 'lanzamiento_generico') &&
+    extraccion.lanzamiento
+  ) {
+    const l = extraccion.lanzamiento
+    const slug = l.tipo ? TIPO_LANZAMIENTO_A_SLUG[l.tipo] : 'events'
+    const titulo = l.titulo?.trim() || l.contexto?.trim() || query.trim()
+    const descPartes: string[] = []
+    if (l.artista) descPartes.push(l.artista)
+    if (l.contexto && l.titulo && l.contexto !== l.titulo) descPartes.push(l.contexto)
+    return {
+      titulo,
+      categoriaSlug: slug,
+      fechaVencimiento: null,
+      horaVencimiento: null,
+      esRecurrente: false,
+      reglaRecurrencia: null,
+      descripcion: descPartes.length > 0 ? descPartes.join(' · ') : null,
+    }
+  }
+
+  return inicialVacia(query)
 }
 
 export function AsistenteProvider({ children }: Props) {
@@ -78,8 +132,8 @@ export function AsistenteProvider({ children }: Props) {
         sessionStorage.removeItem(CLAVE_STORAGE)
         return
       }
-      const estado: EstadoPersistido = { query, extraccion, candidatos }
-      sessionStorage.setItem(CLAVE_STORAGE, JSON.stringify(estado))
+      const snapshot: EstadoPersistido = { query, extraccion, candidatos }
+      sessionStorage.setItem(CLAVE_STORAGE, JSON.stringify(snapshot))
     } catch {}
   }, [query, extraccion, candidatos])
 
@@ -156,7 +210,7 @@ export function AsistenteProvider({ children }: Props) {
       }
 
       if (datosExtraccion.intencion === 'desconocido') {
-        setError(datosExtraccion.aclaracion ?? 'Se mas especifico, por favor')
+        setError(datosExtraccion.aclaracion ?? 'Sé más específico, por favor')
         setEstado('listo')
         return
       }
@@ -225,31 +279,37 @@ export function AsistenteProvider({ children }: Props) {
     [limpiar],
   )
 
-  const confirmarRecordatorio = useCallback(async (): Promise<boolean> => {
-    if (!extraccion?.recordatorio) return false
-    const r = extraccion.recordatorio
-    setEstado('creando')
-    const resultado = await crearRecordatorioDesdeIA({
-      titulo: r.titulo,
-      categoriaSlug: r.categoriaSlug,
-      fechaVencimiento: r.fechaVencimiento,
-      horaVencimiento: r.horaVencimiento,
-      esRecurrente: r.esRecurrente,
-      reglaRecurrencia: r.reglaRecurrencia,
-      descripcion: r.descripcion,
-    })
-    if (resultado.ok) {
-      toast.success('Recordatorio creado')
-      limpiar()
-      setAbierto(false)
-      return true
-    }
-    const msg = typeof resultado.error === 'string' ? resultado.error : 'No se pudo crear'
-    toast.error(msg)
-    setError(msg)
-    setEstado('listo')
-    return false
-  }, [extraccion, limpiar])
+  const confirmarRecordatorioEditado = useCallback(
+    async (datos: DatosFormulario): Promise<boolean> => {
+      setEstado('creando')
+      const resultado = await crearRecordatorioDesdeIA({
+        titulo: datos.titulo,
+        categoriaSlug: datos.categoriaSlug,
+        fechaVencimiento: datos.fechaVencimiento,
+        horaVencimiento: datos.horaVencimiento,
+        esRecurrente: datos.esRecurrente,
+        reglaRecurrencia: datos.reglaRecurrencia,
+        descripcion: datos.descripcion,
+      })
+      if (resultado.ok) {
+        toast.success('Recordatorio creado')
+        limpiar()
+        setAbierto(false)
+        return true
+      }
+      const msg = typeof resultado.error === 'string' ? resultado.error : 'No se pudo crear'
+      toast.error(msg)
+      setError(msg)
+      setEstado('listo')
+      return false
+    },
+    [limpiar],
+  )
+
+  const construirInicialFormulario = useCallback((): DatosFormulario => {
+    if (extraccion) return inicialDesdeExtraccion(extraccion, query)
+    return inicialVacia(query)
+  }, [extraccion, query])
 
   const valor = useMemo<AsistenteContextValue>(
     () => ({
@@ -265,7 +325,8 @@ export function AsistenteProvider({ children }: Props) {
       error,
       procesar,
       confirmarCandidato,
-      confirmarRecordatorio,
+      confirmarRecordatorioEditado,
+      construirInicialFormulario,
       limpiar,
     }),
     [
@@ -281,7 +342,8 @@ export function AsistenteProvider({ children }: Props) {
       error,
       procesar,
       confirmarCandidato,
-      confirmarRecordatorio,
+      confirmarRecordatorioEditado,
+      construirInicialFormulario,
       limpiar,
     ],
   )
