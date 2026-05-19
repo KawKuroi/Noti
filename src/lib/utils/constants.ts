@@ -122,3 +122,7 @@ export const ETIQUETAS_FUENTE_LANZAMIENTO: Record<(typeof FUENTES_LANZAMIENTO)[n
   google_books: 'Google Books',
   manual: 'Manual',
 }
+
+export const ETIQUETAS_CATEGORIA: Record<string, string> = Object.fromEntries(
+  CATEGORIAS.map((c) => [c.slug, c.nombre]),
+)

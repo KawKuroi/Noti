@@ -73,24 +73,43 @@ SW → recibe push → showNotification con acciones Ver/Posponer/Completar
 SW → notificationclick → POST /api/push/action o abre app
 ```
 
-### Chat IA lanzamientos
+### Chat IA unificado (Fase 12)
+Un solo chat global accesible desde cualquier ruta del dashboard via FAB sparkles + bottom sheet o Ctrl+I. Persistido en sessionStorage para sobrevivir cambios de ruta.
+
 ```
-Usuario escribe/dicta en /lanzamientos
-→ POST /api/chat (streamText + tools, stopWhen=8)
-→ LLM infiere tipo → tool buscarLanzamiento({titulo, tipo})
-→ release-search.service enruta a TMDB|RAWG|MusicBrainz|Google Books
-→ Si encontrado=false → SIEMPRE tool pedirFechaManual (nunca inventa)
-→ Si encontrado=true → TarjetaConfirmacion
-→ Usuario confirma → tool agregarRecordatorio → INSERT con notify_at=06:00 día lanzamiento
+Usuario abre asistente (FAB / Ctrl+I) en cualquier ruta
+→ POST /api/chat (streamText + tools unificadas, stopWhen=8)
+→ LLM decide intencion:
+
+  [Intencion A — recordatorio personal]
+  Ej: "Cumpleanos de Marta el 21", "Clase de ingles los martes 7pm"
+  → tool crearRecordatorioSimple({titulo, categoriaSlug, fechaVencimiento,
+       horaVencimiento, esRecurrente, reglaRecurrencia, descripcion})
+  → reusa crearRecordatorioDesdeIA() del backend
+  → tras confirmacion explicita: INSERT en BD
+
+  [Intencion B — lanzamiento con titulo especifico]
+  Ej: "Lanzamiento de GTA 6", "Avatar 4"
+  → tool buscarLanzamiento({titulo, tipo, artista})
+  → release-search.service enruta a TMDB|RAWG|MusicBrainz|Google Books
+  → Si encontrado con tba=true: TarjetaConfirmacion con badge "tentativa"
+       + botón editar fecha inline antes de confirmar
+  → Si encontrado=false: tool pedirFechaManual
+  → Tras confirmacion: tool agregarRecordatorio → INSERT con notify_at=06:00
+
+  [Intencion C — lanzamiento generico por franquicia/artista]
+  Ej: "Nuevo album de The Weeknd", "Proximo Zelda", "Nuevo libro de Sanderson"
+  → tool buscarProximoLanzamiento({tipo, contexto, esFranquicia})
+  → release-search.service llama a proximoJuego / proximaPelicula / proximaSerie /
+       proximoAlbum / proximoLibro segun tipo
+  → Mismo flujo de confirmacion que Intencion B
 ```
 
-### Asistente IA general
-```
-Usuario escribe/dicta desde header/FAB
-→ POST /api/ai/recordatorio (generateObject, Llama 3.1 8B)
-→ Extrae {titulo, categoriaSlug, fechaVencimiento, horaVencimiento, esRecurrente, reglaRecurrencia}
-→ TarjetaConfirmacion → usuario confirma → crearRecordatorioDesdeIA → revalidatePath('/inicio')
-```
+Anti-alucinacion (Fase 12):
+- RAWG ya no genera fechas falsas: si no hay `released` ni se confirma TBA, devuelve `fechaLanzamiento=null` con `tba=true` y la UI obliga al usuario a editarla.
+- Validacion `coincidencia-titulo.ts`: tokeniza (normaliza acentos, equivale romano↔arabe) y descarta resultados que no coincidan en numerales (GTA 6 ya no devuelve GTA 5).
+- MusicBrainz: si release-group no tiene fecha completa, fallback a `/release/`. Para "proximo album de X", buscar artist-id primero.
+- Google Books: `maxResults=10` con iteracion para encontrar la primera fecha valida.
 
 ### Background Sync
 ```

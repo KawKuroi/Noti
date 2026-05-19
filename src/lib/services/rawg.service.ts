@@ -1,4 +1,10 @@
 import type { ResultadoLanzamiento } from '@/types/release.types'
+import {
+  coincideTitulo,
+  tieneNumeralCoincidente,
+  arabeARomano,
+  romanoAArabe,
+} from '@/lib/utils/coincidencia-titulo'
 
 interface RawgGame {
   id: number
@@ -23,15 +29,10 @@ const ALIAS_JUEGO: Record<string, string> = {
   gta: 'Grand Theft Auto',
   cod: 'Call of Duty',
   re: 'Resident Evil',
+  lou: 'The Last of Us',
+  botw: 'Breath of the Wild',
+  totk: 'Tears of the Kingdom',
 }
-
-const A_ROMANO: Record<string, string> = {
-  '1': 'I', '2': 'II', '3': 'III', '4': 'IV', '5': 'V',
-  '6': 'VI', '7': 'VII', '8': 'VIII', '9': 'IX', '10': 'X',
-}
-const A_ARABE: Record<string, string> = Object.fromEntries(
-  Object.entries(A_ROMANO).map(([a, r]) => [r, a]),
-)
 
 function expandirAlias(titulo: string): string {
   for (const [abrev, expansion] of Object.entries(ALIAS_JUEGO)) {
@@ -48,14 +49,14 @@ function variantesNumerales(titulo: string): string[] {
 
   const matchArabe = titulo.match(/^(.*?)\s+(\d{1,2})$/)
   if (matchArabe) {
-    const romano = A_ROMANO[matchArabe[2]]
+    const romano = arabeARomano(Number(matchArabe[2]))
     if (romano) variantes.add(`${matchArabe[1]} ${romano}`)
   }
 
-  const matchRomano = titulo.match(/^(.*?)\s+(I{1,3}|IV|VI{0,3}|IX|XI{0,3}|X{1,3})$/i)
+  const matchRomano = titulo.match(/^(.*?)\s+(I{1,3}|IV|VI{0,3}|IX|XI{0,3}|XV|XVI{0,3}|XIX|XX|X{1,3})$/i)
   if (matchRomano) {
-    const arabe = A_ARABE[matchRomano[2].toUpperCase()]
-    if (arabe) variantes.add(`${matchRomano[1]} ${arabe}`)
+    const arabe = romanoAArabe(matchRomano[2])
+    if (arabe !== null) variantes.add(`${matchRomano[1]} ${arabe}`)
   }
 
   return Array.from(variantes)
@@ -90,16 +91,69 @@ async function llamarRawg<T>(ruta: string, params: Record<string, string> = {}):
 async function buscarTermino(termino: string): Promise<RawgGame[] | null> {
   const precisa = await llamarRawg<RawgSearchResponse>('/games', {
     search: termino,
-    page_size: '10',
+    page_size: '15',
     search_precise: 'true',
   })
   if (precisa && precisa.results.length > 0) return precisa.results
 
   const relajada = await llamarRawg<RawgSearchResponse>('/games', {
     search: termino,
-    page_size: '10',
+    page_size: '15',
   })
   return relajada && relajada.results.length > 0 ? relajada.results : null
+}
+
+function elegirMejorJuego(
+  resultados: RawgGame[],
+  tituloOriginal: string,
+): { juego: RawgGame; esTba: boolean } | null {
+  const coincidentes = resultados.filter(
+    (j) =>
+      coincideTitulo(tituloOriginal, j.name) &&
+      tieneNumeralCoincidente(tituloOriginal, j.name),
+  )
+
+  const pool = coincidentes.length > 0 ? coincidentes : resultados
+
+  const conFecha = pool.filter((j) => j.released && !j.tba)
+  if (conFecha.length > 0) {
+    const ordenado = [...conFecha].sort((a, b) => (b.added ?? 0) - (a.added ?? 0))
+    return { juego: ordenado[0], esTba: false }
+  }
+
+  if (coincidentes.length === 0) return null
+
+  const ordenado = [...pool].sort((a, b) => (b.added ?? 0) - (a.added ?? 0))
+  return { juego: ordenado[0], esTba: true }
+}
+
+async function construirResultado(
+  base: RawgGame,
+  esTba: boolean,
+): Promise<ResultadoLanzamiento> {
+  const detalle = await llamarRawg<RawgGameDetail>(`/games/${base.id}`)
+  const descripcionBase = detalle?.description_raw?.slice(0, 500)
+
+  const fechaLanzamiento = !esTba && base.released ? base.released.slice(0, 10) : null
+  const plataformasArray = detalle?.platforms?.map((p) => p.platform.name) ?? []
+  const plataforma =
+    plataformasArray.length > 0
+      ? plataformasArray.slice(0, 3).join(', ') + (plataformasArray.length > 3 ? '...' : '')
+      : undefined
+
+  return {
+    fuente: 'rawg',
+    tipo: 'game',
+    titulo: base.name,
+    fechaLanzamiento,
+    tba: esTba || undefined,
+    rawgId: base.id,
+    posterUrl: base.background_image ?? undefined,
+    descripcion: esTba
+      ? `(Fecha sin confirmar)${descripcionBase ? ` ${descripcionBase}` : ''}`
+      : descripcionBase,
+    plataforma,
+  }
 }
 
 export async function buscarJuego(titulo: string): Promise<ResultadoLanzamiento | null> {
@@ -109,45 +163,75 @@ export async function buscarJuego(titulo: string): Promise<ResultadoLanzamiento 
     ...variantesNumerales(titulo),
   ])
 
-  let resultados: RawgGame[] | null = null
+  let mejor: { juego: RawgGame; esTba: boolean } | null = null
+
   for (const termino of terminos) {
-    resultados = await buscarTermino(termino)
-    if (resultados) break
+    const resultados = await buscarTermino(termino)
+    if (!resultados || resultados.length === 0) continue
+
+    const elegido = elegirMejorJuego(resultados, expandido)
+    if (elegido) {
+      if (!elegido.esTba) {
+        mejor = elegido
+        break
+      }
+      if (!mejor) mejor = elegido
+    }
   }
 
-  if (!resultados || resultados.length === 0) return null
+  if (!mejor) return null
 
-  const conFecha = resultados.filter((j) => j.released && !j.tba)
-  let mejor: RawgGame
-  let esTba = false
+  console.log('[RAWG]', {
+    titulo,
+    encontrado: mejor.juego.name,
+    tba: mejor.esTba,
+    fecha: mejor.juego.released,
+  })
 
-  if (conFecha.length > 0) {
-    mejor = [...conFecha].sort((a, b) => (b.added ?? 0) - (a.added ?? 0))[0]
-  } else {
-    mejor = [...resultados].sort((a, b) => (b.added ?? 0) - (a.added ?? 0))[0]
-    esTba = true
+  return construirResultado(mejor.juego, mejor.esTba)
+}
+
+export async function proximoJuego(franquicia: string): Promise<ResultadoLanzamiento | null> {
+  const expandido = expandirAlias(franquicia)
+  const hoy = new Date().toISOString().slice(0, 10)
+  const limiteFuturo = new Date()
+  limiteFuturo.setFullYear(limiteFuturo.getFullYear() + 5)
+  const limiteIso = limiteFuturo.toISOString().slice(0, 10)
+
+  const conFiltro = await llamarRawg<RawgSearchResponse>('/games', {
+    search: expandido,
+    page_size: '20',
+    dates: `${hoy},${limiteIso}`,
+    ordering: '-added',
+  })
+
+  const coincidentes =
+    conFiltro?.results.filter((j) => coincideTitulo(expandido, j.name)) ?? []
+
+  if (coincidentes.length > 0) {
+    const conFechaFutura = coincidentes
+      .filter((j) => j.released && j.released >= hoy && !j.tba)
+      .sort((a, b) => (a.released! < b.released! ? -1 : 1))
+    if (conFechaFutura.length > 0) {
+      return construirResultado(conFechaFutura[0], false)
+    }
   }
 
-  const detalle = await llamarRawg<RawgGameDetail>(`/games/${mejor.id}`)
-  const descripcionBase = detalle?.description_raw?.slice(0, 500)
+  const sinFiltro = await llamarRawg<RawgSearchResponse>('/games', {
+    search: expandido,
+    page_size: '20',
+  })
 
-  const fechaRaw = mejor.released ?? `${new Date().getFullYear() + 1}-12-31`
-  const plataformasArray = detalle?.platforms?.map(p => p.platform.name) ?? []
-  const plataforma = plataformasArray.length > 0 ? plataformasArray.slice(0, 3).join(', ') + (plataformasArray.length > 3 ? '...' : '') : undefined
+  const candidatos =
+    sinFiltro?.results.filter((j) => coincideTitulo(expandido, j.name)) ?? []
 
-  console.log('[RAWG]', { titulo, encontrado: mejor.name, tba: esTba, fecha: fechaRaw, plataforma })
+  const tba = candidatos
+    .filter((j) => j.tba || !j.released)
+    .sort((a, b) => (b.added ?? 0) - (a.added ?? 0))[0]
 
-  return {
-    fuente: 'rawg',
-    tipo: 'game',
-    titulo: mejor.name,
-    fechaLanzamiento: fechaRaw.slice(0, 10),
-    tba: esTba || undefined,
-    rawgId: mejor.id,
-    posterUrl: mejor.background_image ?? undefined,
-    descripcion: esTba
-      ? `(Fecha aproximada, sin confirmar)${descripcionBase ? ` ${descripcionBase}` : ''}`
-      : descripcionBase,
-    plataforma,
+  if (tba) {
+    return construirResultado(tba, true)
   }
+
+  return null
 }

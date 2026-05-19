@@ -22,29 +22,7 @@ Las fases 12-16 estan ordenadas por importancia descendente: las primeras son la
 - **Fase 9 — Categoria Notas:** schema nullable para `due_date` y `notify_at`, migracion `0004_notas.sql`, categoria `notes` en constantes y seed, grid de tarjetas en `/notes`, editor con titulo y cuerpo, vista detalle `/notes/[id]`, toggle `Recordarme` con fecha opcional, acciones editar/eliminar/duplicar, integracion en busqueda global Ctrl+K.
 - **Fase 10 — Refinar busqueda y modelo de IA para lanzamientos:** Mejoras en RAWG, TMDB, MusicBrainz, y prompts para IA. *Pendiente:* Pruebas manuales.
 - **Fase 11 — Calendario:** Bugfix vista semana, filtro por categoria, corrección del error gráfico de las fechas.
-
----
-
-## Fase 12: Rediseno del asistente IA
-
-**Objetivo:** sacar el asistente IA del flujo principal del dashboard para que sea opcional y no domine la lista de recordatorios. Esta fase **arranca con prototipos** para que el usuario elija el diseno final entre varias opciones.
-
-### Opciones a prototipar
-- **A)** FAB (Floating Action Button) con sparkles + bottom sheet
-- **B)** Boton sparkles en el header + dialog centrado (atajo Ctrl+I)
-- **C)** Ruta dedicada `/asistente` con chat full-page
-- **D)** Hibrida: boton en header + ruta dedicada
-
-### Implementacion (tras eleccion)
-- [ ] Prototipos rapidos de 2-3 opciones con dummy data
-- [ ] Decision del diseno final
-- [ ] Extraer logica reutilizable de `asistente-ia.tsx` a hook o componente headless
-- [ ] Quitar `<AsistenteIA />` de `src/app/(dashboard)/inicio/page.tsx`
-- [ ] Mover `asistente-ia.tsx` desde `reminders/` a `features/asistente/` para reflejar independencia
-- [ ] Integrar boton de audio (Fase 14) en el nuevo contenedor
-- [ ] Tooltip o tour breve para descubrimiento la primera vez
-
-**Done when:** El dashboard inicio se ve limpio (solo lista de recordatorios + filtros). Puedo invocar el asistente IA desde cualquier ruta con uno o dos clicks o atajo de teclado. Crear con IA funciona identico al actual.
+- **Fase 12 — Refactor IA lanzamientos + chat unificado:** Bug critico de RAWG resuelto (ya no inventa fechas TBA como `${año+1}-12-31`). Nueva tool `buscarProximoLanzamiento` para prompts genericos ("nuevo album de X", "proximo Zelda"). Chat de lanzamientos y asistente IA general consolidados en un unico chat global con FAB sparkles + bottom sheet y atajo Ctrl+I, persistido via sessionStorage para sobrevivir navegacion entre rutas. Validacion de match de titulo en todos los servicios via `coincidencia-titulo.ts`. TarjetaConfirmacion permite editar fecha inline cuando es tentativa.
 
 ---
 

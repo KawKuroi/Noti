@@ -7,7 +7,6 @@ import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nu
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
 import { FiltroCategorias } from '@/components/features/reminders/filtro-categorias'
 import { NotificationPrompt } from '@/components/features/notification-prompt'
-import { AsistenteIA } from '@/components/features/reminders/asistente-ia'
 
 export const metadata: Metadata = { title: 'Inicio | Noti' }
 
@@ -40,8 +39,6 @@ export default async function PaginaDashboard({ searchParams }: Props) {
         </div>
         <BotonNuevoRecordatorio categorias={categorias} />
       </div>
-
-      <AsistenteIA />
 
       <div className="mb-5">
         <Suspense fallback={null}>

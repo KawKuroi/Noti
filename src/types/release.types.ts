@@ -7,7 +7,7 @@ export interface ResultadoLanzamiento {
   fuente: FuenteLanzamiento
   tipo: TipoLanzamiento
   titulo: string
-  fechaLanzamiento: string
+  fechaLanzamiento: string | null
   tba?: boolean
   tmdbId?: number
   rawgId?: number

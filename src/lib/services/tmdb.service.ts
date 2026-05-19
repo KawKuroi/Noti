@@ -1,4 +1,5 @@
 import type { ResultadoLanzamiento } from '@/types/release.types'
+import { coincideTitulo } from '@/lib/utils/coincidencia-titulo'
 
 const POSTER_BASE = 'https://image.tmdb.org/t/p/w500'
 
@@ -168,4 +169,74 @@ export async function buscarSerie(titulo: string): Promise<ResultadoLanzamiento 
     descripcion: mejor.overview || undefined,
     temporada,
   }
+}
+
+export async function proximaPelicula(franquicia: string): Promise<ResultadoLanzamiento | null> {
+  const hoy = new Date().toISOString().slice(0, 10)
+
+  const busqueda = await llamarTmdb<TmdbSearchResponse>('/search/movie', {
+    query: franquicia,
+    include_adult: 'false',
+  })
+  if (!busqueda || busqueda.results.length === 0) return null
+
+  const coincidentes = busqueda.results.filter((r) =>
+    coincideTitulo(franquicia, r.title ?? r.original_title ?? ''),
+  )
+  const pool = coincidentes.length > 0 ? coincidentes : busqueda.results
+
+  const futuros = pool
+    .filter((r) => r.release_date && r.release_date >= hoy)
+    .sort((a, b) => (a.release_date! < b.release_date! ? -1 : 1))
+  if (futuros.length === 0) return null
+
+  const mejor = futuros[0]
+  const detalle = await llamarTmdb<TmdbMovieDetalle>(`/movie/${mejor.id}`, { append_to_response: 'credits' })
+  const director = detalle?.credits?.crew?.find((c) => c.job === 'Director')?.name
+
+  console.log('[TMDB/movie/proximo]', { franquicia, encontrado: mejor.title, fecha: mejor.release_date })
+
+  return {
+    fuente: 'tmdb',
+    tipo: 'movie',
+    titulo: mejor.title ?? mejor.original_title ?? franquicia,
+    fechaLanzamiento: mejor.release_date!.slice(0, 10),
+    tmdbId: mejor.id,
+    posterUrl: mejor.poster_path ? `${POSTER_BASE}${mejor.poster_path}` : undefined,
+    descripcion: mejor.overview || undefined,
+    director,
+  }
+}
+
+export async function proximaSerie(franquicia: string): Promise<ResultadoLanzamiento | null> {
+  const busqueda = await llamarTmdb<TmdbSearchResponse>('/search/tv', { query: franquicia })
+  if (!busqueda || busqueda.results.length === 0) return null
+
+  const coincidentes = busqueda.results.filter((r) =>
+    coincideTitulo(franquicia, r.name ?? r.original_name ?? ''),
+  )
+  const pool = coincidentes.length > 0 ? coincidentes : busqueda.results
+
+  const ordenados = [...pool].sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0))
+
+  for (const candidato of ordenados.slice(0, 5)) {
+    const detalle = await llamarTmdb<TmdbSerieDetalle>(`/tv/${candidato.id}`)
+    const fechaProximoEp = detalle?.next_episode_to_air?.air_date
+    if (fechaProximoEp) {
+      const temporada = detalle?.next_episode_to_air?.season_number
+      console.log('[TMDB/tv/proximo]', { franquicia, encontrado: candidato.name, fechaProximoEp, temporada })
+      return {
+        fuente: 'tmdb',
+        tipo: 'tv',
+        titulo: candidato.name ?? candidato.original_name ?? franquicia,
+        fechaLanzamiento: fechaProximoEp.slice(0, 10),
+        tmdbId: candidato.id,
+        posterUrl: candidato.poster_path ? `${POSTER_BASE}${candidato.poster_path}` : undefined,
+        descripcion: candidato.overview || undefined,
+        temporada,
+      }
+    }
+  }
+
+  return null
 }

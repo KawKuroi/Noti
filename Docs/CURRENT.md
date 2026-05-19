@@ -5,36 +5,25 @@
 
 ## Fase activa
 
-**Activo:** Fase 12 — Rediseño del asistente IA
-**Estado general:** Fases 0–11 completadas. Arrancando Fase 12 (requiere prototipado y decisión UX).
+**Activo:** Próxima — Fase 13 (auto-eliminación de tareas, ya parcialmente implementada) o Fase 14 (audio en asistente).
+**Estado general:** Fases 0–12 completadas. Refactor de IA de lanzamientos resuelto el bug de fechas inventadas y unificó el chat en una sola superficie global.
 
 ## Pendientes manuales bloqueantes
 
 - [ ] Aplicar migración `src/db/migrations/0003_lanzamientos.sql` en el SQL Editor de Supabase (requerida para que Fase 8 funcione correctamente en producción)
 - [ ] `getCategorias` usa `unstable_cache({ revalidate: false })` — tras el deploy, limpiar caché en Vercel o hacer redeploy para que la categoría `notes` aparezca en el sidebar
 
-## Tareas de Fase 12
+## Pruebas manuales pendientes para validar el refactor
 
-**Objetivo:** sacar el asistente IA del flujo principal del dashboard para que sea opcional y no domine la lista de recordatorios. Esta fase **arranca con prototipos** para que el usuario elija el diseño final entre varias opciones.
-
-### Opciones a prototipar
-- **A)** FAB (Floating Action Button) con sparkles + bottom sheet
-- **B)** Botón sparkles en el header + dialog centrado (atajo Ctrl+I)
-- **C)** Ruta dedicada `/asistente` con chat full-page
-- **D)** Híbrida: botón en header + ruta dedicada
-
-### Implementación (tras elección)
-- [ ] Prototipos rápidos de 2-3 opciones con dummy data
-- [ ] Decisión del diseño final
-- [ ] Extraer lógica reutilizable de `asistente-ia.tsx` a hook o componente headless
-- [ ] Quitar `<AsistenteIA />` de `src/app/(dashboard)/inicio/page.tsx`
-- [ ] Mover `asistente-ia.tsx` desde `reminders/` a `features/asistente/` para reflejar independencia
-- [ ] Integrar botón de audio (Fase 14) en el nuevo contenedor
-- [ ] Tooltip o tour breve para descubrimiento la primera vez
-
-**Done when:** El dashboard de inicio se ve limpio (solo lista de recordatorios + filtros). Se puede invocar el asistente IA desde cualquier ruta con uno o dos clicks o atajo de teclado. Crear con IA funciona idéntico al actual.
+- [ ] "Lanzamiento de GTA 6" devuelve resultado de RAWG con badge tentativa y permite editar fecha (no debe aparecer `${año+1}-12-31`).
+- [ ] "Nuevo álbum de The Weeknd" invoca `buscarProximoLanzamiento` con tipo=album.
+- [ ] "Cuándo sale el nuevo Zelda" invoca `buscarProximoLanzamiento` con tipo=game.
+- [ ] "Cumpleaños de Marta el 21 de junio" crea recordatorio recurrente anual sin tocar APIs externas.
+- [ ] Persistencia: abrir asistente en `/inicio`, navegar a `/calendar`, volver a abrir → historial intacto. Refrescar F5 → historial sobrevive (sessionStorage). Cerrar pestaña → historial se borra.
+- [ ] `Ctrl+I` abre/cierra el bottom sheet desde cualquier ruta.
 
 ## Deuda técnica conocida
 
 - Pomodoro sigue en el codebase — se elimina en Fase 15 (baja prioridad ahora)
 - La migración `0003_lanzamientos.sql` requiere aplicación manual en Supabase
+- `/api/ai/recordatorio` ya no lo invoca el cliente. Mantener por compatibilidad; eliminarlo en una iteración futura tras confirmar que nada lo usa.

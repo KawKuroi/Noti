@@ -233,12 +233,12 @@ export async function alternarCompletado(
 export interface EntradaRecordatorioIA {
   titulo: string
   categoriaSlug: string
-  fechaVencimiento: string
-  horaVencimiento?: string
+  fechaVencimiento?: string | null
+  horaVencimiento?: string | null
   fechaHoraUtc?: string
-  descripcion?: string
+  descripcion?: string | null
   esRecurrente?: boolean
-  reglaRecurrencia?: string
+  reglaRecurrencia?: string | null
 }
 
 export async function crearRecordatorioDesdeIA(
@@ -251,17 +251,25 @@ export async function crearRecordatorioDesdeIA(
   const categoria = categorias.find((c) => c.slug === input.categoriaSlug)
   if (!categoria) return { ok: false, error: 'Categoria invalida' }
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.fechaVencimiento)) {
-    return { ok: false, error: 'Formato de fecha invalido' }
-  }
+  const esNota = input.categoriaSlug === 'notes'
 
-  const hora = input.horaVencimiento ?? '09:00'
-  const fechaVencimiento =
-    input.fechaHoraUtc && !isNaN(new Date(input.fechaHoraUtc).getTime())
-      ? new Date(input.fechaHoraUtc)
-      : combinarFechaHora(input.fechaVencimiento, hora)
-  const anticipacionMs = 15 * 60 * 1000
-  const notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+  let fechaVencimiento: Date | null = null
+  let notificarEn: Date | null = null
+
+  if (input.fechaVencimiento) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(input.fechaVencimiento)) {
+      return { ok: false, error: 'Formato de fecha invalido' }
+    }
+    const hora = input.horaVencimiento ?? '09:00'
+    fechaVencimiento =
+      input.fechaHoraUtc && !isNaN(new Date(input.fechaHoraUtc).getTime())
+        ? new Date(input.fechaHoraUtc)
+        : combinarFechaHora(input.fechaVencimiento, hora)
+    const anticipacionMs = 15 * 60 * 1000
+    notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+  } else if (!esNota) {
+    return { ok: false, error: 'La fecha es requerida' }
+  }
 
   try {
     const [fila] = await db
@@ -276,7 +284,7 @@ export async function crearRecordatorioDesdeIA(
         esRecurrente: Boolean(input.esRecurrente),
         reglaRecurrencia: input.reglaRecurrencia ?? null,
         estaCompletado: false,
-        metadatos: null,
+        metadatos: esNota && !input.fechaVencimiento ? { recordarme: false } : null,
       })
       .returning()
 
