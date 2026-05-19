@@ -73,43 +73,52 @@ SW → recibe push → showNotification con acciones Ver/Posponer/Completar
 SW → notificationclick → POST /api/push/action o abre app
 ```
 
-### Chat IA unificado (Fase 12)
-Un solo chat global accesible desde cualquier ruta del dashboard via FAB sparkles + bottom sheet o Ctrl+I. Persistido en sessionStorage para sobrevivir cambios de ruta.
+### Pipeline asistente (Fase 12b — actual)
+Un command palette global (Ctrl+I o FAB sparkles) que ejecuta un pipeline determinístico de 3 pasos. Persistido en sessionStorage para sobrevivir cambios de ruta.
 
 ```
-Usuario abre asistente (FAB / Ctrl+I) en cualquier ruta
-→ POST /api/chat (streamText + tools unificadas, stopWhen=8)
-→ LLM decide intencion:
+Usuario abre palette y escribe texto libre
+→ debounce 600ms
+→ POST /api/asistente/extraer  (generateObject con openai/gpt-oss-120b via Groq)
+  Schema Zod unico: { intencion, recordatorio?, lanzamiento?, aclaracion? }
+  El LLM SOLO clasifica intencion y rellena campos. No elige tools, no llama APIs.
 
-  [Intencion A — recordatorio personal]
-  Ej: "Cumpleanos de Marta el 21", "Clase de ingles los martes 7pm"
-  → tool crearRecordatorioSimple({titulo, categoriaSlug, fechaVencimiento,
-       horaVencimiento, esRecurrente, reglaRecurrencia, descripcion})
-  → reusa crearRecordatorioDesdeIA() del backend
-  → tras confirmacion explicita: INSERT en BD
+→ Ruteo deterministico segun intencion:
 
-  [Intencion B — lanzamiento con titulo especifico]
-  Ej: "Lanzamiento de GTA 6", "Avatar 4"
-  → tool buscarLanzamiento({titulo, tipo, artista})
-  → release-search.service enruta a TMDB|RAWG|MusicBrainz|Google Books
-  → Si encontrado con tba=true: TarjetaConfirmacion con badge "tentativa"
-       + botón editar fecha inline antes de confirmar
-  → Si encontrado=false: tool pedirFechaManual
-  → Tras confirmacion: tool agregarRecordatorio → INSERT con notify_at=06:00
+  [recordatorio_personal]
+    Ej: "Cumpleanos de Marta el 21", "Clase de ingles los martes 7pm"
+    → palette muestra RecordatorioExtraidoCard con campos extraidos
+    → usuario confirma con Enter → server action crearRecordatorioDesdeIA()
+    → INSERT en BD. Sin APIs externas.
 
-  [Intencion C — lanzamiento generico por franquicia/artista]
-  Ej: "Nuevo album de The Weeknd", "Proximo Zelda", "Nuevo libro de Sanderson"
-  → tool buscarProximoLanzamiento({tipo, contexto, esFranquicia})
-  → release-search.service llama a proximoJuego / proximaPelicula / proximaSerie /
-       proximoAlbum / proximoLibro segun tipo
-  → Mismo flujo de confirmacion que Intencion B
+  [lanzamiento_especifico] / [lanzamiento_generico]
+    Ej: "Lanzamiento de GTA 6", "Nuevo album de The Weeknd"
+    → POST /api/asistente/candidatos con la extraccion
+    → release-search.obtenerCandidatos():
+        - Si tipo conocido: candidatos<X>() solo de esa fuente.
+        - Si tipo desconocido (null): TODAS las fuentes en paralelo (Promise.all).
+        - Para generico: proximo<X>() por tipo (futuros del artista/franquicia).
+        - Cada servicio devuelve hasta 5 candidatos (no 1).
+        - Deduplica por id.
+        - Re-rankea por score: +3 fecha confirmada, +2 fecha futura,
+          +1 coincide-titulo exacto, +0.5 tipo coincide.
+        - Devuelve top 5.
+    → palette renderiza CandidatoCard[] (poster, titulo, metadatos por tipo, fecha)
+    → usuario navega con ↑/↓, Enter selecciona
+    → Si candidato tiene tba=true o fecha null: date picker inline obligatorio
+    → server action crearRecordatorioLanzamiento() → INSERT con notify_at=06:00 dia X
+    → Si el usuario edito la fecha, fuente='manual'; sino la fuente original.
+
+  [desconocido]
+    → palette muestra mensaje de aclaracion del LLM
 ```
 
-Anti-alucinacion (Fase 12):
-- RAWG ya no genera fechas falsas: si no hay `released` ni se confirma TBA, devuelve `fechaLanzamiento=null` con `tba=true` y la UI obliga al usuario a editarla.
-- Validacion `coincidencia-titulo.ts`: tokeniza (normaliza acentos, equivale romano↔arabe) y descarta resultados que no coincidan en numerales (GTA 6 ya no devuelve GTA 5).
-- MusicBrainz: si release-group no tiene fecha completa, fallback a `/release/`. Para "proximo album de X", buscar artist-id primero.
-- Google Books: `maxResults=10` con iteracion para encontrar la primera fecha valida.
+Anti-alucinacion (acumulado de fase 12 + 12b):
+- RAWG: si no hay `released` ni se confirma TBA, devuelve `fechaLanzamiento=null` con `tba=true` (eliminado el fallback que inventaba `${año+1}-12-31`).
+- `coincidencia-titulo.ts` tokeniza (normaliza acentos, equivale romano↔arabe) y descarta resultados que no coincidan en numerales (GTA 6 ya no devuelve GTA 5).
+- MusicBrainz: si release-group no tiene fecha completa, fallback a `/release/`. Para genericos, busca artist-id primero.
+- Google Books: `maxResults=20` con iteracion para encontrar la primera fecha valida.
+- **El usuario es el arbitro final**: el LLM nunca elige cual candidato es; solo presenta 3-5 ordenados por score.
 
 ### Background Sync
 ```

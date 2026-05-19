@@ -1,10 +1,10 @@
 'use client'
 
 import { Sparkles } from 'lucide-react'
-import { useChatGlobal } from './chat-provider'
+import { useAsistente } from './asistente-provider'
 
 export function FabAsistente() {
-  const { abierto, alternar } = useChatGlobal()
+  const { abierto, alternar } = useAsistente()
 
   if (abierto) return null
 

@@ -26,7 +26,11 @@ function normalizarFecha(fecha: string): string {
   return fecha
 }
 
-function aResultado(libro: GoogleBooksVolume, fecha: string | null, tba: boolean): ResultadoLanzamiento {
+function aResultado(
+  libro: GoogleBooksVolume,
+  fecha: string | null,
+  tba: boolean,
+): ResultadoLanzamiento {
   const { title, authors, imageLinks } = libro.volumeInfo
   return {
     fuente: 'google_books',
@@ -57,52 +61,48 @@ async function consultar(query: string, params: Record<string, string> = {}): Pr
   }
 }
 
-export async function buscarLibro(
+export async function candidatosLibro(
   titulo: string,
   autor?: string,
-): Promise<ResultadoLanzamiento | null> {
+  limite = 5,
+): Promise<ResultadoLanzamiento[]> {
   const query = autor
     ? `intitle:${encodeURIComponent(titulo)}+inauthor:${encodeURIComponent(autor)}`
     : `intitle:${encodeURIComponent(titulo)}`
 
   const items = await consultar(query, { orderBy: 'relevance' })
-  if (items.length === 0) return null
+  if (items.length === 0) return []
 
   const coincidentes = items.filter((it) => coincideTitulo(titulo, it.volumeInfo.title))
   const pool = coincidentes.length > 0 ? coincidentes : items
 
-  const conFechaCompleta = pool.find((it) => {
+  const candidatos: ResultadoLanzamiento[] = []
+  for (const it of pool) {
+    if (candidatos.length >= limite) break
     const pd = it.volumeInfo.publishedDate
-    if (!pd) return false
+    if (!pd) continue
     const norm = normalizarFecha(pd)
-    return /^\d{4}-\d{2}-\d{2}$/.test(norm) && /^\d{4}-\d{2}-\d{2}$/.test(pd)
-  })
-  if (conFechaCompleta) {
-    return aResultado(conFechaCompleta, conFechaCompleta.volumeInfo.publishedDate!, false)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(norm)) continue
+    const tba = !/^\d{4}-\d{2}-\d{2}$/.test(pd)
+    candidatos.push(aResultado(it, norm, tba))
   }
 
-  const conFechaParcial = pool.find((it) => {
-    const pd = it.volumeInfo.publishedDate
-    if (!pd) return false
-    const norm = normalizarFecha(pd)
-    return /^\d{4}-\d{2}-\d{2}$/.test(norm)
-  })
-  if (conFechaParcial) {
-    const fecha = normalizarFecha(conFechaParcial.volumeInfo.publishedDate!)
-    return aResultado(conFechaParcial, fecha, true)
-  }
-
-  if (coincidentes.length > 0) {
-    return aResultado(coincidentes[0], null, true)
-  }
-
-  return null
+  console.log('[GoogleBooks/candidatos]', { titulo, autor, candidatos: candidatos.length })
+  return candidatos
 }
 
-export async function proximoLibro(autor: string): Promise<ResultadoLanzamiento | null> {
+export async function buscarLibro(
+  titulo: string,
+  autor?: string,
+): Promise<ResultadoLanzamiento | null> {
+  const candidatos = await candidatosLibro(titulo, autor, 1)
+  return candidatos[0] ?? null
+}
+
+export async function proximoLibro(autor: string, limite = 5): Promise<ResultadoLanzamiento[]> {
   const query = `inauthor:${encodeURIComponent(autor)}`
   const items = await consultar(query, { orderBy: 'newest' })
-  if (items.length === 0) return null
+  if (items.length === 0) return []
 
   const hoy = new Date().toISOString().slice(0, 10)
 
@@ -119,16 +119,10 @@ export async function proximoLibro(autor: string): Promise<ResultadoLanzamiento 
   const futuros = conFecha
     .filter((x) => x.fecha >= hoy)
     .sort((a, b) => (a.fecha < b.fecha ? -1 : 1))
-  if (futuros.length > 0) {
-    const elegido = futuros[0]
-    return aResultado(elegido.item, elegido.fecha, !elegido.completa)
-  }
+  const pasados = conFecha
+    .filter((x) => x.fecha < hoy)
+    .sort((a, b) => (a.fecha < b.fecha ? 1 : -1))
 
-  const pasados = conFecha.sort((a, b) => (a.fecha < b.fecha ? 1 : -1))
-  if (pasados.length > 0) {
-    const elegido = pasados[0]
-    return aResultado(elegido.item, elegido.fecha, !elegido.completa)
-  }
-
-  return null
+  const ordenados = [...futuros, ...pasados].slice(0, limite)
+  return ordenados.map((x) => aResultado(x.item, x.fecha, !x.completa))
 }

@@ -103,43 +103,15 @@ async function buscarTermino(termino: string): Promise<RawgGame[] | null> {
   return relajada && relajada.results.length > 0 ? relajada.results : null
 }
 
-function elegirMejorJuego(
-  resultados: RawgGame[],
-  tituloOriginal: string,
-): { juego: RawgGame; esTba: boolean } | null {
-  const coincidentes = resultados.filter(
-    (j) =>
-      coincideTitulo(tituloOriginal, j.name) &&
-      tieneNumeralCoincidente(tituloOriginal, j.name),
-  )
-
-  const pool = coincidentes.length > 0 ? coincidentes : resultados
-
-  const conFecha = pool.filter((j) => j.released && !j.tba)
-  if (conFecha.length > 0) {
-    const ordenado = [...conFecha].sort((a, b) => (b.added ?? 0) - (a.added ?? 0))
-    return { juego: ordenado[0], esTba: false }
-  }
-
-  if (coincidentes.length === 0) return null
-
-  const ordenado = [...pool].sort((a, b) => (b.added ?? 0) - (a.added ?? 0))
-  return { juego: ordenado[0], esTba: true }
-}
-
-async function construirResultado(
-  base: RawgGame,
-  esTba: boolean,
-): Promise<ResultadoLanzamiento> {
+async function juegoAResultado(base: RawgGame, esTba: boolean): Promise<ResultadoLanzamiento> {
   const detalle = await llamarRawg<RawgGameDetail>(`/games/${base.id}`)
   const descripcionBase = detalle?.description_raw?.slice(0, 500)
-
-  const fechaLanzamiento = !esTba && base.released ? base.released.slice(0, 10) : null
   const plataformasArray = detalle?.platforms?.map((p) => p.platform.name) ?? []
   const plataforma =
     plataformasArray.length > 0
       ? plataformasArray.slice(0, 3).join(', ') + (plataformasArray.length > 3 ? '...' : '')
       : undefined
+  const fechaLanzamiento = !esTba && base.released ? base.released.slice(0, 10) : null
 
   return {
     fuente: 'rawg',
@@ -156,42 +128,55 @@ async function construirResultado(
   }
 }
 
-export async function buscarJuego(titulo: string): Promise<ResultadoLanzamiento | null> {
+export async function candidatosJuego(titulo: string, limite = 5): Promise<ResultadoLanzamiento[]> {
   const expandido = expandirAlias(titulo)
   const terminos = new Set<string>([
     ...variantesNumerales(expandido),
     ...variantesNumerales(titulo),
   ])
 
-  let mejor: { juego: RawgGame; esTba: boolean } | null = null
+  const recolectados = new Map<number, RawgGame>()
 
   for (const termino of terminos) {
     const resultados = await buscarTermino(termino)
-    if (!resultados || resultados.length === 0) continue
-
-    const elegido = elegirMejorJuego(resultados, expandido)
-    if (elegido) {
-      if (!elegido.esTba) {
-        mejor = elegido
-        break
-      }
-      if (!mejor) mejor = elegido
+    if (!resultados) continue
+    for (const r of resultados) {
+      if (!recolectados.has(r.id)) recolectados.set(r.id, r)
     }
+    if (recolectados.size >= 20) break
   }
 
-  if (!mejor) return null
+  if (recolectados.size === 0) return []
 
-  console.log('[RAWG]', {
-    titulo,
-    encontrado: mejor.juego.name,
-    tba: mejor.esTba,
-    fecha: mejor.juego.released,
-  })
+  const todos = Array.from(recolectados.values())
+  const coincidentes = todos.filter(
+    (j) => coincideTitulo(expandido, j.name) && tieneNumeralCoincidente(expandido, j.name),
+  )
+  const pool = coincidentes.length > 0 ? coincidentes : todos
 
-  return construirResultado(mejor.juego, mejor.esTba)
+  const conFecha = pool
+    .filter((j) => j.released && !j.tba)
+    .sort((a, b) => (b.added ?? 0) - (a.added ?? 0))
+  const sinFecha = pool
+    .filter((j) => !j.released || j.tba)
+    .sort((a, b) => (b.added ?? 0) - (a.added ?? 0))
+
+  const ordenados = [...conFecha, ...sinFecha].slice(0, limite)
+
+  const resultados = await Promise.all(
+    ordenados.map((j) => juegoAResultado(j, !j.released || j.tba)),
+  )
+
+  console.log('[RAWG/candidatos]', { titulo, candidatos: resultados.length })
+  return resultados
 }
 
-export async function proximoJuego(franquicia: string): Promise<ResultadoLanzamiento | null> {
+export async function buscarJuego(titulo: string): Promise<ResultadoLanzamiento | null> {
+  const candidatos = await candidatosJuego(titulo, 1)
+  return candidatos[0] ?? null
+}
+
+export async function proximoJuego(franquicia: string, limite = 5): Promise<ResultadoLanzamiento[]> {
   const expandido = expandirAlias(franquicia)
   const hoy = new Date().toISOString().slice(0, 10)
   const limiteFuturo = new Date()
@@ -200,7 +185,7 @@ export async function proximoJuego(franquicia: string): Promise<ResultadoLanzami
 
   const conFiltro = await llamarRawg<RawgSearchResponse>('/games', {
     search: expandido,
-    page_size: '20',
+    page_size: '25',
     dates: `${hoy},${limiteIso}`,
     ordering: '-added',
   })
@@ -208,30 +193,28 @@ export async function proximoJuego(franquicia: string): Promise<ResultadoLanzami
   const coincidentes =
     conFiltro?.results.filter((j) => coincideTitulo(expandido, j.name)) ?? []
 
-  if (coincidentes.length > 0) {
-    const conFechaFutura = coincidentes
-      .filter((j) => j.released && j.released >= hoy && !j.tba)
-      .sort((a, b) => (a.released! < b.released! ? -1 : 1))
-    if (conFechaFutura.length > 0) {
-      return construirResultado(conFechaFutura[0], false)
-    }
+  const futuros = coincidentes
+    .filter((j) => j.released && j.released >= hoy && !j.tba)
+    .sort((a, b) => (a.released! < b.released! ? -1 : 1))
+
+  if (futuros.length > 0) {
+    return Promise.all(futuros.slice(0, limite).map((j) => juegoAResultado(j, false)))
   }
 
   const sinFiltro = await llamarRawg<RawgSearchResponse>('/games', {
     search: expandido,
-    page_size: '20',
+    page_size: '25',
   })
 
   const candidatos =
     sinFiltro?.results.filter((j) => coincideTitulo(expandido, j.name)) ?? []
-
   const tba = candidatos
     .filter((j) => j.tba || !j.released)
-    .sort((a, b) => (b.added ?? 0) - (a.added ?? 0))[0]
+    .sort((a, b) => (b.added ?? 0) - (a.added ?? 0))
 
-  if (tba) {
-    return construirResultado(tba, true)
+  if (tba.length > 0) {
+    return Promise.all(tba.slice(0, limite).map((j) => juegoAResultado(j, true)))
   }
 
-  return null
+  return []
 }

@@ -6,7 +6,7 @@
 ## Fase activa
 
 **Activo:** Próxima — Fase 13 (auto-eliminación de tareas, ya parcialmente implementada) o Fase 14 (audio en asistente).
-**Estado general:** Fases 0–12 completadas. Refactor de IA de lanzamientos resuelto el bug de fechas inventadas y unificó el chat en una sola superficie global.
+**Estado general:** Fases 0–12b completadas. La 12b reemplazó el chat conversacional por un pipeline determinístico (extracción → búsqueda multi-fuente → candidatos seleccionables) presentado como command palette.
 
 ## Pendientes manuales bloqueantes
 
@@ -15,12 +15,15 @@
 
 ## Pruebas manuales pendientes para validar el refactor
 
-- [ ] "Lanzamiento de GTA 6" devuelve resultado de RAWG con badge tentativa y permite editar fecha (no debe aparecer `${año+1}-12-31`).
-- [ ] "Nuevo álbum de The Weeknd" invoca `buscarProximoLanzamiento` con tipo=album.
-- [ ] "Cuándo sale el nuevo Zelda" invoca `buscarProximoLanzamiento` con tipo=game.
-- [ ] "Cumpleaños de Marta el 21 de junio" crea recordatorio recurrente anual sin tocar APIs externas.
-- [ ] Persistencia: abrir asistente en `/inicio`, navegar a `/calendar`, volver a abrir → historial intacto. Refrescar F5 → historial sobrevive (sessionStorage). Cerrar pestaña → historial se borra.
-- [ ] `Ctrl+I` abre/cierra el bottom sheet desde cualquier ruta.
+- [ ] "Lanzamiento de GTA 6" → palette muestra 3-5 candidatos de RAWG; GTA VI aparece y permite editar fecha si está marcado como tentativa.
+- [ ] "Nuevo álbum de The Weeknd" → candidatos de MusicBrainz (próximos álbumes del artista).
+- [ ] "Cuándo sale el nuevo Zelda" → candidatos de RAWG con fechas futuras de la franquicia.
+- [ ] "Cumpleaños de Marta el 21 de junio" → card de extracción con `categoriaSlug=birthdays`, recurrencia `yearly:21-06`. Enter crea sin tocar APIs.
+- [ ] "Halo 47" → palette muestra "No encontré candidatos".
+- [ ] "asdf" → palette muestra mensaje de aclaración.
+- [ ] `Ctrl+I` abre/cierra el palette desde cualquier ruta del dashboard.
+- [ ] Persistencia: query + extracción + candidatos sobreviven a navegación entre pestañas y F5 (sessionStorage). Botón "Limpiar" los borra.
+- [ ] Navegación con teclado: ↑/↓ selecciona candidato, Enter agrega.
 
 ## Deuda técnica conocida
 

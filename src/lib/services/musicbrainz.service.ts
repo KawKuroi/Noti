@@ -49,7 +49,6 @@ async function llamarMusicBrainz<T>(
   for (const [key, valor] of Object.entries(params)) {
     url.searchParams.set(key, valor)
   }
-
   try {
     const respuesta = await fetch(url.toString(), {
       headers: { 'User-Agent': USER_AGENT },
@@ -79,23 +78,6 @@ async function obtenerPortada(releaseGroupId: string): Promise<string | undefine
   return undefined
 }
 
-function elegirCandidato(grupos: MbReleaseGroup[]): MbReleaseGroup | null {
-  if (grupos.length === 0) return null
-
-  const hoy = new Date().toISOString().slice(0, 10)
-  const tipos = ['Album', 'EP', 'Single']
-  const filtradoPorTipo = grupos.filter((g) => tipos.includes(g['primary-type'] ?? ''))
-  const candidatos = filtradoPorTipo.length > 0 ? filtradoPorTipo : grupos
-
-  const futuros = candidatos.filter((g) => {
-    const fecha = g['first-release-date']
-    return fecha && fecha >= hoy
-  })
-  const pool = futuros.length > 0 ? futuros : candidatos
-
-  return pool.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))[0] ?? null
-}
-
 async function fechaDesdeReleases(releaseGroupId: string): Promise<string | null> {
   const datos = await llamarMusicBrainz<MbReleaseSearchResponse>('/release/', {
     'release-group': releaseGroupId,
@@ -111,18 +93,33 @@ async function fechaDesdeReleases(releaseGroupId: string): Promise<string | null
   return fechasValidas[0] ?? null
 }
 
-function aResultado(
-  grupo: MbReleaseGroup,
-  fecha: string | null,
-  tba: boolean,
-  posterUrl: string | undefined,
-): ResultadoLanzamiento {
+async function grupoAResultado(grupo: MbReleaseGroup): Promise<ResultadoLanzamiento | null> {
+  let fechaCruda = grupo['first-release-date']
+  let fechaCompleta: string | null = null
+  let tba = false
+
+  if (fechaCruda && /^\d{4}-\d{2}-\d{2}$/.test(fechaCruda)) {
+    fechaCompleta = fechaCruda
+  } else {
+    const desdeReleases = await fechaDesdeReleases(grupo.id)
+    if (desdeReleases) {
+      fechaCompleta = desdeReleases
+    } else if (fechaCruda) {
+      fechaCompleta = fechaCruda.length === 4 ? `${fechaCruda}-01-01` : `${fechaCruda}-01`
+      tba = true
+    } else {
+      tba = true
+    }
+  }
+
   const artistaCredito = grupo['artist-credit']?.[0]?.name
+  const posterUrl = await obtenerPortada(grupo.id)
+
   return {
     fuente: 'musicbrainz',
     tipo: 'album',
     titulo: grupo.title,
-    fechaLanzamiento: fecha,
+    fechaLanzamiento: fechaCompleta,
     tba: tba || undefined,
     musicbrainzId: grupo.id,
     posterUrl,
@@ -143,10 +140,11 @@ async function buscarArtistaId(artista: string): Promise<string | null> {
   return ordenado[0]?.id ?? null
 }
 
-export async function buscarAlbum(
+export async function candidatosAlbum(
   titulo: string,
   artista?: string,
-): Promise<ResultadoLanzamiento | null> {
+  limite = 5,
+): Promise<ResultadoLanzamiento[]> {
   const tituloEsc = escaparLucene(titulo)
   const artistaEsc = artista ? escaparLucene(artista) : null
 
@@ -156,7 +154,7 @@ export async function buscarAlbum(
 
   let datos = await llamarMusicBrainz<MbSearchResponse>('/release-group/', {
     query: consultaPrecisa,
-    limit: '10',
+    limit: '15',
   })
   let grupos = datos?.['release-groups'] ?? []
 
@@ -164,54 +162,37 @@ export async function buscarAlbum(
     const consultaFuzzy = artistaEsc
       ? `${tituloEsc} AND artist:${artistaEsc}`
       : tituloEsc
-
     datos = await llamarMusicBrainz<MbSearchResponse>('/release-group/', {
       query: consultaFuzzy,
-      limit: '10',
+      limit: '15',
     })
     grupos = datos?.['release-groups'] ?? []
   }
 
-  if (grupos.length === 0) return null
+  if (grupos.length === 0) return []
 
-  const elegido = elegirCandidato(grupos)
-  if (!elegido) return null
+  const tipos = ['Album', 'EP', 'Single']
+  const filtradoPorTipo = grupos.filter((g) => tipos.includes(g['primary-type'] ?? ''))
+  const pool = filtradoPorTipo.length > 0 ? filtradoPorTipo : grupos
+  const ordenados = pool.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, limite)
 
-  let fechaCruda = elegido['first-release-date']
-  let fechaCompleta: string | null = null
-  let tba = false
-
-  if (fechaCruda && /^\d{4}-\d{2}-\d{2}$/.test(fechaCruda)) {
-    fechaCompleta = fechaCruda
-  } else {
-    const desdeReleases = await fechaDesdeReleases(elegido.id)
-    if (desdeReleases) {
-      fechaCompleta = desdeReleases
-    } else if (fechaCruda) {
-      fechaCompleta =
-        fechaCruda.length === 4 ? `${fechaCruda}-01-01` : `${fechaCruda}-01`
-      tba = true
-    } else {
-      tba = true
-    }
-  }
-
-  const posterUrl = await obtenerPortada(elegido.id)
-
-  console.log('[MusicBrainz]', {
-    titulo,
-    artista,
-    encontrado: elegido.title,
-    fecha: fechaCompleta,
-    tba,
-  })
-
-  return aResultado(elegido, fechaCompleta, tba, posterUrl)
+  const resultados = await Promise.all(ordenados.map(grupoAResultado))
+  const filtrados = resultados.filter((r): r is ResultadoLanzamiento => r !== null)
+  console.log('[MusicBrainz/candidatos]', { titulo, artista, candidatos: filtrados.length })
+  return filtrados
 }
 
-export async function proximoAlbum(artista: string): Promise<ResultadoLanzamiento | null> {
+export async function buscarAlbum(
+  titulo: string,
+  artista?: string,
+): Promise<ResultadoLanzamiento | null> {
+  const candidatos = await candidatosAlbum(titulo, artista, 1)
+  return candidatos[0] ?? null
+}
+
+export async function proximoAlbum(artista: string, limite = 5): Promise<ResultadoLanzamiento[]> {
   const artistaId = await buscarArtistaId(artista)
-  if (!artistaId) return null
+  if (!artistaId) return []
 
   const datos = await llamarMusicBrainz<MbSearchResponse>('/release-group/', {
     artist: artistaId,
@@ -220,41 +201,20 @@ export async function proximoAlbum(artista: string): Promise<ResultadoLanzamient
   })
 
   const grupos = datos?.['release-groups'] ?? []
-  if (grupos.length === 0) return null
+  if (grupos.length === 0) return []
 
   const hoy = new Date().toISOString().slice(0, 10)
-
-  const conFecha = grupos
-    .filter((g) => g['first-release-date'])
-    .map((g) => ({ grupo: g, fechaRaw: g['first-release-date']! }))
+  const conFecha = grupos.filter((g) => g['first-release-date'])
 
   const futuros = conFecha
-    .filter((x) => x.fechaRaw >= hoy)
-    .sort((a, b) => (a.fechaRaw < b.fechaRaw ? -1 : 1))
+    .filter((g) => g['first-release-date']! >= hoy)
+    .sort((a, b) => (a['first-release-date']! < b['first-release-date']! ? -1 : 1))
 
-  if (futuros.length > 0) {
-    const elegido = futuros[0]
-    const fecha = elegido.fechaRaw.length === 10
-      ? elegido.fechaRaw
-      : elegido.fechaRaw.length === 7
-        ? `${elegido.fechaRaw}-01`
-        : `${elegido.fechaRaw}-01-01`
-    const tba = elegido.fechaRaw.length !== 10
-    const posterUrl = await obtenerPortada(elegido.grupo.id)
-    return aResultado(elegido.grupo, fecha, tba, posterUrl)
-  }
+  const pasados = conFecha
+    .filter((g) => g['first-release-date']! < hoy)
+    .sort((a, b) => (a['first-release-date']! < b['first-release-date']! ? 1 : -1))
 
-  const pasados = conFecha.sort((a, b) => (a.fechaRaw < b.fechaRaw ? 1 : -1))
-  if (pasados.length > 0) {
-    const elegido = pasados[0]
-    const fecha = elegido.fechaRaw.length === 10
-      ? elegido.fechaRaw
-      : elegido.fechaRaw.length === 7
-        ? `${elegido.fechaRaw}-01`
-        : `${elegido.fechaRaw}-01-01`
-    const posterUrl = await obtenerPortada(elegido.grupo.id)
-    return aResultado(elegido.grupo, fecha, false, posterUrl)
-  }
-
-  return null
+  const ordenados = [...futuros, ...pasados].slice(0, limite)
+  const resultados = await Promise.all(ordenados.map(grupoAResultado))
+  return resultados.filter((r): r is ResultadoLanzamiento => r !== null)
 }

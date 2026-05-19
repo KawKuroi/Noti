@@ -10,8 +10,7 @@
 | Base de datos | PostgreSQL via Supabase |
 | ORM | Drizzle ORM |
 | Auth | Supabase Auth (Google OAuth + email/password) |
-| IA — lanzamientos | Groq Llama 3.3 70B Versatile · AI SDK v6 · streamText + tools |
-| IA — recordatorios | Groq Llama 3.1 8B Instant · AI SDK v6 · generateObject |
+| IA — asistente unico | Groq openai/gpt-oss-120b · AI SDK v6 · generateObject (extraccion estructurada con Zod). Sin tool calling: el LLM solo clasifica intencion; la busqueda es deterministica y los candidatos los elige el usuario. |
 | Transcripción | Groq Whisper Large v3 Turbo |
 | Notificaciones | Web Push API + VAPID |
 | Cron | Vercel Cron (check-reminders cada minuto, resumen-diario cada hora, limpiar-tareas 03:00 UTC) |

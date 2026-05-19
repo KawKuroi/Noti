@@ -3,9 +3,9 @@ import { getCategorias } from '@/lib/queries/category.queries'
 import { Sidebar } from '@/components/features/sidebar'
 import { Header } from '@/components/features/header'
 import {
-  ChatProvider,
+  AsistenteProvider,
   FabAsistente,
-  BottomSheetAsistente,
+  CommandPalette,
 } from '@/components/features/asistente'
 
 interface Props {
@@ -18,7 +18,7 @@ export default async function LayoutDashboard({ children }: Props) {
   const categorias = await getCategorias()
 
   return (
-    <ChatProvider>
+    <AsistenteProvider>
       <div className="flex h-screen overflow-hidden bg-gray-50">
         <Sidebar categorias={categorias} />
         <div className="flex-1 flex flex-col min-w-0">
@@ -27,7 +27,7 @@ export default async function LayoutDashboard({ children }: Props) {
         </div>
       </div>
       <FabAsistente />
-      <BottomSheetAsistente />
-    </ChatProvider>
+      <CommandPalette />
+    </AsistenteProvider>
   )
 }
