@@ -7,11 +7,11 @@ src/
 ├── app/
 │   ├── (auth)/              login, register
 │   ├── (dashboard)/
-│   │   ├── inicio/          Dashboard principal
-│   │   ├── calendar/        Vistas mes/semana
-│   │   ├── lanzamientos/    Hub con tabs por tipo (movies/tv/games/music/books)
-│   │   ├── notes/           Grid de tarjetas + [id] vista detalle
-│   │   └── settings/        Perfil, notificaciones, resumen diario, auto-eliminación
+│   │   ├── inicio/          Dashboard principal (rediseñado en Fase 17)
+│   │   ├── calendar/        Vistas mes/semana — agrupado bajo "Herramientas" en el sidebar (Fase 15)
+│   │   ├── lanzamientos/    Hub con tabs por tipo (movies/tv/games/music/books) + tab "Todos" (Fase 16)
+│   │   ├── notes/           Grid de tarjetas + [id] vista detalle — agrupado bajo "Herramientas" en el sidebar (Fase 15)
+│   │   └── settings/        Perfil, notificaciones, resumen diario, auto-eliminación, cerrar sesión
 │   └── api/
 │       ├── push/            subscribe, action
 │       ├── chat/            streamText + tools (lanzamientos)
@@ -31,8 +31,8 @@ src/
 │   ├── actions/             Server Actions (mutaciones)
 │   ├── queries/             Queries de solo lectura
 │   ├── services/            tmdb, rawg, musicbrainz, google-books, release-search, push
-│   ├── ai/                  tools.ts, prompt.ts
-│   ├── utils/               date, cn, constants, formato-fecha, rate-limit
+│   ├── ai/                  tools.ts, prompt.ts, extractor.ts
+│   ├── utils/               date, cn, constants, formato-fecha, rate-limit, parsear-fecha-natural (Fase 18)
 │   ├── supabase/            client.ts, server.ts
 │   └── validations/         schemas Zod
 └── db/
@@ -41,18 +41,37 @@ src/
     └── migrations/          SQL aplicados vía Drizzle o manualmente en Supabase
 ```
 
+## Sidebar (estructura visual desde Fase 15)
+
+```
+Sidebar
+  ├─ Inicio
+  ├─ Lanzamientos
+  ├─ Pendientes
+  ├─ Estudio
+  ├─ Cumpleaños
+  ├─ Eventos
+  ├─ Lupa (icono) → abre modal Ctrl+K
+  ├─ Herramientas (grupo colapsable)
+  │   ├─ Calendario
+  │   └─ Notas
+  └─ Footer: {nombre del usuario} ⚙ (engranaje → /settings)
+```
+
 ## Modelo de datos (tablas principales)
 
 ```sql
 profiles          -- Extiende auth.users. Campos clave: timezone, notification_advance,
                   --   daily_summary (bool), summary_hour, auto_delete_completed_tasks_days
 
-categories        -- Fijas. Campos: id, name, slug, color, icon
+categories        -- Fijas. Campos: id, name, slug, color, icon.
+                  -- Slug `classes` retirado en Fase 14 (fusionado en `study`).
 
 reminders         -- Campos clave: id, user_id, category_id, title, description,
                   --   due_date (nullable desde Fase 9), notify_at (nullable desde Fase 9),
                   --   is_completed, completed_at, is_recurring, recurrence_rule,
-                  --   release_type, image_url
+                  --   release_type, image_url (DEPRECATED desde Fase 16 — no se escribe,
+                  --   queda hasta limpieza futura), metadatos (jsonb)
 
 push_subscriptions -- endpoint, p256dh, auth, device_name. UNIQUE(user_id, endpoint)
 
@@ -88,6 +107,11 @@ Usuario abre palette y escribe texto libre
   [recordatorio_personal]
     Ej: "Cumpleanos de Marta el 21", "Clase de ingles los martes 7pm"
     → palette muestra RecordatorioExtraidoCard con campos extraidos
+    → Si la fecha viene `null` pero el texto original contiene un token de fecha
+      ("nov 19", "20/06", "3 mar", "viernes 21") aplicar parsearFechaNatural() (Fase 18).
+    → usuario puede editar TODOS los campos antes de confirmar (Fase 18):
+      titulo, descripcion, categoria, fecha, hora, recurrencia, dias semana,
+      anticipacion, autor/artista (si aplica), tipo de lanzamiento.
     → usuario confirma con Enter → server action crearRecordatorioDesdeIA()
     → INSERT en BD. Sin APIs externas.
 
@@ -103,10 +127,12 @@ Usuario abre palette y escribe texto libre
         - Re-rankea por score: +3 fecha confirmada, +2 fecha futura,
           +1 coincide-titulo exacto, +0.5 tipo coincide.
         - Devuelve top 5.
-    → palette renderiza CandidatoCard[] (poster, titulo, metadatos por tipo, fecha)
+    → palette renderiza CandidatoCard[] (poster, titulo, metadatos por tipo, fecha).
+      Las portadas se muestran aqui (UX visual) pero NO se persisten al guardar (Fase 16).
     → usuario navega con ↑/↓, Enter selecciona
     → Si candidato tiene tba=true o fecha null: date picker inline obligatorio
-    → server action crearRecordatorioLanzamiento() → INSERT con notify_at=06:00 dia X
+    → server action crearRecordatorioLanzamiento() → INSERT con notify_at=06:00 dia X.
+      No escribe `image_url`.
     → Si el usuario edito la fecha, fuente='manual'; sino la fuente original.
 
   [desconocido]
@@ -149,3 +175,4 @@ Las migraciones en `src/db/migrations/` marcadas como "aplicar manualmente" se e
 | 0004_notas.sql | Pendiente (Fase 9) |
 | 0005_note_attachments.sql | Pendiente (Fase 16) |
 | 0006_auto_delete_tasks.sql | Aplicada |
+| 0007_fusion_classes_study.sql | Pendiente (Fase 14) |

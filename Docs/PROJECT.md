@@ -50,9 +50,13 @@ src/db/schema.ts     → Schema Drizzle (fuente de verdad del modelo de datos)
 
 ## Categorías disponibles
 
-`birthday` · `study` · `class` · `task` · `event` · `notes` · `movies` · `tv` · `games` · `music` · `books`
+`birthday` · `study` · `task` · `event` · `notes` · `movies` · `tv` · `games` · `music` · `books`
 
-Los slugs de lanzamiento (`movies`, `tv`, `games`, `music`, `books`) están agrupados en el hub `/lanzamientos`. Las notas viven en `/notes`. El resto en `/inicio`.
+Los slugs de lanzamiento (`movies`, `tv`, `games`, `music`, `books`) están agrupados en el hub `/lanzamientos`. Las notas viven en `/notes` y se muestran en el sidebar bajo el grupo "Herramientas" junto al Calendario. El resto en `/inicio`.
+
+Notas sobre nombres visibles:
+- El slug `task` muestra "Pendientes" en la UI (rename hecho en Fase 14; slug se mantiene).
+- El slug `study` absorbió a `classes` en Fase 14 (ambos casos de uso se solapaban en la práctica).
 
 ## Variables de entorno requeridas
 

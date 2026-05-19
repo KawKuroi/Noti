@@ -23,19 +23,18 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 3. **CRUD de recordatorios** — Crear, editar, eliminar y marcar como completado
 
 4. **Sistema de categorías:**
-   - Lanzamientos (películas, series, videojuegos, música y libros agendados vía chat IA o manualmente, en un hub unificado)
-   - Notas (archivos individuales tipo Google Keep con recordatorio opcional, evolucionables a baúl multimedia)
-   - Estudio (sesiones de lectura y aprendizaje)
-   - Horario de clases (recurrencia semanal)
+   - Lanzamientos (películas, series, videojuegos, música y libros agendados vía chat IA o manualmente, en un hub unificado con pestaña "Todos" y color por tipo)
+   - Notas (archivos individuales tipo Google Keep con recordatorio opcional, evolucionables a baúl multimedia). Agrupada visualmente bajo "Herramientas" en el sidebar junto al Calendario
+   - Estudio (sesiones de lectura, aprendizaje y horario de clases — fusionadas en Fase 14)
    - Cumpleaños (recurrencia anual)
-   - Tareas/pendientes (fecha límite, con auto-eliminación configurable)
-   - Eventos personales (fecha y hora específica)
+   - Pendientes (fecha límite, con auto-eliminación configurable)
+   - Eventos personales (fecha y hora específica, para casos excepcionales que no encajan en Estudio/Pendientes)
 
 5. **Notificaciones push** — Web Push API con VAPID, funciona en Android y Windows; acciones desde la notificación (Ver, Posponer, Completar); múltiples dispositivos por usuario
 
 6. **Resumen diario** — Push notification matutina configurable con los recordatorios del día; el usuario elige la hora desde Settings
 
-7. **Chat IA para lanzamientos** — Asistente conversacional con Groq Llama 3.3 70B Versatile que consulta TMDB (películas/series), RAWG (videojuegos), MusicBrainz (álbumes) y Google Books (libros). Fallback manual si la fuente no tiene la fecha. Anti-alucinación: nunca inventa fechas. Refinado para reconocer aliases comunes y formas numéricas alternativas (GTA 6 / Grand Theft Auto VI)
+7. **Chat IA para lanzamientos** — Asistente conversacional con Groq Llama 3.3 70B Versatile que consulta TMDB (películas/series), RAWG (videojuegos), MusicBrainz (álbumes) y Google Books (libros). Fallback manual si la fuente no tiene la fecha. Anti-alucinación: nunca inventa fechas. Refinado para reconocer aliases comunes y formas numéricas alternativas (GTA 6 / Grand Theft Auto VI). A partir de la Fase 18 también entiende fechas naturales escritas dentro del prompt ("GTA 6 nov 19" → 19 noviembre del próximo año disponible)
 
 8. **Asistente IA general** — Input de lenguaje natural accesible desde cualquier vista del dashboard para crear cualquier tipo de recordatorio: "cumpleaños de María el 20 de junio", "clase de inglés los martes a las 7pm", "cita médica el viernes a las 3pm". Soporta entrada por audio (dictado con transcripción Whisper)
 
@@ -101,3 +100,7 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 - **Lanzamientos divididos por tipo:** Cada tipo (película, serie, videojuego, álbum, libro) tiene UI y prompts de IA específicos, agrupados en un hub unificado para no saturar el sidebar
 - **Notas como archivos individuales:** Cada nota se trata como un documento independiente con su propia vista detalle, no como entradas en un único documento concatenado
 - **Auto-eliminación opt-in:** La auto-eliminación de tareas completadas está desactivada por defecto. El usuario decide explícitamente si quiere ese comportamiento y a qué intervalo
+- **Portadas no persistentes en lanzamientos:** Las portadas (de TMDB, RAWG, MusicBrainz, Google Books) se muestran en el palette de candidatos para facilitar la selección visual, pero no se guardan en BD al crear el recordatorio. Las URLs de imágenes externas son volátiles y agregan complejidad sin valor proporcional
+- **Recordatorios recurrentes sin checkbox:** Clases, cumpleaños y otros recurrentes no se pueden marcar como completados. Una "Clase de inglés los lunes" no tiene semántica clara al "tacharla"; el checkbox solo aporta ruido
+- **Búsqueda como atajo de teclado primario:** La barra de búsqueda fija del dashboard se reemplaza por un icono de lupa en el sidebar que abre el modal Ctrl+K. Libera espacio vertical y consolida la entrada
+- **Paleta de color minimalista por tipo de lanzamiento:** Cada tipo (películas, series, juegos, música, libros) tiene un color de acento (no fondo) para diferenciación visual en la pestaña "Todos" sin sacrificar el aire minimalista

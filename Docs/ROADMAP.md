@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Las fases 14-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
+Las fases 14-19 son la nueva ola priorizada por el usuario (bugfixes, refactor de categorias, reestructuracion de navegacion, rediseno del inicio, mejoras al asistente y landing). Las fases 20-23 son aditivas y quedan en cola para iteraciones posteriores. Estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion, y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo Fase 22 (notas multimedia), que depende de la Fase 9.
 
 ---
 
@@ -26,7 +26,101 @@ Las fases 14-16 estan ordenadas por importancia descendente: las primeras son la
 
 ---
 
-## Fase 14: Auto-eliminacion de tareas completadas
+## Fase 14: Bugfixes criticos + refactor de categorias
+
+**Objetivo:** corregir los dos bugs criticos visibles en produccion y reducir la friccion conceptual unificando categorias que se solapan. Bloquea al resto del plan porque cambia el modelo de categorias.
+
+- [ ] **Bug recurrencia 400 ocurrencias**: arreglar `expandirOcurrenciasEnRango()` en `src/lib/utils/date.utils.ts:161-203`. Asegurar avance estricto del cursor cuando `calcularProximaOcurrencia()` devuelve la misma fecha o una fecha <= cursor.
+- [ ] **Bug formulario manual de notas**: el formulario retorna `null` para `notes` (`src/components/features/reminders/formulario-recordatorio.tsx:156`); revisar handler de submit para `notes` (campos minimos: titulo + cuerpo; sin fecha obligatoria).
+- [ ] **Fusion `classes` -> `study`**: migracion SQL `0007_fusion_classes_study.sql` que actualiza `reminders.category_id` y elimina la fila de `categories` con slug `classes`. Quitar `classes` de `src/lib/utils/constants.ts` y `src/db/seed.ts`. Actualizar prompts del extractor (`src/lib/ai/extractor.ts`) para que `classes` ya no exista como intencion.
+- [ ] **Rename label "Tareas" -> "Pendientes"**: solo cambiar `nombre` en seed y en constantes UI. Slug `tasks` se mantiene en BD.
+- [ ] **Ocultar checkbox en cards recurrentes**: condicionar el render del checkbox a `!esRecurrente` en `tarjeta-recordatorio.tsx`. Las acciones disponibles para recurrentes son editar y eliminar.
+
+**Done when:** Una clase recurrente genera 1 fila en BD y se ve correctamente expandida en el calendario sin duplicados (no aparecen 400 entradas en el dialog del dia). Crear una nota desde el formulario manual persiste y aparece en `/notes`. La categoria `classes` ya no existe en BD ni en UI. En el sidebar y filtros, donde decia "Tareas" ahora dice "Pendientes". Las cards de clase/cumpleanos no tienen checkbox.
+
+---
+
+## Fase 15: Reestructuracion del sidebar y navegacion
+
+**Objetivo:** liberar espacio vertical en el dashboard moviendo la busqueda al sidebar, agrupar herramientas accesorias (Calendario + Notas) y mover el usuario al footer del sidebar.
+
+- [ ] Crear grupo "Herramientas" colapsable en `src/components/features/sidebar.tsx` que contenga `Calendario` y `Notas`. Las rutas `/calendar` y `/notes` no cambian.
+- [ ] Mover la busqueda global a un icono de lupa en el sidebar; al hacer click abre el modal Ctrl+K. Eliminar la barra superior de busqueda del dashboard (`src/app/(dashboard)/inicio/page.tsx`).
+- [ ] Footer del sidebar: mostrar nombre del usuario + icono engranaje al lado (link a `/settings`). Eliminar el bloque de usuario/logout que hoy vive en la esquina superior derecha.
+- [ ] Mover accion "Cerrar sesion" dentro de la pagina `/settings` (zona Cuenta).
+
+**Done when:** El sidebar incluye un grupo "Herramientas" con Calendario + Notas. La busqueda global solo se accede por la lupa del sidebar o `Ctrl+K`. El nombre del usuario aparece en el footer del sidebar con un engranaje al lado. La esquina superior derecha ya no muestra el bloque de usuario/logout. Logout se hace desde `/settings`.
+
+---
+
+## Fase 16: Lanzamientos - pestana Todos, paleta de color, formulario completo, portadas no persistentes
+
+**Objetivo:** mejorar la experiencia del hub de lanzamientos con vision agregada, diferenciacion visual por tipo y formulario manual completo. Definir formalmente que las portadas son UX visual durante la seleccion, no datos persistidos.
+
+- [ ] Agregar pestana "Todos" en `/lanzamientos` que muestra todos los tipos mezclados, ordenados por fecha de lanzamiento.
+- [ ] Aplicar paleta de color por tipo (constantes nuevas en `src/lib/utils/constants.ts`):
+  - Peliculas `#0A0A0A` (negro)
+  - Series `#2563EB` (azul)
+  - Juegos `#16A34A` (verde)
+  - Musica `#DC2626` (rojo)
+  - Libros `#7C3AED` (morado)
+  - Usar el color como acento sutil (borde izquierdo, badge, dot). No fondos completos. Mantener minimalismo.
+- [ ] Extender `formulario-manual-lanzamiento.tsx` con campos faltantes:
+  - Descripcion (opcional, todas las categorias)
+  - Autor (solo `books`)
+  - Artista/Banda (solo `music`)
+  - Director/Showrunner (opcional, `movies`/`tv`)
+  - Persistir en `metadatos` (jsonb).
+- [ ] **Portadas no persistentes**: en el palette de candidatos IA se siguen mostrando las portadas (UX visual). Al guardar (`crearRecordatorioLanzamiento`), **no** se persiste la imagen. Ignorar/eliminar la columna `image_url` en escrituras.
+- [ ] Actualizar la card de lanzamiento para no leer `image_url` (placeholder de icono por tipo segun la paleta).
+
+**Done when:** En `/lanzamientos` aparece la pestana "Todos" con cards diferenciadas por color segun tipo. El formulario manual permite anadir artista/autor/descripcion y se persiste en `metadatos`. Al crear un lanzamiento via IA, en el palette se ven las portadas, pero la card guardada no muestra portada (icono por tipo). Ninguna ruta de creacion escribe `image_url`.
+
+---
+
+## Fase 17: Redisenno del inicio
+
+**Objetivo:** convertir `/inicio` en un panel personal con saludo dinamico, input IA prominente, lista de proximos recordatorios y widgets laterales (mini-calendario + chips de categorias). Mantener el minimalismo actual.
+
+- [ ] Reorganizar `src/app/(dashboard)/inicio/page.tsx` con la estructura:
+  1. Saludo dinamico ("Buenos dias/tardes/noches, {nombre}") segun hora local.
+  2. Subtitulo con resumen rapido ("Tienes X tareas para hoy y un evento proximo").
+  3. Input IA prominente (mismo componente del asistente, full-width) con microfono.
+  4. Seccion "Proximos Recordatorios" con link "Ver todos".
+  5. Sidebar derecho con mini-calendario del mes actual + seccion "Categorias" con chips filtrables.
+- [ ] Mantener tipografia, espaciados y paleta actuales (minimalismo).
+- [ ] El input IA del inicio comparte estado con el palette Ctrl+I (no duplicar logica).
+
+**Done when:** Al entrar a `/inicio` se ve un saludo personalizado, el input IA grande, una lista de proximos recordatorios con la opcion "Ver todos", un mini-calendario lateral y los chips de categorias. La UI conserva el aire minimalista.
+
+---
+
+## Fase 18: Asistente IA - fechas naturales y edicion inline completa
+
+**Objetivo:** que la IA entienda fechas tipo "nov 19", "20/06", "3 mar" y "viernes 21" sin necesidad de re-prompt, y que la card de extraccion permita editar cualquier campo antes de confirmar.
+
+- [ ] Extender `src/lib/ai/extractor.ts` con ejemplos en el prompt: "nov 19", "20/06", "3 mar", "viernes 21".
+- [ ] Crear `src/lib/utils/parsear-fecha-natural.ts` (date-fns + locale espanol) que toma un string libre y devuelve `Date | null`. Inferir el ano: si la fecha resultante es pasada respecto a `hoy`, sumar 1 ano. Cubrir formatos: `dd/mm`, `dd-mm`, `mmm dd`, `dd mmm`, `dd de mmmm`.
+- [ ] Pipeline: tras `generateObject`, si `lanzamiento.fechaTentativa`/`recordatorio.fecha` sigue siendo `null` pero el texto original contenia un token de fecha, intentar `parsearFechaNatural()` antes de marcar TBA/pedir aclaracion.
+- [ ] Extender `RecordatorioExtraidoCard` (`src/components/features/asistente/recordatorio-form-card.tsx`) para permitir editar **todos** los campos antes de confirmar: titulo, descripcion, categoria, fecha, hora, recurrencia, dias semana, anticipacion, autor/artista (si aplica), tipo de lanzamiento.
+
+**Done when:** "Lanzamiento de GTA 6 nov 19" rellena automaticamente la fecha 19 noviembre del proximo ano disponible en la card de candidatos. La card de edicion permite cambiar cualquier campo antes de pulsar Enter para confirmar. Una fecha pasada se reinterpreta al proximo ano.
+
+---
+
+## Fase 19: Landing page - enlace a GitHub
+
+**Objetivo:** dar visibilidad al repositorio publico desde la landing para que visitantes interesados puedan explorar el codigo.
+
+- [ ] Agregar enlace al repositorio de GitHub en el footer del landing (`src/app/page.tsx`).
+- [ ] Boton secundario "Ver en GitHub" en el hero junto al CTA principal.
+- [ ] Icono de GitHub usando `lucide-react`.
+
+**Done when:** La landing tiene un link visible al repo (hero + footer) que abre en nueva pestana.
+
+---
+
+## Fase 20: Auto-eliminacion de tareas completadas
 
 **Objetivo:** el usuario configura cada cuanto se borran sus tareas completadas (7 / 30 / 90 dias o Nunca). Alcance limitado a la categoria `tasks`.
 
@@ -44,7 +138,7 @@ Las fases 14-16 estan ordenadas por importancia descendente: las primeras son la
 
 ---
 
-## Fase 15: Entrada por audio en el asistente IA
+## Fase 21: Entrada por audio en el asistente IA
 
 **Objetivo:** boton de microfono que graba, transcribe con Groq Whisper y rellena el input para que el usuario revise.
 
@@ -58,33 +152,31 @@ Las fases 14-16 estan ordenadas por importancia descendente: las primeras son la
 
 ---
 
-
-## Fase 16: Notas multimedia (multi-iteracion)
+## Fase 22: Notas multimedia (multi-iteracion)
 
 **Objetivo:** convertir las notas en un baul de cosas - texto, imagenes, audio, documentos y video - implementado en sub-fases progresivas. Depende de la Fase 9.
 
+### Fase 22.0: Reestructuracion de notas
+Antes de cualquier cambio, quiero que las notas se parezcan a chats de whatsapp, que cada "chat" funcione como un "archivo" que se puede modificar su nombre y eliminar, dentro de cada "archivo" se puede guardar cualquier tipo de informacion, primero texto, luego el resto de caracteristicas que aparecen en la lista de las fases.
 
-### Fase 16.0: Reestructuracion de notas
-Antes de cualquier cambio, quiero que las notas se parezcan a chats de whatsapp, que cada "chat" funcione como un "archivo" que se puede modificar su nombre y eliminar, dentro de cada "archivo" se puede guardar cualquier tipo de información, primero texto, luego el resto de caracteristicas que aparecen en la lista de las fases 
+Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mime, tamano, creado_en)` (creada en 22.A) y la UI; cada una es un PR independiente.
 
-Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mime, tamano, creado_en)` (creada en 16.A) y la UI; cada una es un PR independiente.
-
-### Fase 16.A - Imagenes
+### Fase 22.A - Imagenes
 - [ ] Migracion `0005_note_attachments.sql`: CREATE TABLE `note_attachments`
 - [ ] Integracion con Vercel Blob (variable `BLOB_READ_WRITE_TOKEN`)
 - [ ] Server action `subirAdjunto` con validacion (JPG/PNG/WebP, max 5MB)
 - [ ] UI: drag & drop o input file, galeria con lightbox
 - [ ] Borrado de adjunto y de blob asociado
 
-### Fase 16.B - Audios
+### Fase 22.B - Audios
 - [ ] Aceptar MP3/OGG/WAV; reusar `MediaRecorder` para grabacion in-app
 - [ ] Reproductor con play/pause/seek
 
-### Fase 16.C - Documentos
+### Fase 22.C - Documentos
 - [ ] Aceptar PDF/DOCX/TXT
 - [ ] Icono por tipo + boton de descarga; preview opcional para PDF
 
-### Fase 16.D - Videos
+### Fase 22.D - Videos
 - [ ] Aceptar MP4/WebM con limite de tamano
 - [ ] Reproductor inline
 
@@ -92,7 +184,7 @@ Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mim
 
 ---
 
-## Fase 17 (futuras mejoras)
+## Fase 23 (futuras mejoras)
 
 **No priorizado - oportunidades de mejora identificadas:**
 

@@ -35,6 +35,26 @@ _Razón:_ Permite búsqueda, filtros, recordatorios individuales por nota y exte
 _Alternativa:_ activada por defecto con opción de desactivar
 _Razón:_ Eliminar datos silenciosamente es una mala sorpresa. El usuario debe elegirlo explícitamente.
 
+**Fusión `classes` dentro de `study`** _(Fase 14)_
+_Alternativa:_ mantener ambas categorías separadas
+_Razón:_ En el uso real "Estudio" y "Clases" se solapan (preparar examen, asistir a clase, hacer tarea) y agregan ruido al sidebar. Los casos excepcionales que no encajan se cubren con la categoría "Eventos". Una sola categoría reduce la fricción al crear y al filtrar.
+
+**Portadas no persistentes en lanzamientos** _(Fase 16)_
+_Alternativa:_ guardar la URL de la portada en BD (campo `image_url`) o subir la imagen a Vercel Blob
+_Razón:_ Las URLs de imágenes externas (TMDB, RAWG, MusicBrainz, Google Books) son volátiles y pueden romperse sin aviso. Subir a Blob agrega complejidad operativa y costo. Las portadas aportan valor solo en el momento de selección (palette IA); después de guardado, el título + tipo + fecha bastan.
+
+**Recordatorios recurrentes sin checkbox** _(Fase 14)_
+_Alternativa:_ checkbox deshabilitado con tooltip explicativo
+_Razón:_ Marcar como completada una "Clase de inglés los lunes" o un "Cumpleaños de Juan" no tiene semántica clara — la actividad vuelve a ocurrir. El checkbox solo aporta confusión. Las acciones útiles para recurrentes son editar y eliminar.
+
+**Búsqueda como atajo de teclado primario** _(Fase 15)_
+_Alternativa:_ mantener la barra de búsqueda fija en el top del dashboard
+_Razón:_ La barra ocupaba espacio vertical en el área más valiosa del dashboard (encima de la lista de recordatorios) y duplicaba el atajo Ctrl+K. Moverla al sidebar como icono libera la pantalla y consolida la entrada única.
+
+**Paleta de color minimalista por tipo de lanzamiento** _(Fase 16)_
+_Alternativa:_ usar el mismo color (gris/negro) para todos los lanzamientos, o usar fondos coloridos completos
+_Razón:_ En la pestaña "Todos" la diferenciación visual ayuda al escaneo rápido. Color como acento (borde izquierdo, badge, dot) preserva el minimalismo. Paleta elegida: Películas `#0A0A0A`, Series `#2563EB`, Juegos `#16A34A`, Música `#DC2626`, Libros `#7C3AED`.
+
 **PWA-first, sin app nativa**
 _Alternativa:_ Flutter o React Native
 _Razón:_ La PWA cubre los casos de uso (push notifications reales en Android y Windows), es deployable en Vercel gratis y no requiere cuentas de developer store.
