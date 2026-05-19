@@ -19,6 +19,12 @@ interface TmdbSearchResponse {
   results: TmdbSearchResult[]
 }
 
+interface TmdbMovieDetalle {
+  credits?: {
+    crew: Array<{ job: string; name: string }>
+  }
+}
+
 interface TmdbReleaseDates {
   results: Array<{
     iso_3166_1: string
@@ -110,7 +116,10 @@ export async function buscarPelicula(titulo: string): Promise<ResultadoLanzamien
   const fecha = fechaLocalizada ?? mejor.release_date
   if (!fecha) return null
 
-  console.log('[TMDB/movie]', { titulo, encontrado: mejor.title, fecha })
+  const detalle = await llamarTmdb<TmdbMovieDetalle>(`/movie/${mejor.id}`, { append_to_response: 'credits' })
+  const director = detalle?.credits?.crew?.find(c => c.job === 'Director')?.name
+
+  console.log('[TMDB/movie]', { titulo, encontrado: mejor.title, fecha, director })
 
   return {
     fuente: 'tmdb',
@@ -120,6 +129,7 @@ export async function buscarPelicula(titulo: string): Promise<ResultadoLanzamien
     tmdbId: mejor.id,
     posterUrl: mejor.poster_path ? `${POSTER_BASE}${mejor.poster_path}` : undefined,
     descripcion: mejor.overview || undefined,
+    director,
   }
 }
 
@@ -138,11 +148,14 @@ export async function buscarSerie(titulo: string): Promise<ResultadoLanzamiento 
   const fecha = fechaProximoEp ?? fechaPrimera
   if (!fecha) return null
 
+  const temporada = detalle?.next_episode_to_air?.season_number
+
   console.log('[TMDB/tv]', {
     titulo,
     encontrado: mejor.name,
     fechaProximoEp,
     fecha,
+    temporada,
   })
 
   return {
@@ -153,5 +166,6 @@ export async function buscarSerie(titulo: string): Promise<ResultadoLanzamiento 
     tmdbId: mejor.id,
     posterUrl: mejor.poster_path ? `${POSTER_BASE}${mejor.poster_path}` : undefined,
     descripcion: mejor.overview || undefined,
+    temporada,
   }
 }

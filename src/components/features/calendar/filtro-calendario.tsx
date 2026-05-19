@@ -16,7 +16,18 @@ export function FiltroCalendario({ categorias, seleccionadas, onChange }: Props)
   }
 
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
+    <div className="flex flex-wrap gap-2 mb-4 items-center">
+      <button
+        onClick={() => onChange([])}
+        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border flex items-center gap-2 ${
+          seleccionadas.length === 0
+            ? 'bg-gray-900 text-white border-gray-900'
+            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+        }`}
+      >
+        Todas
+      </button>
+      
       {categorias.map((cat) => {
         const activa = seleccionadas.includes(cat.id)
         return (

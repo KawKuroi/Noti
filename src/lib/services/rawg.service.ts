@@ -16,6 +16,7 @@ interface RawgSearchResponse {
 
 interface RawgGameDetail extends RawgGame {
   description_raw?: string
+  platforms?: Array<{ platform: { name: string } }>
 }
 
 const ALIAS_JUEGO: Record<string, string> = {
@@ -131,8 +132,10 @@ export async function buscarJuego(titulo: string): Promise<ResultadoLanzamiento 
   const descripcionBase = detalle?.description_raw?.slice(0, 500)
 
   const fechaRaw = mejor.released ?? `${new Date().getFullYear() + 1}-12-31`
+  const plataformasArray = detalle?.platforms?.map(p => p.platform.name) ?? []
+  const plataforma = plataformasArray.length > 0 ? plataformasArray.slice(0, 3).join(', ') + (plataformasArray.length > 3 ? '...' : '') : undefined
 
-  console.log('[RAWG]', { titulo, encontrado: mejor.name, tba: esTba, fecha: fechaRaw })
+  console.log('[RAWG]', { titulo, encontrado: mejor.name, tba: esTba, fecha: fechaRaw, plataforma })
 
   return {
     fuente: 'rawg',
@@ -145,5 +148,6 @@ export async function buscarJuego(titulo: string): Promise<ResultadoLanzamiento 
     descripcion: esTba
       ? `(Fecha aproximada, sin confirmar)${descripcionBase ? ` ${descripcionBase}` : ''}`
       : descripcionBase,
+    plataforma,
   }
 }

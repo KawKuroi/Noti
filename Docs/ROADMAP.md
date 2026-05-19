@@ -2,13 +2,13 @@
 
 ## Estado actual
 
-Fases 0-10 completadas. Pendiente manual: aplicar migracion de BD en Supabase dashboard (`src/db/migrations/0003_lanzamientos.sql`) y pruebas manuales de Fase 10.
+Fases 0-11 completadas. Pendiente manual: aplicar migracion de BD en Supabase dashboard (`src/db/migrations/0003_lanzamientos.sql`) y pruebas manuales de Fase 10.
 
-Las fases 11-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
+Las fases 12-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
 
 ---
 
-## Historico de fases completadas (0-10)
+## Historico de fases completadas (0-11)
 
 - **Fase 0 — Setup inicial:** PRD, Arquitectura, Roadmap, CLAUDE.md, .gitignore, .env.example, .editorconfig.
 - **Fase 1 — Foundation:** Next.js 15 + App Router + TypeScript + Tailwind, Supabase (DB + Auth), Drizzle, Google OAuth + email/password, middleware de proteccion, layouts auth/dashboard, seed de 6 categorias, PWA basica, primer deploy a Vercel.
@@ -21,92 +21,7 @@ Las fases 11-16 estan ordenadas por importancia descendente: las primeras son la
 - **Fase 8 — Reestructuracion de Lanzamientos:** categoria `movies` dividida en 5 (`movies`, `tv`, `games`, `music`, `books`), hub `/lanzamientos` con tabs y formulario manual, Google Books para libros, `SLUGS_LANZAMIENTO`, sidebar con entrada unica "Lanzamientos", mapeo tipo→slug en `crearRecordatorioLanzamiento`. *Pendiente manual:* aplicar `0003_lanzamientos.sql` en Supabase.
 - **Fase 9 — Categoria Notas:** schema nullable para `due_date` y `notify_at`, migracion `0004_notas.sql`, categoria `notes` en constantes y seed, grid de tarjetas en `/notes`, editor con titulo y cuerpo, vista detalle `/notes/[id]`, toggle `Recordarme` con fecha opcional, acciones editar/eliminar/duplicar, integracion en busqueda global Ctrl+K.
 - **Fase 10 — Refinar busqueda y modelo de IA para lanzamientos:** Mejoras en RAWG, TMDB, MusicBrainz, y prompts para IA. *Pendiente:* Pruebas manuales.
-
----
-
-## Fase 10: Refinar busqueda y modelo de IA para lanzamientos
-
-**Objetivo:** corregir los bugs que hacen que consultas como "Cuando sale GTA 6" devuelvan sin resultado, aunque la informacion exista en RAWG / TMDB / MusicBrainz. Mejorar la robustez del prompt y el modelo para que encadene tools correctamente. Critico para que el chat de Lanzamientos funcione bien (hoy falla en una mayoria de consultas reales).
-
-La idea es escribir algo como "Cuando sale el nuevo Zelda" o "Nuevo album de The Weeknd" y que el sistema sea capaz de encontrar el lanzamiento correspondiente. Que devuelva la información concreta, como el titulo original, fecha de lanzamiento, director, autor, artista, dependiendo de la categoria y que yo pueda confirmar como se va a guardar la información y en base a esa información se cree el recordatorio.
-
-Tipos de lanzamientos y campos asociados:
-- Album de musica: titulo del album, el artista, la fecha de lanzamiento
-- Videojuego: titulo, fecha de lanzamiento, plataforma
-- Pelicula: titulo, fecha de lanzamiento, director
-- Serie: titulo, fecha de lanzamiento, temporada
-- Libro: titulo, fecha de lanzamiento, autor
-
-Tambien me gustaria que se asignara una imagen con respecto al lanzamiento, por ejemplo para un album de musica una imagen de la portada, para un videojuego la portada, para una pelicula la portada, para una serie la portada y para un libro la portada, todas estas imagenes se guardarian en la base de datos junto con la información del lanzamiento (Preguntar viabilidad de esta peticion).
-
-Cuando acepto la creacion del recordatorio, el evento se clona muchas veces, hay que limitar esto a que se cree solo un evento. Además, cuando se acepta la creación del evento, debería de verse en tiempo real dentro de la pestaña de lanzamientos, no es necesario esperar a que se recargue la página.
-
-### Bugs identificados a corregir
-
-**RAWG (`src/lib/services/rawg.service.ts`)**
-- [ ] Manejar resultados TBA: cuando todos los `results` tienen `tba: true` o `released: null`, devolver el mejor candidato con `tba: true` y la fecha aproximada (RAWG suele tener "2026-12-31" como placeholder de Q4). No retornar `null` silencioso.
-- [ ] Quitar `search_precise: 'true'` por defecto. Hacer doble pasada: primera precisa, segunda relajada si la primera trae 0 resultados.
-- [ ] Mapeo de aliases comunes: "GTA" -> "Grand Theft Auto", "CoD" -> "Call of Duty", "RE" -> "Resident Evil". Tabla de aliases en el servicio.
-- [ ] Si la consulta termina en numero romano vs arabe (VI vs 6), probar ambos.
-
-**TMDB (`src/lib/services/tmdb.service.ts`)**
-- [ ] `elegirMejorResultado`: cuando hay varios candidatos, priorizar los que tienen fecha futura sobre los populares ya estrenados (relevante para "cuando sale X 5" cuando X 1-4 ya existen).
-- [ ] Para series, manejar el caso de `next_episode_to_air` (proximo episodio) cuando ya esta emitida. Endpoint `/tv/{id}` trae ese campo util.
-- [ ] Si la pelicula no tiene fecha en CO, intentar US como segundo fallback antes de la fecha generica `release_date`.
-
-**MusicBrainz (`src/lib/services/musicbrainz.service.ts`)**
-- [ ] Hacer doble pasada: primero con quotes exactas (precisa), si vacio sin quotes (fuzzy).
-- [ ] Escapar caracteres especiales del titulo y artista antes de armar la consulta Lucene.
-- [ ] Priorizar releases con fecha futura cuando el usuario pregunta "cuando sale".
-
-**Prompt IA (`src/lib/ai/prompt.ts`)**
-- [ ] Agregar regla explicita: "Extrae SOLO el titulo del lanzamiento. NUNCA pases frases interrogativas. Ejemplo: usuario dice 'cuando sale GTA 6' -> titulo='GTA 6', no 'cuando sale GTA 6'."
-- [ ] Reforzar: "Si buscarLanzamiento devuelve encontrado=false, SIEMPRE debes llamar pedirFechaManual a continuacion. NUNCA respondas con texto plano diciendo que no encontraste sin haber llamado pedirFechaManual primero."
-- [ ] Agregar few-shot examples: 2-3 ejemplos resueltos en el prompt para anclar el comportamiento (consulta -> tool call con titulo limpio -> respuesta).
-- [ ] Para juegos con sufijo numerico ("GTA 6", "Half-Life 3"), guiar al modelo a buscar tanto la forma numerica como su expansion conocida ("Grand Theft Auto VI").
-
-**Flujo de tools (`src/app/api/chat/route.ts`)**
-- [ ] Aumentar `stopWhen: stepCountIs(5)` a `stepCountIs(8)` para dar margen al encadenamiento buscar -> pedirFechaManual -> agregarRecordatorio.
-- [ ] Evaluar modelos alternativos en Groq con mejor tool calling: `qwen/qwen3-32b` o `moonshotai/kimi-k2-instruct-0905`. Hacer un benchmark con 10 consultas representativas y comparar tasa de exito.
-
-**Logica de retry cross-source (`src/lib/services/release-search.service.ts`)**
-- [ ] Si el tipo es ambiguo o la primera busqueda devuelve null, ejecutar busqueda paralela en las otras fuentes como fallback (ej: si tipo='game' devuelve null para "Avatar", probar movie/tv).
-- [ ] Funcion `limpiarTitulo(titulo)` que quita frases interrogativas en espanol e ingles antes de llamar a las APIs (defensa en profundidad ademas del prompt).
-
-### Telemetria y debug
-
-- [ ] Loguear cada consulta con `{ titulo, tipo, fuente, encontrado, mejorScore }` para identificar patrones de fallo. Sin PII.
-- [ ] En desarrollo (`NODE_ENV !== 'production'`), incluir en la respuesta del tool un campo opcional `debug: { query, resultados }` que el UI puede mostrar al desarrollador.
-
-### Tests manuales del done
-
-Validar al menos 10 consultas reales que hoy fallan:
-- [ ] "Cuando sale GTA 6" -> trae fecha aproximada o TBA (no null silencioso)
-- [ ] "Cuando sale Hollow Knight Silksong" -> trae fecha
-- [ ] "Cuando sale Avatar 4" -> prefiere fecha futura sobre Avatar 1 (mas popular)
-- [ ] "Nuevo album de Bad Bunny" -> trae el ultimo lanzamiento
-- [ ] "Album DeBI TiRAR MaS FOToS" (con mayusculas raras) -> trae resultado
-- [ ] "Half-Life 3" -> reconoce que es juego, devuelve TBA / sin fecha sin colgarse
-- [ ] "Stranger Things temporada 5" -> trae la serie y la proxima fecha de emision
-- [ ] "Resident Evil 9" -> reconoce alias "RE 9" tambien
-
-**Done when:** Al menos 8 de las 10 consultas anteriores resuelven correctamente (con fecha real, fecha aproximada con disclaimer, o cayendo limpiamente al formulario manual con prefill del titulo). El log no muestra `encontrado: false` cuando la informacion si existe en la fuente.
-
----
-
-## Fase 11: Calendario - bugfix vista semana y filtro por categoria
-
-**Objetivo:** corregir el bug de navegacion en vista semana (no trae los recordatorios correctos) y permitir filtrar el calendario por categoria.
-
-Además, hay un error grafico en el que se ven los dias de la semana. pues aparece semana del 17-17 de mayo, cuando deberia ser del 11-17 de mayo. Esto sucede cuando navego por el menú de meses y posteriormente presiono "semana".
-
-- [ ] Cambiar query param de `/calendar` de `?mes=YYYY-MM` a `?fecha=YYYY-MM-DD` para que vista semana fetchee el rango correcto
-- [ ] Actualizar `src/app/(dashboard)/calendar/page.tsx` para parsear `fecha`; mantener fallback con `mes`
-- [ ] Actualizar `vista-calendario.tsx` (`navegar`, `irAHoy`, `cambiarVista`) para construir el nuevo param
-- [ ] Nuevo componente `src/components/features/calendar/filtro-calendario.tsx` (pills multi-select por categoria)
-- [ ] Estado de filtro en `VistaCalendario`; filtrar `recordatorios` antes de pasar a `VistaMes` / `VistaSemana`
-
-**Done when:** Navegar entre semanas trae los recordatorios reales de cada semana. Puedo activar/desactivar categorias en el filtro y los dots (mes) o bloques (semana) responden.
+- **Fase 11 — Calendario:** Bugfix vista semana, filtro por categoria, corrección del error gráfico de las fechas.
 
 ---
 

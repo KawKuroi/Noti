@@ -66,6 +66,10 @@ const inputAgregarSchema = z.object({
   posterUrl: z.string().url().optional(),
   descripcion: z.string().optional(),
   autor: z.string().optional(),
+  artista: z.string().optional(),
+  plataforma: z.string().optional(),
+  director: z.string().optional(),
+  temporada: z.number().int().optional(),
 })
 
 export const agregarRecordatorioTool = tool({

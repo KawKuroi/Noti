@@ -50,7 +50,7 @@ export function FormularioManualLanzamiento() {
         fechaLanzamiento: fecha,
         fuente: 'manual',
         ...(tipo === 'book' && autor.trim() ? { autor: autor.trim() } : {}),
-        ...(tipo === 'album' && autor.trim() ? {} : {}),
+        ...(tipo === 'album' && autor.trim() ? { artista: autor.trim() } : {}),
       })
 
       if (resultado.ok) {

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { toast } from 'sonner'
 import { Check, Pencil, Trash2, RotateCcw, Clock, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -36,6 +37,13 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
       ? formatearFechaSinHora(new Date(recordatorio.fechaVencimiento))
       : formatearFechaCorta(new Date(recordatorio.fechaVencimiento))
     : null
+
+  const metadatos = recordatorio.metadatos as any
+  const posterUrl = metadatos?.posterUrl
+  const director = metadatos?.director
+  const artista = metadatos?.artista
+  const plataforma = metadatos?.plataforma
+  const temporada = metadatos?.temporada
 
   async function manejarCompletar() {
     setCargando(true)
@@ -93,6 +101,19 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
           )}
         </button>
 
+        {posterUrl && (
+          <div className="relative w-12 h-16 flex-shrink-0 rounded overflow-hidden bg-gray-100 mt-1">
+            <Image
+              src={posterUrl}
+              alt={recordatorio.titulo}
+              fill
+              sizes="48px"
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+        )}
+
         {/* Contenido */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
@@ -141,6 +162,17 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
 
           {recordatorio.descripcion && (
             <p className="text-xs text-gray-500 mt-0.5 truncate">{recordatorio.descripcion}</p>
+          )}
+
+          {(director || artista || plataforma || temporada) && (
+            <p className="text-xs text-gray-500 mt-0.5 truncate">
+              {[
+                director ? `Dir. ${director}` : null,
+                artista,
+                plataforma,
+                temporada ? `Temp. ${temporada}` : null,
+              ].filter(Boolean).join(' · ')}
+            </p>
           )}
 
           <div className="flex items-center gap-2 mt-1.5">

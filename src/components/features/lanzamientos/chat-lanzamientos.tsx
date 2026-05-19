@@ -103,6 +103,10 @@ export function ChatLanzamientos() {
       resultado.googleBooksId ? `googleBooksId=${resultado.googleBooksId}` : null,
       resultado.posterUrl ? `posterUrl=${resultado.posterUrl}` : null,
       resultado.autor ? `autor=${resultado.autor}` : null,
+      resultado.artista ? `artista=${resultado.artista}` : null,
+      resultado.plataforma ? `plataforma=${resultado.plataforma}` : null,
+      resultado.director ? `director=${resultado.director}` : null,
+      resultado.temporada ? `temporada=${resultado.temporada}` : null,
     ].filter(Boolean)
     sendMessage({ text: partes.join('\n') })
   }

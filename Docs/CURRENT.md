@@ -5,25 +5,34 @@
 
 ## Fase activa
 
-**Activo:** Fase 11 — Calendario - bugfix vista semana y filtro por categoria
-**Estado general:** Fases 0–10 completadas (Fase 10 pdte pruebas manuales). Comenzando Fase 11.
+**Activo:** Fase 12 — Rediseño del asistente IA
+**Estado general:** Fases 0–11 completadas. Arrancando Fase 12 (requiere prototipado y decisión UX).
 
 ## Pendientes manuales bloqueantes
 
 - [ ] Aplicar migración `src/db/migrations/0003_lanzamientos.sql` en el SQL Editor de Supabase (requerida para que Fase 8 funcione correctamente en producción)
 - [ ] `getCategorias` usa `unstable_cache({ revalidate: false })` — tras el deploy, limpiar caché en Vercel o hacer redeploy para que la categoría `notes` aparezca en el sidebar
 
-## Tareas de Fase 11
+## Tareas de Fase 12
 
-**Objetivo:** corregir el bug de navegacion en vista semana (no trae los recordatorios correctos) y permitir filtrar el calendario por categoria. Arreglar error grafico en fechas de la semana (ej: semana del 17-17 de mayo en lugar de 11-17 de mayo) al navegar de mes a semana.
+**Objetivo:** sacar el asistente IA del flujo principal del dashboard para que sea opcional y no domine la lista de recordatorios. Esta fase **arranca con prototipos** para que el usuario elija el diseño final entre varias opciones.
 
-- [ ] Cambiar query param de `/calendar` de `?mes=YYYY-MM` a `?fecha=YYYY-MM-DD` para que vista semana fetchee el rango correcto
-- [ ] Actualizar `src/app/(dashboard)/calendar/page.tsx` para parsear `fecha`; mantener fallback con `mes`
-- [ ] Actualizar `vista-calendario.tsx` (`navegar`, `irAHoy`, `cambiarVista`) para construir el nuevo param
-- [ ] Nuevo componente `src/components/features/calendar/filtro-calendario.tsx` (pills multi-select por categoria)
-- [ ] Estado de filtro en `VistaCalendario`; filtrar `recordatorios` antes de pasar a `VistaMes` / `VistaSemana`
+### Opciones a prototipar
+- **A)** FAB (Floating Action Button) con sparkles + bottom sheet
+- **B)** Botón sparkles en el header + dialog centrado (atajo Ctrl+I)
+- **C)** Ruta dedicada `/asistente` con chat full-page
+- **D)** Híbrida: botón en header + ruta dedicada
 
-**Done when:** Navegar entre semanas trae los recordatorios reales de cada semana. Puedo activar/desactivar categorias en el filtro y los dots (mes) o bloques (semana) responden.
+### Implementación (tras elección)
+- [ ] Prototipos rápidos de 2-3 opciones con dummy data
+- [ ] Decisión del diseño final
+- [ ] Extraer lógica reutilizable de `asistente-ia.tsx` a hook o componente headless
+- [ ] Quitar `<AsistenteIA />` de `src/app/(dashboard)/inicio/page.tsx`
+- [ ] Mover `asistente-ia.tsx` desde `reminders/` a `features/asistente/` para reflejar independencia
+- [ ] Integrar botón de audio (Fase 14) en el nuevo contenedor
+- [ ] Tooltip o tour breve para descubrimiento la primera vez
+
+**Done when:** El dashboard de inicio se ve limpio (solo lista de recordatorios + filtros). Se puede invocar el asistente IA desde cualquier ruta con uno o dos clicks o atajo de teclado. Crear con IA funciona idéntico al actual.
 
 ## Deuda técnica conocida
 

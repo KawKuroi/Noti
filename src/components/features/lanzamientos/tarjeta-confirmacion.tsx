@@ -61,7 +61,15 @@ export function TarjetaConfirmacion({ resultado, onConfirmar, onRechazar }: Prop
           <p className="text-xs text-gray-500 mt-0.5">
             {ETIQUETAS_TIPO_LANZAMIENTO[resultado.tipo]}
             {resultado.autor ? ` · ${resultado.autor}` : ''}
+            {resultado.artista ? ` · ${resultado.artista}` : ''}
+            {resultado.director ? ` · Dir. ${resultado.director}` : ''}
+            {resultado.temporada ? ` · Temporada ${resultado.temporada}` : ''}
           </p>
+          {resultado.plataforma && (
+            <p className="text-xs text-gray-500 mt-0.5">
+              {resultado.plataforma}
+            </p>
+          )}
           <p className="text-sm text-gray-700 mt-1.5">
             {fechaFormateada}
             {resultado.tba && (

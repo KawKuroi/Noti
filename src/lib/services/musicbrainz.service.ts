@@ -136,5 +136,6 @@ export async function buscarAlbum(
     descripcion: artistaCredito
       ? `Album de ${artistaCredito}${elegido['primary-type'] ? ` (${elegido['primary-type']})` : ''}`
       : undefined,
+    artista: artistaCredito,
   }
 }

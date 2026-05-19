@@ -308,6 +308,10 @@ export interface EntradaCrearLanzamiento {
   posterUrl?: string
   descripcion?: string
   autor?: string
+  artista?: string
+  plataforma?: string
+  director?: string
+  temporada?: number
 }
 
 export async function crearRecordatorioLanzamiento(
@@ -337,6 +341,10 @@ export async function crearRecordatorioLanzamiento(
     ...(input.musicbrainzId ? { musicbrainzId: input.musicbrainzId } : {}),
     ...(input.googleBooksId ? { googleBooksId: input.googleBooksId } : {}),
     ...(input.autor ? { autor: input.autor } : {}),
+    ...(input.artista ? { artista: input.artista } : {}),
+    ...(input.plataforma ? { plataforma: input.plataforma } : {}),
+    ...(input.director ? { director: input.director } : {}),
+    ...(input.temporada ? { temporada: input.temporada } : {}),
   }
 
   try {

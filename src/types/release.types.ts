@@ -16,6 +16,10 @@ export interface ResultadoLanzamiento {
   posterUrl?: string
   descripcion?: string
   autor?: string
+  artista?: string
+  plataforma?: string
+  director?: string
+  temporada?: number
 }
 
 export interface MetadatosLanzamiento {
@@ -27,4 +31,8 @@ export interface MetadatosLanzamiento {
   musicbrainzId?: string
   googleBooksId?: string
   autor?: string
+  artista?: string
+  plataforma?: string
+  director?: string
+  temporada?: number
 }
