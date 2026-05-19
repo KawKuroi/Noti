@@ -15,6 +15,7 @@ import {
   format,
   isBefore,
   isAfter,
+  startOfWeek,
   endOfWeek,
   parseISO,
 } from 'date-fns'
@@ -208,8 +209,9 @@ export function formatearMesAno(fecha: Date): string {
   return format(fecha, "MMMM yyyy", { locale: es })
 }
 
-export function formatearRangoSemana(inicio: Date): string {
-  const fin = endOfWeek(inicio, { weekStartsOn: 1 })
+export function formatearRangoSemana(fecha: Date): string {
+  const inicio = startOfWeek(fecha, { weekStartsOn: 1 })
+  const fin = endOfWeek(fecha, { weekStartsOn: 1 })
   if (getMonth(inicio) === getMonth(fin)) {
     return format(inicio, "d") + "-" + format(fin, "d MMM yyyy", { locale: es })
   }

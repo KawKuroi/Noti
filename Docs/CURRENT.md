@@ -5,18 +5,25 @@
 
 ## Fase activa
 
-**Activo:** Fase 10 — Refinar búsqueda y modelo IA para lanzamientos
-**Estado general:** Fases 0–9 completadas. Fase 10 implementada, pendiente pruebas manuales.
+**Activo:** Fase 11 — Calendario - bugfix vista semana y filtro por categoria
+**Estado general:** Fases 0–10 completadas (Fase 10 pdte pruebas manuales). Comenzando Fase 11.
 
 ## Pendientes manuales bloqueantes
 
 - [ ] Aplicar migración `src/db/migrations/0003_lanzamientos.sql` en el SQL Editor de Supabase (requerida para que Fase 8 funcione correctamente en producción)
 - [ ] `getCategorias` usa `unstable_cache({ revalidate: false })` — tras el deploy, limpiar caché en Vercel o hacer redeploy para que la categoría `notes` aparezca en el sidebar
 
-## Pendientes manuales de Fase 10
+## Tareas de Fase 11
 
-- [ ] Validar al menos 8 de las 10 consultas de prueba del ROADMAP
-- [ ] Evaluar modelos alternativos en Groq (benchmark 10 consultas): `qwen/qwen3-32b` o `moonshotai/kimi-k2-instruct-0905`
+**Objetivo:** corregir el bug de navegacion en vista semana (no trae los recordatorios correctos) y permitir filtrar el calendario por categoria. Arreglar error grafico en fechas de la semana (ej: semana del 17-17 de mayo en lugar de 11-17 de mayo) al navegar de mes a semana.
+
+- [ ] Cambiar query param de `/calendar` de `?mes=YYYY-MM` a `?fecha=YYYY-MM-DD` para que vista semana fetchee el rango correcto
+- [ ] Actualizar `src/app/(dashboard)/calendar/page.tsx` para parsear `fecha`; mantener fallback con `mes`
+- [ ] Actualizar `vista-calendario.tsx` (`navegar`, `irAHoy`, `cambiarVista`) para construir el nuevo param
+- [ ] Nuevo componente `src/components/features/calendar/filtro-calendario.tsx` (pills multi-select por categoria)
+- [ ] Estado de filtro en `VistaCalendario`; filtrar `recordatorios` antes de pasar a `VistaMes` / `VistaSemana`
+
+**Done when:** Navegar entre semanas trae los recordatorios reales de cada semana. Puedo activar/desactivar categorias en el filtro y los dots (mes) o bloques (semana) responden.
 
 ## Deuda técnica conocida
 

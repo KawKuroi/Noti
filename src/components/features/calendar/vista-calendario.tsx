@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/features/empty-state'
 import { VistaMes } from './vista-mes'
 import { VistaSemana } from './vista-semana'
 import { DialogDia } from './dialog-dia'
+import { FiltroCalendario } from './filtro-calendario'
 import { formatearMesAno, formatearRangoSemana } from '@/lib/utils/date.utils'
 import type { Recordatorio } from '@/types/reminder.types'
 import type { Categoria } from '@/types/category.types'
@@ -32,9 +33,14 @@ export function VistaCalendario({
   const [vista, setVista] = useState<VistaCalendario>(vistaInicial)
   const [referencia, setReferencia] = useState<Date>(referenciaInicial)
   const [diaAbierto, setDiaAbierto] = useState<Date | null>(null)
+  const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([])
+
+  const recordatoriosFiltrados = categoriasSeleccionadas.length > 0
+    ? recordatorios.filter((rec) => categoriasSeleccionadas.includes(rec.categoriaId))
+    : recordatorios
 
   const recordatoriosDeDia = diaAbierto
-    ? recordatorios.filter((rec) => {
+    ? recordatoriosFiltrados.filter((rec) => {
         if (!rec.fechaVencimiento) return false
         const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento)
         return isSameDay(fecha, diaAbierto)
@@ -47,21 +53,21 @@ export function VistaCalendario({
       : addWeeks(referencia, delta)
     setReferencia(nueva)
 
-    const mesParam = `${nueva.getFullYear()}-${String(nueva.getMonth() + 1).padStart(2, '0')}`
-    router.replace(`/calendar?mes=${mesParam}&vista=${vista}`)
+    const fechaParam = `${nueva.getFullYear()}-${String(nueva.getMonth() + 1).padStart(2, '0')}-${String(nueva.getDate()).padStart(2, '0')}`
+    router.replace(`/calendar?fecha=${fechaParam}&vista=${vista}`)
   }
 
   function irAHoy() {
     const hoy = new Date()
     setReferencia(hoy)
-    const mesParam = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`
-    router.replace(`/calendar?mes=${mesParam}&vista=${vista}`)
+    const fechaParam = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`
+    router.replace(`/calendar?fecha=${fechaParam}&vista=${vista}`)
   }
 
   function cambiarVista(nueva: VistaCalendario) {
     setVista(nueva)
-    const mesParam = `${referencia.getFullYear()}-${String(referencia.getMonth() + 1).padStart(2, '0')}`
-    router.replace(`/calendar?mes=${mesParam}&vista=${nueva}`)
+    const fechaParam = `${referencia.getFullYear()}-${String(referencia.getMonth() + 1).padStart(2, '0')}-${String(referencia.getDate()).padStart(2, '0')}`
+    router.replace(`/calendar?fecha=${fechaParam}&vista=${nueva}`)
   }
 
   const titulo = vista === 'mes'
@@ -112,24 +118,30 @@ export function VistaCalendario({
         </div>
       </div>
 
+      <FiltroCalendario
+        categorias={categorias}
+        seleccionadas={categoriasSeleccionadas}
+        onChange={setCategoriasSeleccionadas}
+      />
+
       {/* Vista activa */}
       {vista === 'mes' ? (
         <VistaMes
           referencia={referencia}
-          recordatorios={recordatorios}
+          recordatorios={recordatoriosFiltrados}
           categorias={categorias}
           onDiaClick={setDiaAbierto}
         />
       ) : (
         <VistaSemana
           referencia={referencia}
-          recordatorios={recordatorios}
+          recordatorios={recordatoriosFiltrados}
           categorias={categorias}
           onDiaClick={setDiaAbierto}
         />
       )}
 
-      {recordatorios.length === 0 && (
+      {recordatoriosFiltrados.length === 0 && (
         <EmptyState
           titulo="Nada agendado en este periodo"
           descripcion="Crea un recordatorio desde el inicio o cualquier categoria para verlo aqui."

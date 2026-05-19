@@ -2,13 +2,13 @@
 
 ## Estado actual
 
-Fases 0-9 completadas. Pendiente manual: aplicar migracion de BD en Supabase dashboard (`src/db/migrations/0003_lanzamientos.sql`).
+Fases 0-10 completadas. Pendiente manual: aplicar migracion de BD en Supabase dashboard (`src/db/migrations/0003_lanzamientos.sql`) y pruebas manuales de Fase 10.
 
-Las fases 10-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
+Las fases 11-16 estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion (refactores estructurales, nuevas categorias, bugfixes criticos), y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo la Fase 16, que depende de la Fase 9.
 
 ---
 
-## Historico de fases completadas (0-9)
+## Historico de fases completadas (0-10)
 
 - **Fase 0 — Setup inicial:** PRD, Arquitectura, Roadmap, CLAUDE.md, .gitignore, .env.example, .editorconfig.
 - **Fase 1 — Foundation:** Next.js 15 + App Router + TypeScript + Tailwind, Supabase (DB + Auth), Drizzle, Google OAuth + email/password, middleware de proteccion, layouts auth/dashboard, seed de 6 categorias, PWA basica, primer deploy a Vercel.
@@ -20,6 +20,7 @@ Las fases 10-16 estan ordenadas por importancia descendente: las primeras son la
 - **Fase 7 — Busqueda, IA general y segundo plano:** Ctrl+K con debounce, asistente IA en dashboard (`/api/ai/recordatorio` con `generateObject`), `crearRecordatorioDesdeIA`, resumen diario por push (cron `resumen-diario` cada hora), Background Sync en Service Worker, shortcuts y `window-controls-overlay` en manifest.
 - **Fase 8 — Reestructuracion de Lanzamientos:** categoria `movies` dividida en 5 (`movies`, `tv`, `games`, `music`, `books`), hub `/lanzamientos` con tabs y formulario manual, Google Books para libros, `SLUGS_LANZAMIENTO`, sidebar con entrada unica "Lanzamientos", mapeo tipo→slug en `crearRecordatorioLanzamiento`. *Pendiente manual:* aplicar `0003_lanzamientos.sql` en Supabase.
 - **Fase 9 — Categoria Notas:** schema nullable para `due_date` y `notify_at`, migracion `0004_notas.sql`, categoria `notes` en constantes y seed, grid de tarjetas en `/notes`, editor con titulo y cuerpo, vista detalle `/notes/[id]`, toggle `Recordarme` con fecha opcional, acciones editar/eliminar/duplicar, integracion en busqueda global Ctrl+K.
+- **Fase 10 — Refinar busqueda y modelo de IA para lanzamientos:** Mejoras en RAWG, TMDB, MusicBrainz, y prompts para IA. *Pendiente:* Pruebas manuales.
 
 ---
 

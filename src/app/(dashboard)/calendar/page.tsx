@@ -15,18 +15,23 @@ import { expandirOcurrenciasEnRango } from '@/lib/utils/date.utils'
 import { VistaCalendario } from '@/components/features/calendar/vista-calendario'
 
 interface Props {
-  searchParams: Promise<{ mes?: string; vista?: string }>
+  searchParams: Promise<{ mes?: string; vista?: string; fecha?: string }>
 }
 
 export default async function PaginaCalendario({ searchParams }: Props) {
   const usuario = await requerirUsuario()
-  const { mes, vista } = await searchParams
+  const { mes, vista, fecha } = await searchParams
 
   const vistaActual = vista === 'semana' ? 'semana' : 'mes'
 
   // Parsear referencia del mes desde query param o usar hoy
   let referencia = new Date()
-  if (mes) {
+  if (fecha) {
+    const [anio, mesNum, diaNum] = fecha.split('-').map(Number)
+    if (!isNaN(anio) && !isNaN(mesNum) && !isNaN(diaNum)) {
+      referencia = new Date(anio, mesNum - 1, diaNum)
+    }
+  } else if (mes) {
     const [anio, mesNum] = mes.split('-').map(Number)
     if (!isNaN(anio) && !isNaN(mesNum)) {
       referencia = new Date(anio, mesNum - 1, 1)
