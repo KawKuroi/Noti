@@ -5,13 +5,13 @@ export const CATEGORIAS: DefinicionCategoria[] = [
     slug: 'movies',
     nombre: 'Peliculas',
     icono: 'Film',
-    color: '#7C3AED',
+    color: '#0A0A0A',
   },
   {
     slug: 'tv',
     nombre: 'Series',
     icono: 'Tv',
-    color: '#0EA5E9',
+    color: '#2563EB',
   },
   {
     slug: 'games',
@@ -23,13 +23,13 @@ export const CATEGORIAS: DefinicionCategoria[] = [
     slug: 'music',
     nombre: 'Musica',
     icono: 'Music',
-    color: '#EA580C',
+    color: '#DC2626',
   },
   {
     slug: 'books',
     nombre: 'Libros',
     icono: 'BookMarked',
-    color: '#8B5CF6',
+    color: '#7C3AED',
   },
   {
     slug: 'study',

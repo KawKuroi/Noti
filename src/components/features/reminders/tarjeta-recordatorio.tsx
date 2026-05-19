@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Check, Pencil, Trash2, RotateCcw, Clock, Film, Tv, Gamepad2, Music, BookMarked } from 'lucide-react'
+import { Check, Pencil, Trash2, RotateCcw, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -23,14 +23,6 @@ interface Props {
   recordatorio: Recordatorio
   categorias: Categoria[]
   mostrarCategoria?: boolean
-}
-
-const ICONOS_TIPO: Record<TipoLanzamiento, React.ElementType> = {
-  movie: Film,
-  tv: Tv,
-  game: Gamepad2,
-  album: Music,
-  book: BookMarked,
 }
 
 export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria }: Props) {
@@ -54,7 +46,6 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
   const temporada = metadatos?.temporada as number | undefined
 
   const colorAcento = tipoLanzamiento ? PALETA_LANZAMIENTOS[tipoLanzamiento] : undefined
-  const IconoTipo = tipoLanzamiento ? ICONOS_TIPO[tipoLanzamiento] : undefined
 
   async function manejarCompletar() {
     setCargando(true)
@@ -110,15 +101,6 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
           >
             {recordatorio.estaCompletado && <Check size={10} className="text-white" />}
           </button>
-        )}
-
-        {IconoTipo && colorAcento && (
-          <div
-            className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5"
-            style={{ backgroundColor: `${colorAcento}15` }}
-          >
-            <IconoTipo size={16} style={{ color: colorAcento }} />
-          </div>
         )}
 
         {/* Contenido */}

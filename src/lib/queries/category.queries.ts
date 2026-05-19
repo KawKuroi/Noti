@@ -1,7 +1,10 @@
 import { unstable_cache } from 'next/cache'
 import { db } from '@/db'
 import { categorias } from '@/db/schema'
+import { CATEGORIAS } from '@/lib/utils/constants'
 import type { Categoria } from '@/types/category.types'
+
+const COLOR_POR_SLUG = Object.fromEntries(CATEGORIAS.map((c) => [c.slug, c.color]))
 
 export const getCategorias = unstable_cache(
   async (): Promise<Categoria[]> => {
@@ -12,7 +15,7 @@ export const getCategorias = unstable_cache(
       slug: f.slug,
       nombre: f.nombre,
       icono: f.icono,
-      color: f.color,
+      color: COLOR_POR_SLUG[f.slug] ?? f.color,
       creadaEn: f.creadaEn,
     }))
   },
