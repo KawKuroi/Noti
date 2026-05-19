@@ -15,14 +15,14 @@ import type { Recordatorio, EstadoAccionRecordatorio } from '@/types/reminder.ty
 
 const estadoInicial: EstadoAccionRecordatorio = { ok: false }
 
-function CamposTareas() {
+function CamposTareas({ prioridadInicial }: { prioridadInicial?: string }) {
   return (
     <div className="space-y-1">
       <Label htmlFor="meta_prioridad">Prioridad</Label>
       <select
         id="meta_prioridad"
         name="meta_prioridad"
-        defaultValue="media"
+        defaultValue={prioridadInicial ?? 'media'}
         className="flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 py-1 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
       >
         {PRIORIDADES.map((p) => (
@@ -35,7 +35,7 @@ function CamposTareas() {
   )
 }
 
-function CamposCumpleanos() {
+function CamposCumpleanos({ edadInicial }: { edadInicial?: number }) {
   return (
     <>
       <input type="hidden" name="esRecurrente" value="true" />
@@ -49,6 +49,7 @@ function CamposCumpleanos() {
           min={0}
           max={150}
           placeholder="Ej: 25"
+          defaultValue={edadInicial}
         />
       </div>
       <p className="text-xs text-gray-400">
@@ -58,7 +59,7 @@ function CamposCumpleanos() {
   )
 }
 
-function CamposEventos() {
+function CamposEventos({ ubicacionInicial }: { ubicacionInicial?: string }) {
   return (
     <div className="space-y-1">
       <Label htmlFor="meta_ubicacion">Ubicacion (opcional)</Label>
@@ -67,12 +68,13 @@ function CamposEventos() {
         name="meta_ubicacion"
         placeholder="Ej: Calle 72 con Carrera 10"
         maxLength={200}
+        defaultValue={ubicacionInicial ?? ''}
       />
     </div>
   )
 }
 
-function CamposEstudio() {
+function CamposEstudio({ duracionInicial }: { duracionInicial?: number }) {
   return (
     <div className="space-y-1">
       <Label htmlFor="meta_duracionMin">Duracion estimada (minutos)</Label>
@@ -83,21 +85,28 @@ function CamposEstudio() {
         min={1}
         max={480}
         placeholder="Ej: 90"
+        defaultValue={duracionInicial}
       />
     </div>
   )
 }
 
-function BloqueCondicional({ slug }: { slug: string }) {
+function BloqueCondicional({
+  slug,
+  metadatos,
+}: {
+  slug: string
+  metadatos?: Record<string, unknown>
+}) {
   switch (slug) {
     case 'tasks':
-      return <CamposTareas />
+      return <CamposTareas prioridadInicial={metadatos?.prioridad as string | undefined} />
     case 'birthdays':
-      return <CamposCumpleanos />
+      return <CamposCumpleanos edadInicial={metadatos?.edad as number | undefined} />
     case 'events':
-      return <CamposEventos />
+      return <CamposEventos ubicacionInicial={metadatos?.ubicacion as string | undefined} />
     case 'study':
-      return <CamposEstudio />
+      return <CamposEstudio duracionInicial={metadatos?.duracionMin as number | undefined} />
     default:
       return null
   }
@@ -133,6 +142,10 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
 
   const [slugActual, setSlugActual] = useState(categoriaInicial?.slug ?? 'events')
   const [categoriaIdActual, setCategoriaId] = useState(categoriaInicial?.id ?? categorias[0]?.id)
+  const [metadatosIniciales] = useState(
+    recordatorio?.metadatos as Record<string, unknown> | undefined,
+  )
+  const [slugInicialEdicion] = useState(categoriaInicial?.slug)
 
   const onExitoRef = useRef(onExito)
   onExitoRef.current = onExito
@@ -172,7 +185,19 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
     return isNaN(d.getTime()) ? '' : d.toISOString()
   }, [fecha, hora])
 
+  const anticipacionMinInicial = useMemo(() => {
+    if (!recordatorio?.fechaVencimiento || !recordatorio?.notificarEn) return 15
+    const diff = Math.round(
+      (new Date(recordatorio.fechaVencimiento).getTime() -
+        new Date(recordatorio.notificarEn).getTime()) /
+        60000,
+    )
+    return diff > 0 ? diff : 15
+  }, [recordatorio])
+
   const tieneError = !estado.ok && estado.error && typeof estado.error === 'string'
+
+  const metadatosParaCampos = slugActual === slugInicialEdicion ? metadatosIniciales : undefined
 
   return (
     <form action={dispatch} className="space-y-4">
@@ -180,28 +205,26 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
       <input type="hidden" name="categoriaId" value={categoriaIdActual} />
       <input type="hidden" name="fechaHoraUtc" value={fechaHoraUtc} />
 
-      {/* Selector de categoria */}
-      {!esEdicion && (
-        <div className="space-y-1">
-          <Label>Categoria</Label>
-          <div className="flex gap-1.5 flex-wrap">
-            {categorias.map((cat) => (
-              <button
-                key={cat.slug}
-                type="button"
-                onClick={() => alCambiarCategoria(cat.slug)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                  slugActual === cat.slug
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {cat.nombre}
-              </button>
-            ))}
-          </div>
+      {/* Selector de categoria (visible siempre) */}
+      <div className="space-y-1">
+        <Label>Categoria</Label>
+        <div className="flex gap-1.5 flex-wrap">
+          {categorias.map((cat) => (
+            <button
+              key={cat.slug}
+              type="button"
+              onClick={() => alCambiarCategoria(cat.slug)}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                slugActual === cat.slug
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {cat.nombre}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Titulo */}
       <div className="space-y-1">
@@ -266,7 +289,7 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
         <select
           id="anticipacionMin"
           name="anticipacionMin"
-          defaultValue="15"
+          defaultValue={String(anticipacionMinInicial)}
           className="flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 py-1 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
         >
           {OPCIONES_ANTICIPACION.map((op) => (
@@ -278,7 +301,7 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
       </div>
 
       {/* Campos condicionales por categoria */}
-      <BloqueCondicional slug={slugActual} />
+      <BloqueCondicional key={slugActual} slug={slugActual} metadatos={metadatosParaCampos} />
 
       {/* Errores */}
       {tieneError && (

@@ -7,6 +7,7 @@ import { FormularioManualLanzamiento } from './formulario-manual-lanzamiento'
 import type { Categoria } from '@/types/category.types'
 import type { Recordatorio } from '@/types/reminder.types'
 import { SLUGS_LANZAMIENTO } from '@/lib/utils/constants'
+import type { TipoLanzamiento } from '@/types/release.types'
 
 type SlugLanzamiento = (typeof SLUGS_LANZAMIENTO)[number]
 
@@ -23,6 +24,14 @@ interface Props {
 
 const ORDEN_TABS: SlugLanzamiento[] = ['movies', 'tv', 'games', 'music', 'books']
 
+const SLUG_A_TIPO: Record<SlugLanzamiento, TipoLanzamiento> = {
+  movies: 'movie',
+  tv: 'tv',
+  games: 'game',
+  music: 'album',
+  books: 'book',
+}
+
 export function HubLanzamientos({ datos, todos, categorias }: Props) {
   const datosOrdenados = ORDEN_TABS.flatMap((slug) => {
     const encontrado = datos.find((d) => d.cat.slug === slug)
@@ -32,6 +41,7 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
   const [tabActiva, setTabActiva] = useState<string>('todos')
 
   const categoriaActiva = datosOrdenados.find((d) => d.cat.slug === tabActiva)
+  const tipoActivo = SLUG_A_TIPO[tabActiva as SlugLanzamiento]
 
   return (
     <div className="space-y-4">
@@ -64,7 +74,7 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
           ))}
           <div className="flex-1" />
           <div className="pb-2">
-            <FormularioManualLanzamiento />
+            <FormularioManualLanzamiento tipoInicial={tipoActivo} />
           </div>
         </div>
       </div>

@@ -27,6 +27,7 @@ interface Props {
 
 export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria }: Props) {
   const [editarAbierto, setEditarAbierto] = useState(false)
+  const [eliminarAbierto, setEliminarAbierto] = useState(false)
   const [cargando, setCargando] = useState(false)
 
   const categoria = categorias.find((c) => c.id === recordatorio.categoriaId)
@@ -65,8 +66,8 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
     }
   }
 
-  async function manejarEliminar() {
-    if (!confirm('¿Eliminar este recordatorio?')) return
+  async function confirmarEliminar() {
+    setEliminarAbierto(false)
     setCargando(true)
     const resultado = await eliminarRecordatorio(recordatorio.id)
     setCargando(false)
@@ -127,7 +128,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
               <Button
                 variante="fantasma"
                 tamano="icono"
-                onClick={manejarEliminar}
+                onClick={() => setEliminarAbierto(true)}
                 disabled={cargando}
                 title="Eliminar"
                 className="hover:text-red-500"
@@ -192,6 +193,34 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
             slugInicial={slug}
             onExito={() => setEditarAbierto(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de confirmacion de eliminacion */}
+      <Dialog open={eliminarAbierto} onOpenChange={setEliminarAbierto}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Eliminar recordatorio</DialogTitle>
+            <DialogDescription>
+              Esta accion no se puede deshacer. El recordatorio sera eliminado permanentemente.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 pt-2">
+            <Button
+              variante="contorno"
+              className="flex-1"
+              onClick={() => setEliminarAbierto(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              onClick={confirmarEliminar}
+              disabled={cargando}
+            >
+              {cargando ? 'Eliminando...' : 'Eliminar'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -25,9 +25,13 @@ import { crearRecordatorioLanzamiento } from '@/lib/actions/reminder.actions'
 import { TIPOS_LANZAMIENTO, ETIQUETAS_TIPO_LANZAMIENTO } from '@/lib/utils/constants'
 import type { TipoLanzamiento } from '@/types/release.types'
 
-export function FormularioManualLanzamiento() {
+interface Props {
+  tipoInicial?: TipoLanzamiento
+}
+
+export function FormularioManualLanzamiento({ tipoInicial }: Props) {
   const [abierto, setAbierto] = useState(false)
-  const [tipo, setTipo] = useState<TipoLanzamiento>('movie')
+  const [tipo, setTipo] = useState<TipoLanzamiento>(tipoInicial ?? 'movie')
   const [titulo, setTitulo] = useState('')
   const [fecha, setFecha] = useState('')
   const [autor, setAutor] = useState('')
@@ -36,7 +40,7 @@ export function FormularioManualLanzamiento() {
   const [pending, startTransition] = useTransition()
 
   function resetear() {
-    setTipo('movie')
+    setTipo(tipoInicial ?? 'movie')
     setTitulo('')
     setFecha('')
     setAutor('')
@@ -82,7 +86,7 @@ export function FormularioManualLanzamiento() {
 
   return (
     <>
-      <Button variante="contorno" tamano="sm" onClick={() => setAbierto(true)}>
+      <Button variante="contorno" tamano="sm" onClick={() => { setTipo(tipoInicial ?? 'movie'); setAbierto(true) }}>
         <PlusCircle size={15} />
         Agregar manualmente
       </Button>

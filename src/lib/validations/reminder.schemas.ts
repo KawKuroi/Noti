@@ -63,7 +63,10 @@ export const esquemaRecordatorioBase = z
     descripcion: z.string().max(500, 'Maximo 500 caracteres').optional(),
     categoriaId: z.coerce.number().int().positive('Categoria requerida'),
     fechaVencimiento: z.string().min(1, 'La fecha es requerida'),
-    horaVencimiento: z.string().regex(horaRegex, 'Formato HH:mm requerido').optional(),
+    horaVencimiento: z.preprocess(
+      (v) => (v === '' ? undefined : v),
+      z.string().regex(horaRegex, 'Formato HH:mm requerido').optional(),
+    ),
     anticipacionMin: z.coerce.number().int().min(0).default(15),
     esRecurrente: z
       .string()

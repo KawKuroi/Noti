@@ -6,7 +6,14 @@
 ## Fase activa
 
 **Activo:** Fase 17 (Inicio - rediseno con saludo dinamico, input IA grande, proximos recordatorios, mini-calendario lateral y chips de categorias).
-**Estado general:** Fases 0–15 completadas. La nueva ola priorizada va de Fase 16 a Fase 19 (ver `ROADMAP.md`).
+**Estado general:** Fases 0–16 completadas + bugs de formularios resueltos. La nueva ola priorizada va de Fase 17 a Fase 19 (ver `ROADMAP.md`).
+
+## Bugs resueltos (sesión 2026-05-19)
+
+- **Bug A** — `horaVencimiento: ''` fallaba el regex en Zod aunque sea opcional. Fix: `z.preprocess` convierte `''` a `undefined` en `reminder.schemas.ts`.
+- **Bug B** — Formulario manual de lanzamientos no preseleccionaba la subcategoría activa. Fix: `hub-lanzamientos.tsx` mapea `tabActiva` → `TipoLanzamiento` y lo pasa como `tipoInicial` a `FormularioManualLanzamiento`.
+- **Bug C** — Editor no mostraba selector de categoría ni cargaba metadata existente. Fix: selector siempre visible, `anticipacionMin` inicializado desde el recordatorio, campos condicionales pre-llenados con metadata, `actualizarRecordatorio` ahora guarda `categoriaId`.
+- **Bug D** — `confirm()` nativo al eliminar. Fix: reemplazado con `Dialog` de confirmación con botones Cancelar / Eliminar.
 
 ## Pendientes manuales bloqueantes
 

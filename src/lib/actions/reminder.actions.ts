@@ -128,6 +128,7 @@ export async function actualizarRecordatorio(
     const [fila] = await db
       .update(recordatorios)
       .set({
+        categoriaId: datos.categoriaId,
         titulo: datos.titulo,
         descripcion: datos.descripcion ?? null,
         fechaVencimiento,
