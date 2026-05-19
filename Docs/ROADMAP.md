@@ -2,11 +2,11 @@
 
 ## Estado actual
 
-Las fases 14-19 son la nueva ola priorizada por el usuario (bugfixes, refactor de categorias, reestructuracion de navegacion, rediseno del inicio, mejoras al asistente y landing). Las fases 20-23 son aditivas y quedan en cola para iteraciones posteriores. Estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion, y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo Fase 22 (notas multimedia), que depende de la Fase 9.
+Las fases 15-19 son la nueva ola activa (reestructuracion de navegacion, rediseno del inicio, mejoras al asistente y landing). Las fases 20-23 son aditivas y quedan en cola para iteraciones posteriores. Estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion, y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo Fase 22 (notas multimedia), que depende de la Fase 9.
 
 ---
 
-## Historico de fases completadas (0-13)
+## Historico de fases completadas (0-14)
 
 - **Fase 0 — Setup inicial:** PRD, Arquitectura, Roadmap, CLAUDE.md, .gitignore, .env.example, .editorconfig.
 - **Fase 1 — Foundation:** Next.js 15 + App Router + TypeScript + Tailwind, Supabase (DB + Auth), Drizzle, Google OAuth + email/password, middleware de proteccion, layouts auth/dashboard, seed de 6 categorias, PWA basica, primer deploy a Vercel.
@@ -23,20 +23,7 @@ Las fases 14-19 son la nueva ola priorizada por el usuario (bugfixes, refactor d
 - **Fase 12 — Refactor IA lanzamientos:** Bug RAWG resuelto, chat unificado con bottom sheet y Ctrl+I, validacion de coincidencia de titulo, edicion inline de fecha tentativa.
 - **Fase 12b — Pipeline deterministico + command palette:** Reemplazo del chat conversacional por pipeline de 3 pasos (extraccion estructurada, busqueda multi-candidato, UI de seleccion estilo Raycast). Precision ~95%.
 - **Fase 13 — Eliminar Pomodoro:** Retirado del producto todo lo relacionado con el temporizador Pomodoro.
-
----
-
-## Fase 14: Bugfixes criticos + refactor de categorias
-
-**Objetivo:** corregir los dos bugs criticos visibles en produccion y reducir la friccion conceptual unificando categorias que se solapan. Bloquea al resto del plan porque cambia el modelo de categorias.
-
-- [ ] **Bug recurrencia 400 ocurrencias**: arreglar `expandirOcurrenciasEnRango()` en `src/lib/utils/date.utils.ts:161-203`. Asegurar avance estricto del cursor cuando `calcularProximaOcurrencia()` devuelve la misma fecha o una fecha <= cursor.
-- [ ] **Bug formulario manual de notas**: el formulario retorna `null` para `notes` (`src/components/features/reminders/formulario-recordatorio.tsx:156`); revisar handler de submit para `notes` (campos minimos: titulo + cuerpo; sin fecha obligatoria).
-- [ ] **Fusion `classes` -> `study`**: migracion SQL `0007_fusion_classes_study.sql` que actualiza `reminders.category_id` y elimina la fila de `categories` con slug `classes`. Quitar `classes` de `src/lib/utils/constants.ts` y `src/db/seed.ts`. Actualizar prompts del extractor (`src/lib/ai/extractor.ts`) para que `classes` ya no exista como intencion.
-- [ ] **Rename label "Tareas" -> "Pendientes"**: solo cambiar `nombre` en seed y en constantes UI. Slug `tasks` se mantiene en BD.
-- [ ] **Ocultar checkbox en cards recurrentes**: condicionar el render del checkbox a `!esRecurrente` en `tarjeta-recordatorio.tsx`. Las acciones disponibles para recurrentes son editar y eliminar.
-
-**Done when:** Una clase recurrente genera 1 fila en BD y se ve correctamente expandida en el calendario sin duplicados (no aparecen 400 entradas en el dialog del dia). Crear una nota desde el formulario manual persiste y aparece en `/notes`. La categoria `classes` ya no existe en BD ni en UI. En el sidebar y filtros, donde decia "Tareas" ahora dice "Pendientes". Las cards de clase/cumpleanos no tienen checkbox.
+- **Fase 14 — Bugfixes criticos + refactor de categorias:** Cursor de recurrencia con avance estricto (bug 400 ocurrencias). Formulario de notas sin fecha obligatoria. Fusion `classes → study` en BD, constants, seed, extractor, validaciones y tipos. Rename "Tareas" → "Pendientes". Checkbox oculto en cards recurrentes.
 
 ---
 

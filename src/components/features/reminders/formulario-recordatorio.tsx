@@ -7,67 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { crearRecordatorio, actualizarRecordatorio } from '@/lib/actions/reminder.actions'
-import { PRIORIDADES, DIAS_SEMANA, OPCIONES_ANTICIPACION } from '@/lib/utils/constants'
+import { PRIORIDADES, OPCIONES_ANTICIPACION } from '@/lib/utils/constants'
 import { format } from 'date-fns'
-import { serializarReglaRecurrencia } from '@/lib/utils/date.utils'
 import type { Categoria } from '@/types/category.types'
 import type { Recordatorio, EstadoAccionRecordatorio } from '@/types/reminder.types'
 
 const estadoInicial: EstadoAccionRecordatorio = { ok: false }
-
-function CamposClases() {
-  const [diasSeleccionados, setDias] = useState<number[]>([1])
-
-  function alternarDia(dia: number) {
-    setDias((prev) =>
-      prev.includes(dia) ? prev.filter((d) => d !== dia) : [...prev, dia],
-    )
-  }
-
-  const regla = serializarReglaRecurrencia({ tipo: 'weekly', dias: diasSeleccionados })
-
-  return (
-    <>
-      <input type="hidden" name="esRecurrente" value="true" />
-      <input type="hidden" name="reglaRecurrencia" value={regla} />
-      <div className="space-y-1">
-        <Label>Dias de clase</Label>
-        <div className="flex gap-1.5 flex-wrap">
-          {DIAS_SEMANA.map((dia) => (
-            <button
-              key={dia.valor}
-              type="button"
-              onClick={() => alternarDia(dia.valor)}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                diasSeleccionados.includes(dia.valor)
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {dia.corto}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label htmlFor="meta_horaInicio">Hora inicio</Label>
-          <Input id="meta_horaInicio" name="meta_horaInicio" type="time" required />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="meta_horaFin">Hora fin</Label>
-          <Input id="meta_horaFin" name="meta_horaFin" type="time" required />
-        </div>
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="meta_aula">Aula (opcional)</Label>
-        <Input id="meta_aula" name="meta_aula" placeholder="Ej: Salon 301" maxLength={100} />
-      </div>
-    </>
-  )
-}
 
 function CamposTareas() {
   return (
@@ -144,8 +90,6 @@ function CamposEstudio() {
 
 function BloqueCondicional({ slug }: { slug: string }) {
   switch (slug) {
-    case 'classes':
-      return <CamposClases />
     case 'tasks':
       return <CamposTareas />
     case 'birthdays':
@@ -267,15 +211,18 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
         />
       </div>
 
-      {/* Descripcion */}
+      {/* Descripcion / cuerpo de nota */}
       <div className="space-y-1">
-        <Label htmlFor="descripcion">Descripcion (opcional)</Label>
+        <Label htmlFor="descripcion">
+          {slugActual === 'notes' ? 'Contenido' : 'Descripcion (opcional)'}
+        </Label>
         <Textarea
           id="descripcion"
           name="descripcion"
           defaultValue={recordatorio?.descripcion ?? ''}
-          placeholder="Agrega detalles adicionales..."
-          maxLength={500}
+          placeholder={slugActual === 'notes' ? 'Escribe tu nota aqui...' : 'Agrega detalles adicionales...'}
+          maxLength={slugActual === 'notes' ? 10000 : 500}
+          rows={slugActual === 'notes' ? 6 : 3}
         />
       </div>
 
@@ -291,7 +238,7 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
             type="date"
             value={fecha}
             onChange={(e) => setFecha(e.target.value)}
-            required
+            required={slugActual !== 'notes'}
           />
         </div>
         {slugActual !== 'birthdays' && (

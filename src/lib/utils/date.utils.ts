@@ -184,11 +184,9 @@ export function expandirOcurrenciasEnRango(
 
     // Expandir desde el inicio del rango hasta el fin
     let cursor = startOfDay(inicio)
-    let intentos = 0
-    const maxIteraciones = 400 // tope de seguridad
+    const maxIteraciones = 400 // tope de seguridad (rango max ~1 año con recurrencia diaria)
 
-    while (!isAfter(cursor, endOfDay(fin)) && intentos < maxIteraciones) {
-      intentos++
+    for (let intentos = 0; intentos < maxIteraciones && !isAfter(cursor, endOfDay(fin)); intentos++) {
       const ocurrencia = calcularProximaOcurrencia(rec.reglaRecurrencia, ancla, cursor)
 
       if (isAfter(ocurrencia, endOfDay(fin))) break
@@ -197,8 +195,10 @@ export function expandirOcurrenciasEnRango(
         resultado.push({ ...rec, fechaVencimiento: ocurrencia })
       }
 
-      // Avanzar cursor al dia siguiente de la ocurrencia para buscar la siguiente
-      cursor = addDays(startOfDay(ocurrencia), 1)
+      // Avanzar cursor al dia siguiente de la ocurrencia, garantizando avance estricto
+      // para evitar bucles infinitos cuando la regla devuelve una fecha anterior al cursor
+      const siguienteCursor = addDays(startOfDay(ocurrencia), 1)
+      cursor = isAfter(siguienteCursor, cursor) ? siguienteCursor : addDays(cursor, 1)
     }
   }
 

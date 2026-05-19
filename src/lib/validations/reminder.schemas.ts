@@ -43,7 +43,6 @@ export const esquemaMetadatosNotas = z.object({
 })
 
 const esquemasMetadatosPorSlug = {
-  classes: esquemaMetadatosClases,
   tasks: esquemaMetadatosTareas,
   birthdays: esquemaMetadatosCumpleanos,
   events: esquemaMetadatosEventos,

@@ -10,7 +10,7 @@ export const maxDuration = 30
 const esquemaRecordatorioIA = z.object({
   titulo: z.string().describe('Titulo descriptivo del recordatorio'),
   categoriaSlug: z.enum(SLUGS_VALIDOS).describe(
-    'Categoria: movies=peliculas/series/videojuegos/musica, study=estudio/leer, classes=clases/cursos, birthdays=cumpleanos/aniversarios, tasks=tareas/pendientes/compras, events=eventos/citas/reuniones',
+    'Categoria: movies=peliculas/series/videojuegos/musica, study=estudio/clases/cursos/leer, birthdays=cumpleanos/aniversarios, tasks=tareas/pendientes/compras, events=eventos/citas/reuniones',
   ),
   fechaVencimiento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe('Fecha en formato YYYY-MM-DD'),
   horaVencimiento: z

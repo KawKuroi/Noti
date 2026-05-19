@@ -38,12 +38,6 @@ export const CATEGORIAS: DefinicionCategoria[] = [
     color: '#0284C7',
   },
   {
-    slug: 'classes',
-    nombre: 'Clases',
-    icono: 'CalendarDays',
-    color: '#059669',
-  },
-  {
     slug: 'birthdays',
     nombre: 'Cumpleanos',
     icono: 'Cake',
@@ -51,7 +45,7 @@ export const CATEGORIAS: DefinicionCategoria[] = [
   },
   {
     slug: 'tasks',
-    nombre: 'Tareas',
+    nombre: 'Pendientes',
     icono: 'CheckSquare',
     color: '#D97706',
   },
@@ -99,7 +93,7 @@ export const OPCIONES_ANTICIPACION: { valor: number; etiqueta: string }[] = [
 export const SLUGS_LANZAMIENTO = ['movies', 'tv', 'games', 'music', 'books'] as const
 export type SlugLanzamiento = (typeof SLUGS_LANZAMIENTO)[number]
 
-export const SLUGS_VALIDOS = ['study', 'classes', 'birthdays', 'tasks', 'events', 'notes'] as const
+export const SLUGS_VALIDOS = ['study', 'birthdays', 'tasks', 'events', 'notes'] as const
 export type SlugCategoria = (typeof SLUGS_VALIDOS)[number]
 
 export const HORA_NOTIFICACION_LANZAMIENTO = '06:00'

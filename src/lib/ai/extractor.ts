@@ -13,7 +13,7 @@ export const esquemaExtraccion = z.object({
   recordatorio: z
     .object({
       titulo: z.string(),
-      categoriaSlug: z.enum(['birthdays', 'study', 'classes', 'tasks', 'events', 'notes']),
+      categoriaSlug: z.enum(['birthdays', 'study', 'tasks', 'events', 'notes']),
       fechaVencimiento: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -45,10 +45,10 @@ const PROMPT = `Eres un clasificador estructurado para una app de recordatorios.
 Las cuatro intenciones posibles:
 
 1) recordatorio_personal — el usuario quiere agendar algo personal (cumpleanos, clases, tareas, eventos, citas, notas). Llena el campo "recordatorio".
-   - categoriaSlug debe ser uno de: birthdays | study | classes | tasks | events | notes
+   - categoriaSlug debe ser uno de: birthdays | study | tasks | events | notes
    - Si la fecha es relativa ("manana", "el viernes", "la proxima semana"), calculala a partir de la fecha actual.
    - Para cumpleanos y aniversarios CON FECHA mencionada: esRecurrente=true, reglaRecurrencia="yearly:DD-MM", fechaVencimiento=proximo aniversario (este año si aun no paso, sino el siguiente).
-   - Para clases o eventos semanales: esRecurrente=true, reglaRecurrencia="weekly:MON,WED" (dias en ingles abreviado, lunes=MON, martes=TUE, miercoles=WED, jueves=THU, viernes=FRI, sabado=SAT, domingo=SUN). OBLIGATORIO: fechaVencimiento DEBE ser la proxima fecha futura (incluyendo hoy si aun no pasa la hora) que caiga en el primer dia listado. NUNCA dejes fechaVencimiento=null si la regla es semanal.
+   - Para clases o eventos semanales: esRecurrente=true, reglaRecurrencia="weekly:1,3" (dias ISO numericos: lunes=1, martes=2, miercoles=3, jueves=4, viernes=5, sabado=6, domingo=7). Ejemplo: lunes y miercoles → "weekly:1,3". OBLIGATORIO: fechaVencimiento DEBE ser la proxima fecha futura (incluyendo hoy si aun no pasa la hora) que caiga en el primer dia listado. NUNCA dejes fechaVencimiento=null si la regla es semanal.
    - Para notas sin fecha: categoriaSlug="notes", fechaVencimiento=null.
    - Si NO mencionan fecha y NO es nota (ej: "cumpleanos de pardo" sin fecha): fechaVencimiento=null, esRecurrente=false. El usuario rellenara la fecha manualmente despues.
 

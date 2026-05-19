@@ -11,9 +11,8 @@ const CATEGORIAS = [
   { slug: 'music', nombre: 'Musica', icono: 'Music', color: '#EA580C' },
   { slug: 'books', nombre: 'Libros', icono: 'BookMarked', color: '#8B5CF6' },
   { slug: 'study', nombre: 'Estudio', icono: 'BookOpen', color: '#0284C7' },
-  { slug: 'classes', nombre: 'Clases', icono: 'CalendarDays', color: '#059669' },
   { slug: 'birthdays', nombre: 'Cumpleanos', icono: 'Cake', color: '#DB2777' },
-  { slug: 'tasks', nombre: 'Tareas', icono: 'CheckSquare', color: '#D97706' },
+  { slug: 'tasks', nombre: 'Pendientes', icono: 'CheckSquare', color: '#D97706' },
   { slug: 'events', nombre: 'Eventos', icono: 'MapPin', color: '#DC2626' },
   { slug: 'notes', nombre: 'Notas', icono: 'StickyNote', color: '#6366F1' },
 ]

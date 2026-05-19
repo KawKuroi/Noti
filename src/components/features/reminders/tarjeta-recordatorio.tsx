@@ -84,22 +84,21 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
             : 'border-gray-100 hover:border-gray-200'
         }`}
       >
-        {/* Boton completar */}
-        <button
-          onClick={manejarCompletar}
-          disabled={cargando}
-          title={recordatorio.esRecurrente ? 'Avanzar a proxima ocurrencia' : 'Marcar como completado'}
-          className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-            recordatorio.estaCompletado
-              ? 'border-green-500 bg-green-500'
-              : 'border-gray-300 hover:border-gray-500'
-          }`}
-        >
-          {recordatorio.estaCompletado && <Check size={10} className="text-white" />}
-          {recordatorio.esRecurrente && !recordatorio.estaCompletado && (
-            <RotateCcw size={9} className="text-gray-400" />
-          )}
-        </button>
+        {/* Boton completar — solo para recordatorios no recurrentes */}
+        {!recordatorio.esRecurrente && (
+          <button
+            onClick={manejarCompletar}
+            disabled={cargando}
+            title="Marcar como completado"
+            className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+              recordatorio.estaCompletado
+                ? 'border-green-500 bg-green-500'
+                : 'border-gray-300 hover:border-gray-500'
+            }`}
+          >
+            {recordatorio.estaCompletado && <Check size={10} className="text-white" />}
+          </button>
+        )}
 
         {posterUrl && (
           <div className="relative w-12 h-16 flex-shrink-0 rounded overflow-hidden bg-gray-100 mt-1">

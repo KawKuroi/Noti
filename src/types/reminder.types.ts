@@ -1,12 +1,5 @@
 export type Prioridad = 'baja' | 'media' | 'alta'
 
-export interface MetadatosClases {
-  diaSemana: number // 1=lunes, 7=domingo (ISO)
-  horaInicio: string // "HH:mm"
-  horaFin: string // "HH:mm"
-  aula?: string
-}
-
 export interface MetadatosTareas {
   prioridad: Prioridad
 }
@@ -29,7 +22,6 @@ export interface MetadatosPelicula {
 }
 
 export type MetadatosPorSlug = {
-  classes: MetadatosClases
   tasks: MetadatosTareas
   birthdays: MetadatosCumpleanos
   events: MetadatosEventos

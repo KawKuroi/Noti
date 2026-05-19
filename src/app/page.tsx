@@ -4,7 +4,6 @@ import {
   Bell,
   Film,
   BookOpen,
-  CalendarDays,
   Cake,
   CheckSquare,
   MapPin,
@@ -21,10 +20,9 @@ export const metadata: Metadata = {
 
 const CATEGORIAS = [
   { icono: Film, nombre: 'Peliculas y series', descripcion: 'El chat IA busca fechas exactas de estrenos en TMDB y te notifica el dia del lanzamiento.', color: '#7C3AED' },
-  { icono: BookOpen, nombre: 'Estudio', descripcion: 'Recordatorios para sesiones de estudio y trabajo. Nunca mas olvides estudiar.', color: '#0284C7' },
-  { icono: CalendarDays, nombre: 'Clases', descripcion: 'Horarios recurrentes semanales. Configura una vez, recibe el aviso cada semana.', color: '#059669' },
+  { icono: BookOpen, nombre: 'Estudio', descripcion: 'Recordatorios para sesiones de estudio, clases y trabajo. Configura recurrencias semanales.', color: '#0284C7' },
   { icono: Cake, nombre: 'Cumpleanos', descripcion: 'Recordatorios anuales automaticos para que nunca olvides felicitar a alguien.', color: '#DB2777' },
-  { icono: CheckSquare, nombre: 'Tareas', descripcion: 'Lista de pendientes con prioridad baja, media o alta y fecha limite.', color: '#D97706' },
+  { icono: CheckSquare, nombre: 'Pendientes', descripcion: 'Lista de pendientes con prioridad baja, media o alta y fecha limite.', color: '#D97706' },
   { icono: MapPin, nombre: 'Eventos', descripcion: 'Eventos con ubicacion. Llega a tiempo a donde necesitas estar.', color: '#DC2626' },
 ]
 
