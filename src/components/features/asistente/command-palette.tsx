@@ -1,10 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Loader2, Search, Sparkles, X } from 'lucide-react'
+import { Loader2, Mic, Search, Sparkles, Square, X } from 'lucide-react'
 import { useAsistente } from './asistente-provider'
 import { CandidatoCard } from './candidato-card'
 import { RecordatorioFormCard } from './recordatorio-form-card'
+import { useAudioRecorder } from '@/hooks/use-audio-recorder'
 
 const EJEMPLOS = [
   'Cumpleaños de Marta el 21 de junio',
@@ -34,6 +35,16 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [indiceSeleccionado, setIndiceSeleccionado] = useState(0)
   const [mostrarFormManual, setMostrarFormManual] = useState(false)
+
+  const alTranscribir = useCallback(
+    (texto: string) => {
+      setQuery(texto)
+    },
+    [setQuery],
+  )
+
+  const { estadoGrabacion, segundosGrabando, errorGrabacion, iniciarGrabacion, detenerGrabacion } =
+    useAudioRecorder(alTranscribir)
 
   useEffect(() => {
     if (abierto) {
@@ -120,6 +131,8 @@ export function CommandPalette() {
 
   const modoForm: 'personal' | 'lanzamiento' = esLanzamiento ? 'lanzamiento' : 'personal'
 
+  const micDeshabilitado = cargando || creando || estadoGrabacion === 'procesando'
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4">
       <div className="absolute inset-0 bg-black/40" onClick={cerrar} />
@@ -134,7 +147,35 @@ export function CommandPalette() {
             placeholder="¿Qué te recuerdo o agendo?"
             className="flex-1 text-sm outline-none text-gray-900 placeholder:text-gray-400"
           />
-          {cargando && <Loader2 size={14} className="text-gray-400 animate-spin shrink-0" />}
+          {(cargando || estadoGrabacion === 'procesando') && estadoGrabacion !== 'procesando' && (
+            <Loader2 size={14} className="text-gray-400 animate-spin shrink-0" />
+          )}
+
+          {estadoGrabacion === 'grabando' ? (
+            <button
+              type="button"
+              onClick={detenerGrabacion}
+              className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-500 hover:bg-red-100 transition-colors shrink-0"
+              title="Detener grabacion"
+            >
+              <Square size={12} />
+              {segundosGrabando}s
+            </button>
+          ) : estadoGrabacion === 'procesando' ? (
+            <Loader2 size={14} className="text-purple-500 animate-spin shrink-0" />
+          ) : (
+            <button
+              type="button"
+              onClick={iniciarGrabacion}
+              disabled={micDeshabilitado}
+              className="p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+              title="Dictado por voz"
+              aria-label="Dictado por voz"
+            >
+              <Mic size={14} />
+            </button>
+          )}
+
           <button
             type="button"
             onClick={ejecutarBusqueda}
@@ -164,6 +205,12 @@ export function CommandPalette() {
             <X size={16} />
           </button>
         </header>
+
+        {errorGrabacion && (
+          <div className="px-4 py-2 bg-red-50 border-b border-red-100">
+            <p className="text-xs text-red-600">{errorGrabacion}</p>
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {!hayResultado && !cargando && (

@@ -2,74 +2,38 @@
 
 ## Solicitud original (usuario, 2026-05-20)
 
-> Ejecuta la Fase 20 del roadmap: auto-eliminacion de tareas completadas.
+> Ejecuta el current — Fase 21: Entrada por audio en el asistente IA
 
 ## 1. Contexto y Archivos Afectados
 
-La Fase 20 introduce una columna nueva en `profiles` (`auto_delete_completed_tasks_days`) y otra en `reminders` (`completed_at`), un cron diario que limpia tareas vencidas, ajustes en settings y un indicador visual en las tarjetas de tareas completadas.
+Fase 21 introduce grabación de voz en el asistente. El flujo: usuario pulsa mic en el CommandPalette → MediaRecorder captura audio → POST /api/ai/transcribir → Groq Whisper devuelve texto → texto aparece en el input para revisión → usuario envía normalmente.
 
 Archivos directamente involucrados:
-- `src/db/migrations/0006_auto_delete_tasks.sql` — nueva migracion SQL (crear)
-- `src/db/schema.ts` — agregar 2 columnas nuevas al schema de Drizzle
-- `src/types/user.types.ts` — ampliar interfaz `Perfil` con el nuevo campo
-- `src/types/reminder.types.ts` — agregar `completadoEn` a `Recordatorio`
-- `src/lib/queries/user.queries.ts` — actualizar `mapearPerfil`
-- `src/lib/queries/reminder.queries.ts` — actualizar `mapearRecordatorio` y el select explicito en `getRecordatoriosANotificar`
-- `src/lib/actions/reminder.actions.ts` — `alternarCompletado` llena `completed_at` al completar y lo limpia al desmarcar
-- `src/app/api/cron/limpiar-tareas/route.ts` — nuevo endpoint de cron (crear)
-- `vercel.json` — agregar entrada de cron diario a las 03:00 UTC
-- `src/lib/utils/constants.ts` — nueva constante `OPCIONES_AUTO_DELETE_TAREAS`
-- `src/lib/actions/user.actions.ts` — nueva accion `actualizarAutoDeleteTareas`
-- `src/components/features/settings/formulario-auto-delete-tareas.tsx` — nuevo componente de settings (crear)
-- `src/app/(dashboard)/settings/page.tsx` — agregar seccion de pendientes con el formulario
-- `src/components/features/reminders/tarjeta-recordatorio.tsx` — mostrar countdown ambar en tareas completadas
-- `src/components/features/reminders/lista-recordatorios.tsx` — propagar prop opcional `diasAutoEliminar`
-- `src/app/(dashboard)/[slug]/page.tsx` — cargar perfil en slug `tasks` y pasar la configuracion
+- `src/app/api/ai/transcribir/route.ts` — nuevo endpoint POST: recibe FormData con audio, valida, llama Groq Whisper `whisper-large-v3-turbo`, rate-limit 10 req/min, devuelve `{ texto: string }`
+- `src/hooks/use-audio-recorder.ts` — nuevo hook cliente: encapsula `MediaRecorder`, gestiona permisos, timer de grabación (máx 60s), envío al endpoint y callback `onTranscripcion(texto)`
+- `src/components/features/asistente/command-palette.tsx` — modificar header: agregar botón Mic junto al input, mostrar timer rojo al grabar, loader al procesar, mensaje de error de permiso inline
 
 ## 2. Plan de Accion Detallado
 
-### Bloque 1 - Capa de datos
+### Bloque 1 - Endpoint de transcripcion
 
-- [x] **Paso 1: `src/db/migrations/0006_auto_delete_tasks.sql`** Crear archivo con tres sentencias SQL.
-- [x] **Paso 2: `src/db/schema.ts`** Agregar `autoEliminarTareasCompletadasDias` a `perfiles` y `completadoEn` + indice a `recordatorios`.
-- [x] **Paso 3: `src/types/user.types.ts`** Agregar `autoEliminarTareasCompletadasDias: number | null` a `Perfil`.
-- [x] **Paso 4: `src/types/reminder.types.ts`** Agregar `completadoEn: Date | null` a `Recordatorio`.
-- [x] **Paso 5: `src/lib/queries/user.queries.ts`** Actualizar `mapearPerfil`.
-- [x] **Paso 6: `src/lib/queries/reminder.queries.ts`** Actualizar `mapearRecordatorio` y select de `getRecordatoriosANotificar`.
+- [x] **Paso 1: `src/app/api/ai/transcribir/route.ts`** Crear el archivo. Handler POST: (a) auth con `obtenerUsuario`, (b) rate-limit `verificarLimite` 10 req/min, (c) verificar `GROQ_API_KEY`, (d) parsear FormData y extraer `audio` como Blob, (e) validar que el audio existe y pesa menos de 25 MB, (f) reenviar FormData a `https://api.groq.com/openai/v1/audio/transcriptions` con headers `Authorization: Bearer $GROQ_API_KEY` y campos `model=whisper-large-v3-turbo`, `language=es`, `response_format=json`, (g) leer `{ text }` de la respuesta de Groq y devolver `Response.json({ texto: text })`.
 
-### Bloque 2 - Logica de negocio
+### Bloque 2 - Hook de grabacion
 
-- [x] **Paso 7: `src/lib/actions/reminder.actions.ts`** `alternarCompletado` llena/limpia `completadoEn`.
-- [x] **Paso 8: `src/app/api/cron/limpiar-tareas/route.ts`** Nuevo cron con autenticacion y eliminacion por perfil.
+- [x] **Paso 2: `src/hooks/use-audio-recorder.ts`** Crear el hook. Estado: `EstadoGrabacion = 'inactivo' | 'grabando' | 'procesando' | 'error'`, `segundosGrabando: number`, `errorGrabacion: string | null`. Refs: `grabadorRef<MediaRecorder>`, `chunkRef<Blob[]>`, `intervaloRef`, `timeoutRef`. Función `iniciarGrabacion`: pedir permiso de micrófono con `getUserMedia`, crear `MediaRecorder` (mimeType elegido por compatibilidad: `audio/webm;codecs=opus` → `audio/webm` → `audio/ogg` en ese orden), acumular chunks en `ondataavailable`, en `onstop` construir Blob, hacer POST a `/api/ai/transcribir`, llamar `onTranscripcion(texto)` y volver a `inactivo`. Función `detenerGrabacion`: llama `grabador.stop()` y limpia el intervalo. Auto-stop a los 60 segundos. Manejo de errores de permiso (`NotAllowedError`) y de transcripción.
 
-### Bloque 3 - Configuracion y constants
+### Bloque 3 - UI en CommandPalette
 
-- [x] **Paso 9: `vercel.json`** Cron diario a las 03:00 UTC.
-- [x] **Paso 10: `src/lib/utils/constants.ts`** Constante `OPCIONES_AUTO_DELETE_TAREAS`.
-
-### Bloque 4 - Settings UI
-
-- [x] **Paso 11: `src/lib/actions/user.actions.ts`** Accion `actualizarAutoDeleteTareas`.
-- [x] **Paso 12: `src/components/features/settings/formulario-auto-delete-tareas.tsx`** Nuevo componente cliente.
-- [x] **Paso 13: `src/app/(dashboard)/settings/page.tsx`** Seccion "Tareas completadas" en settings.
-
-### Bloque 5 - Indicador visual en tarjetas
-
-- [x] **Paso 14: `src/components/features/reminders/tarjeta-recordatorio.tsx`** Countdown ambar en completadas.
-- [x] **Paso 15: `src/components/features/reminders/lista-recordatorios.tsx`** Propagar `diasAutoEliminar`.
-- [x] **Paso 16: `src/app/(dashboard)/[slug]/page.tsx`** Carga perfil en slug `tasks` y pasa config.
-
-### Bloque 6 - Verificacion
-
-- [x] **Paso 17: Validacion estatica** `npx tsc --noEmit` — cero errores. `next lint` — cero warnings.
+- [x] **Paso 3: `src/components/features/asistente/command-palette.tsx`** Modificar el archivo. (a) Agregar `Mic`, `Square` a las importaciones de lucide-react. (b) Importar `useAudioRecorder` de `@/hooks/use-audio-recorder`. (c) En el cuerpo del componente, definir `alTranscribir` con `useCallback` que llame `setQuery(texto)`. (d) Instanciar `useAudioRecorder(alTranscribir)` para obtener `estadoGrabacion`, `segundosGrabando`, `errorGrabacion`, `iniciarGrabacion`, `detenerGrabacion`. (e) En el JSX del header, insertar el bloque del micrófono entre el spinner de carga y el botón Buscar: cuando `estadoGrabacion === 'grabando'` mostrar botón rojo con `Square` + timer `"{segundosGrabando}s"`; cuando `'procesando'` mostrar `Loader2` con clase `text-purple-500`; cuando `'inactivo'` o `'error'` mostrar botón con `Mic` y title "Dictado por voz". (f) Debajo del header agregar un `<div>` condicional que muestre `errorGrabacion` si existe como texto rojo pequeño dentro del panel.
 
 ## 3. Reporte de Pruebas
 
 **Estado:** [APROBADO]
 
-- **Cumplimiento funcional:** migracion SQL lista para aplicar en Supabase; schema Drizzle con las dos columnas nuevas; `alternarCompletado` graba `completed_at`; cron `limpiar-tareas` elimina tareas segun perfil; settings expone selector de auto-eliminacion; tarjeta muestra countdown ambar cuando quedan 3 dias o menos.
-- **Espanol absoluto:** todos los identificadores nuevos en espanol (`autoEliminarTareasCompletadasDias`, `completadoEn`, `etiquetaAutoDelete`, `actualizarAutoDeleteTareas`, etc.).
-- **Seguridad:** cron protegido con `CRON_SECRET`; grep de patrones sensibles en archivos nuevos — sin credenciales hardcodeadas. RLS mantenido: el cron opera internamente sobre `perfiles`; no expone datos de un usuario a otro.
+- **Cumplimiento funcional:** endpoint `/api/ai/transcribir` creado con `whisper-large-v3-turbo`, rate-limit 10 req/min, validacion de tamano (25 MB); hook `useAudioRecorder` encapsula `MediaRecorder` con seleccion de mimeType por compatibilidad, timer de grabacion, auto-stop a 60s y manejo de errores de permiso; boton Mic integrado en `CommandPalette` con estados visuales: icono + timer rojo al grabar, loader purpura al procesar, icono inactivo; error de microfono visible bajo el header.
+- **Espanol absoluto:** identificadores nuevos en espanol: `estadoGrabacion`, `segundosGrabando`, `errorGrabacion`, `iniciarGrabacion`, `detenerGrabacion`, `alTranscribir`, `chunkRef`, `grabadorRef`, `timeoutRef`, `intervaloRef`, `limpiarTimers`, `elegirMimeType`, `formularioGroq`, `micDeshabilitado`.
+- **Seguridad:** `GROQ_API_KEY` solo accedida via `process.env`; sin credenciales hardcodeadas; rate-limit por usuario.
 - **TSC:** cero errores.
 - **Linter:** cero warnings.
-- **Nota UI:** `tarjeta-recordatorio.tsx`, `lista-recordatorios.tsx`, `settings/page.tsx` y `[slug]/page.tsx` modificados — requiere validacion visual en navegador.
+- **Nota UI:** `command-palette.tsx` modificado — requiere validacion visual en navegador.

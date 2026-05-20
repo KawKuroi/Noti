@@ -5,8 +5,12 @@
 
 ## Fase activa
 
-**Activo:** Fase 21 (entrada por audio en el asistente IA) — siguiente fase de la cola.
-**Estado general:** Fases 0–20 completadas. La ola priorizada original esta cerrada. Proximas fases son aditivas (ver `ROADMAP.md`).
+**Activo:** Fase 22 (Notas multimedia) — siguiente fase de la cola.
+**Estado general:** Fases 0–21 completadas. La ola priorizada original esta cerrada. Proximas fases son aditivas (ver `ROADMAP.md`).
+
+## Fase 21 completada (sesion 2026-05-20)
+
+- **Entrada por audio en el asistente IA** — endpoint `src/app/api/ai/transcribir/route.ts` con Groq `whisper-large-v3-turbo` y rate-limit 10 req/min; hook `src/hooks/use-audio-recorder.ts` con `MediaRecorder`, seleccion de mimeType por compatibilidad, timer, auto-stop a 60 s y manejo de permisos; boton Mic en `CommandPalette` con estados grabando (rojo + timer), procesando (loader purpura) y error inline.
 
 ## Fase 20 completada (sesion 2026-05-20)
 

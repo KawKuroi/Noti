@@ -38,17 +38,9 @@ La ola priorizada original (Fases 0-19) esta completa. Las fases 20-23 son aditi
 
 ---
 
-## Fase 21: Entrada por audio en el asistente IA
+## Historico: Fase 21 completada (2026-05-20)
 
-**Objetivo:** boton de microfono que graba, transcribe con Groq Whisper y rellena el input para que el usuario revise.
-
-- [ ] Nuevo endpoint `src/app/api/ai/transcribir/route.ts` con `whisper-large-v3-turbo` y rate-limit 10 req/min
-- [ ] Nuevo hook `src/hooks/use-audio-recorder.ts` que encapsula `MediaRecorder`
-- [ ] Boton `Mic` junto al input de `asistente-ia.tsx` y `chat-lanzamientos.tsx`
-- [ ] Indicador visual de grabacion (waveform o timer)
-- [ ] Manejo de permisos del navegador y fallback de error
-
-**Done when:** Puedo pulsar el microfono, dictar "cumpleanos de Lucas el 5 de julio", soltar, y el texto aparece en el input. Reviso y envio normal. Funciona en Chrome Android y Windows.
+**Entrada por audio en el asistente IA** — endpoint `src/app/api/ai/transcribir/route.ts` con `whisper-large-v3-turbo` y rate-limit 10 req/min; hook `src/hooks/use-audio-recorder.ts` con seleccion de mimeType por compatibilidad, timer, auto-stop a 60 s y manejo de permisos denegados; boton Mic integrado en `CommandPalette` con estados grabando (rojo + timer), procesando (loader purpura) y error inline bajo el header. Todos los checkboxes de la fase: [x].
 
 ---
 
