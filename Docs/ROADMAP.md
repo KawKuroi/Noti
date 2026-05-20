@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-La Fase 19 es la unica pendiente de la ola priorizada actual (landing - enlace a GitHub). Las fases 20-23 son aditivas y quedan en cola para iteraciones posteriores. Estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion, y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo Fase 22 (notas multimedia), que depende de la Fase 9.
+La ola priorizada original (Fases 0-19) esta completa. Las fases 20-23 son aditivas y quedan en cola para iteraciones posteriores. Estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion, y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo Fase 22 (notas multimedia), que depende de la Fase 9.
 
 ---
 
@@ -28,35 +28,7 @@ La Fase 19 es la unica pendiente de la ola priorizada actual (landing - enlace a
 - **Fase 16 — Lanzamientos - pestana Todos, paleta de color, formulario completo, portadas no persistentes:** Pestana "Todos" en `/lanzamientos` con orden cronologico. Paleta de colores sutiles por tipo de lanzamiento. Formulario manual extendido con descripcion, autor, artista/banda y director/showrunner persistidos en metadatos JSONB. Portadas visuales no persistentes al guardar (eliminado `image_url` en escrituras y reemplazo por iconos de tipo en las cards).
 - **Fase 17 — Rediseno del inicio:** Layout de dos columnas en `/inicio`. Saludo dinamico por hora local con nombre del usuario y resumen de recordatorios del dia. Input IA prominente (full-width) que abre el asistente compartiendo estado con Ctrl+I. Mini-calendario lateral del mes actual con dots en dias con recordatorios. Chips de categorias filtrables en sidebar derecho. Boton de nuevo recordatorio reubicado junto al saludo. Ampliacion 2026-05-19: saludo escalado a `text-4xl`, eliminacion del FAB de asistente, promocion de la barra "Que te recuerdo o agendo" a componente reutilizable (`BarraAsistente`) extendido a Inicio + Lanzamientos + categorias simples, calendario ocupa el alto completo, vista Semana refactorizada como timeline tipo Google Calendar con columna de horas a la izquierda y scroll inicial a 07:00, padding superior del dashboard ampliado (`pt-10`).
 - **Fase 18 — IA fechas naturales y edicion inline completa:** Utility `parsearFechaNatural` con tabla de meses ES que resuelve `dd/mm`, `dd-mm`, `dd mmm`, `mmm dd`, `dd de mmmm` y suma 1 ano cuando la fecha es anterior a hoy. Extractor IA gana campo `lanzamiento.fechaTentativa` y ejemplos en el prompt. Pipeline determinista aplica el parser como fallback cuando el LLM devuelve `null` y propaga `fechaTentativa` a candidatos sin fecha confirmada. Card de extraccion editable completa: anticipacion (`OPCIONES_ANTICIPACION`), tipo de lanzamiento, autor/artista/director condicionales. Card de candidato auto-abre el datepicker con la fecha tentativa cuando la fuente devuelve TBA. `crearRecordatorioDesdeIA` acepta `anticipacionMin?`. Ruteo dual en `confirmarRecordatorioEditado`: lanzamientos persisten metadatos JSONB via `crearRecordatorioLanzamiento` con `fuente='manual'`.
-
----
-
-## Fase 17: Redisenno del inicio
-
-**Objetivo:** convertir `/inicio` en un panel personal con saludo dinamico, input IA prominente, lista de proximos recordatorios y widgets laterales (mini-calendario + chips de categorias). Mantener el minimalismo actual.
-
-- [x] Reorganizar `src/app/(dashboard)/inicio/page.tsx` con la estructura:
-  1. Saludo dinamico ("Buenos dias/tardes/noches, {nombre}") segun hora local.
-  2. Subtitulo con resumen rapido ("Tienes X tareas para hoy y un evento proximo").
-  3. Input IA prominente (mismo componente del asistente, full-width) con microfono.
-  4. Seccion "Proximos Recordatorios" con link "Ver todos".
-  5. Sidebar derecho con mini-calendario del mes actual + seccion "Categorias" con chips filtrables.
-- [x] Mantener tipografia, espaciados y paleta actuales (minimalismo).
-- [x] El input IA del inicio comparte estado con el palette Ctrl+I (no duplicar logica).
-
-**Done when:** Al entrar a `/inicio` se ve un saludo personalizado, el input IA grande, una lista de proximos recordatorios con la opcion "Ver todos", un mini-calendario lateral y los chips de categorias. La UI conserva el aire minimalista.
-
----
-
-## Fase 19: Landing page - enlace a GitHub
-
-**Objetivo:** dar visibilidad al repositorio publico desde la landing para que visitantes interesados puedan explorar el codigo.
-
-- [ ] Agregar enlace al repositorio de GitHub en el footer del landing (`src/app/page.tsx`).
-- [ ] Boton secundario "Ver en GitHub" en el hero junto al CTA principal.
-- [ ] Icono de GitHub usando `lucide-react`.
-
-**Done when:** La landing tiene un link visible al repo (hero + footer) que abre en nueva pestana.
+- **Fase 19 — Landing enlace a GitHub:** Boton secundario "Ver en GitHub" (icono `Github` + texto outline) en el hero de la landing junto a los CTAs principales. Link con icono GitHub en el footer junto al texto del proyecto. Ambos abren el repositorio en nueva pestana.
 
 ---
 

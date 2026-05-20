@@ -11,6 +11,7 @@ import {
   Smartphone,
   ShieldCheck,
   Calendar,
+  Github,
 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -123,6 +124,15 @@ export default function PaginaLanding() {
             >
               Ya tengo cuenta
             </Link>
+            <a
+              href="https://github.com/KawKuroi/Noti"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors inline-flex items-center justify-center gap-2"
+            >
+              <Github size={16} />
+              Ver en GitHub
+            </a>
           </div>
         </section>
 
@@ -282,7 +292,18 @@ export default function PaginaLanding() {
       {/* Footer */}
       <footer className="border-t border-gray-100 py-8">
         <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
-          <p>Noti — proyecto de portafolio de codigo abierto.</p>
+          <p className="flex items-center gap-2">
+            Noti — proyecto de portafolio de codigo abierto.
+            <a
+              href="https://github.com/KawKuroi/Noti"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 hover:text-gray-600 underline"
+            >
+              <Github size={11} />
+              GitHub
+            </a>
+          </p>
           <div className="flex items-center gap-4">
             <span>
               Datos de peliculas y series:{' '}

@@ -5,8 +5,12 @@
 
 ## Fase activa
 
-**Activo:** Fase 19 (landing - enlace a GitHub).
-**Estado general:** Fases 0–18 completadas. Solo queda Fase 19 antes de cerrar la ola priorizada actual (ver `ROADMAP.md`).
+**Activo:** Fase 20 (auto-eliminacion de tareas completadas) — siguiente fase de la cola.
+**Estado general:** Fases 0–19 completadas. La ola priorizada original esta cerrada. Proximas fases son aditivas (ver `ROADMAP.md`).
+
+## Fase 19 completada (sesion 2026-05-20)
+
+- **Enlace a GitHub en landing** — boton secundario "Ver en GitHub" (icono `Github` + texto, estilo outline) agregado al bloque de CTAs del hero en `src/app/page.tsx`. Link con icono GitHub agregado al footer junto al texto del proyecto. Ambos abren `https://github.com/KawKuroi/Noti` en nueva pestana.
 
 ## Bugs resueltos (sesión 2026-05-19)
 
