@@ -58,8 +58,10 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
     return { dots, total: delDia.length }
   }
 
+  const filas = dias.length / 7
+
   return (
-    <div>
+    <div className="flex flex-col h-full">
       {/* Cabecera de dias */}
       <div className="grid grid-cols-7 mb-1">
         {DIAS_CABECERA.map((dia) => (
@@ -73,7 +75,10 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
       </div>
 
       {/* Grid de dias */}
-      <div className="grid grid-cols-7 gap-px bg-gray-100 border border-gray-100 rounded-xl overflow-hidden">
+      <div
+        className="grid grid-cols-7 gap-px bg-gray-100 border border-gray-100 rounded-xl overflow-hidden flex-1 min-h-0"
+        style={{ gridTemplateRows: `repeat(${filas}, minmax(0, 1fr))` }}
+      >
         {dias.map((dia) => {
           const esDelMes = isSameMonth(dia, referencia)
           const esDiaHoy = isToday(dia)
@@ -85,7 +90,7 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
               key={dia.toISOString()}
               onClick={() => total > 0 || esDelMes ? onDiaClick(dia) : undefined}
               className={cn(
-                'bg-white min-h-[72px] p-2 flex flex-col items-start gap-1 hover:bg-gray-50 transition-colors text-left',
+                'bg-white p-2 flex flex-col items-start gap-1 hover:bg-gray-50 transition-colors text-left overflow-hidden',
                 !esDelMes && 'bg-gray-50/70',
                 total > 0 && 'cursor-pointer',
                 total === 0 && !esDelMes && 'cursor-default',

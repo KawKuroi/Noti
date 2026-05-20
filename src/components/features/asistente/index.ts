@@ -1,5 +1,5 @@
 export { AsistenteProvider, useAsistente } from './asistente-provider'
-export { FabAsistente } from './fab-asistente'
+export { BarraAsistente } from './barra-asistente'
 export { CommandPalette } from './command-palette'
 export { CandidatoCard } from './candidato-card'
 export { RecordatorioFormCard } from './recordatorio-form-card'

@@ -10,7 +10,7 @@ import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nu
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
 import { NotificationPrompt } from '@/components/features/notification-prompt'
 import { SaludoDinamico } from '@/components/features/inicio/saludo-dinamico'
-import { InputAsistenteInicio } from '@/components/features/inicio/input-asistente-inicio'
+import { BarraAsistente } from '@/components/features/asistente'
 import { MiniCalendario } from '@/components/features/inicio/mini-calendario'
 import { ChipsCategoriasSidebar } from '@/components/features/inicio/chips-categorias-sidebar'
 
@@ -83,7 +83,7 @@ export default async function PaginaInicio({ searchParams }: Props) {
             </div>
           </div>
 
-          <InputAsistenteInicio />
+          <BarraAsistente />
 
           <section>
             <div className="flex items-center justify-between mb-3">

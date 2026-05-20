@@ -58,18 +58,20 @@ export default async function PaginaCalendario({ searchParams }: Props) {
   const recordatorios = expandirOcurrenciasEnRango(recordatoriosRaw, rangoInicio, rangoFin)
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 h-full">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Calendario</h1>
         <p className="text-sm text-gray-500 mt-1">Vista mensual y semanal de todos tus recordatorios.</p>
       </div>
 
-      <VistaCalendario
-        recordatorios={recordatorios}
-        categorias={categorias}
-        vistaInicial={vistaActual}
-        referenciaInicial={referencia}
-      />
+      <div className="flex-1 min-h-0">
+        <VistaCalendario
+          recordatorios={recordatorios}
+          categorias={categorias}
+          vistaInicial={vistaActual}
+          referenciaInicial={referencia}
+        />
+      </div>
     </div>
   )
 }

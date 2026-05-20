@@ -15,6 +15,15 @@
 - **Bug C** — Editor no mostraba selector de categoría ni cargaba metadata existente. Fix: selector siempre visible, `anticipacionMin` inicializado desde el recordatorio, campos condicionales pre-llenados con metadata, `actualizarRecordatorio` ahora guarda `categoriaId`.
 - **Bug D** — `confirm()` nativo al eliminar. Fix: reemplazado con `Dialog` de confirmación con botones Cancelar / Eliminar.
 
+## Cambios UI (sesión 2026-05-19, ampliación post-Fase 17)
+
+- **Saludo de inicio** — `saludo-dinamico.tsx` escalado de `text-2xl` a `text-4xl tracking-tight`; resumen pasa a `text-base mt-2` para mantener jerarquía.
+- **Eliminación del FAB de asistente** — Quitado `<FabAsistente />` y su archivo. El acceso al asistente queda en Ctrl+I (CommandPalette) y en la nueva `BarraAsistente`.
+- **Promoción de la barra "¿Qué te recuerdo o agendo?"** — `InputAsistenteInicio` migrado a `src/components/features/asistente/barra-asistente.tsx` como componente reutilizable. Insertado en Inicio, Lanzamientos, Pendientes, Estudio, Cumpleaños y Eventos. Calendario, Notas y Ajustes quedan sin barra (decisión explícita del usuario). Eliminado `BotonAbrirAsistente` del hub de lanzamientos por redundancia.
+- **Calendario al alto completo** — `calendar/page.tsx` y `vista-calendario.tsx` ahora son `flex flex-col h-full min-h-0`; `vista-mes.tsx` usa `gridTemplateRows: repeat(filas, minmax(0, 1fr))` para que las semanas se repartan la altura disponible.
+- **Vista Semana como timeline** — `vista-semana.tsx` reescrito al estilo Google Calendar: columna fija de 60px con horas 00–23 a la izquierda, 7 columnas de día, fila condicional "Todo el día" sobre el timeline (solo si existen eventos sin hora esa semana), eventos posicionados absolutamente con `top = (hora + minutos/60) * 48px`, scroll vertical interno con auto-scroll a las 07:00 al montar. Manejo de eventos solapados queda fuera de alcance.
+- **Aire superior en el dashboard** — `<main>` del layout pasa de `p-6` a `px-6 pt-10 pb-6` para despegar el contenido del borde superior.
+
 ## Pendientes manuales bloqueantes
 
 - [ ] Aplicar migración `src/db/migrations/0003_lanzamientos.sql` en el SQL Editor de Supabase (requerida para que Fase 8 funcione correctamente en producción)

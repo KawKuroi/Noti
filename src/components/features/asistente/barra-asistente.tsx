@@ -1,9 +1,9 @@
 'use client'
 
 import { Sparkles } from 'lucide-react'
-import { useAsistente } from '@/components/features/asistente/asistente-provider'
+import { useAsistente } from './asistente-provider'
 
-export function InputAsistenteInicio() {
+export function BarraAsistente() {
   const { abrir } = useAsistente()
 
   return (

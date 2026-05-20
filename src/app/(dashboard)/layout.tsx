@@ -5,7 +5,6 @@ import { Sidebar } from '@/components/features/sidebar'
 import { BusquedaGlobal } from '@/components/features/busqueda-global'
 import {
   AsistenteProvider,
-  FabAsistente,
   CommandPalette,
 } from '@/components/features/asistente'
 
@@ -22,10 +21,9 @@ export default async function LayoutDashboard({ children }: Props) {
     <AsistenteProvider>
       <div className="flex h-screen overflow-hidden bg-gray-50">
         <Sidebar categorias={categorias} usuario={user} nombrePerfil={perfil?.nombreMostrado} />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto px-6 pt-10 pb-6">{children}</main>
       </div>
       <BusquedaGlobal />
-      <FabAsistente />
       <CommandPalette />
     </AsistenteProvider>
   )

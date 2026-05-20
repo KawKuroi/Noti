@@ -11,6 +11,7 @@ import { getCategorias } from '@/lib/queries/category.queries'
 import { getRecordatoriosPorCategoria } from '@/lib/queries/reminder.queries'
 import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
+import { BarraAsistente } from '@/components/features/asistente'
 import { SLUGS_VALIDOS } from '@/lib/utils/constants'
 
 const ICONOS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
@@ -65,6 +66,10 @@ export default async function PaginaCategoria({ params }: Props) {
           </div>
         </div>
         <BotonNuevoRecordatorio categorias={categorias} slugInicial={slug} />
+      </div>
+
+      <div className="mb-6">
+        <BarraAsistente />
       </div>
 
       <ListaRecordatorios

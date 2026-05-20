@@ -75,7 +75,7 @@ export function VistaCalendario({
     : formatearRangoSemana(referencia)
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4 h-full min-h-0">
       {/* Header del calendario */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -125,21 +125,23 @@ export function VistaCalendario({
       />
 
       {/* Vista activa */}
-      {vista === 'mes' ? (
-        <VistaMes
-          referencia={referencia}
-          recordatorios={recordatoriosFiltrados}
-          categorias={categorias}
-          onDiaClick={setDiaAbierto}
-        />
-      ) : (
-        <VistaSemana
-          referencia={referencia}
-          recordatorios={recordatoriosFiltrados}
-          categorias={categorias}
-          onDiaClick={setDiaAbierto}
-        />
-      )}
+      <div className="flex-1 min-h-0">
+        {vista === 'mes' ? (
+          <VistaMes
+            referencia={referencia}
+            recordatorios={recordatoriosFiltrados}
+            categorias={categorias}
+            onDiaClick={setDiaAbierto}
+          />
+        ) : (
+          <VistaSemana
+            referencia={referencia}
+            recordatorios={recordatoriosFiltrados}
+            categorias={categorias}
+            onDiaClick={setDiaAbierto}
+          />
+        )}
+      </div>
 
       {recordatoriosFiltrados.length === 0 && (
         <EmptyState
