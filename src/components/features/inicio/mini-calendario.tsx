@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 interface Props {
-  diasConRecordatorios: number[]
+  diasConRecordatorios: Record<number, string[]>
 }
 
 const DIAS_SEMANA = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']
@@ -33,15 +33,14 @@ export function MiniCalendario({ diasConRecordatorios }: Props) {
     return celdas
   }, [mesActual, anioActual])
 
-  const conjuntoConRec = useMemo(() => new Set(diasConRecordatorios), [diasConRecordatorios])
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
+    <div className="bg-white rounded-xl border border-gray-200 p-5">
       <p className="text-xs font-semibold text-gray-700 mb-3">
         {MESES[mesActual]} {anioActual}
       </p>
 
-      <div className="grid grid-cols-7 gap-0.5 mb-1">
+      <div className="grid grid-cols-7 gap-1 mb-1">
         {DIAS_SEMANA.map((d) => (
           <span key={d} className="text-center text-[10px] font-medium text-gray-400">
             {d}
@@ -49,25 +48,34 @@ export function MiniCalendario({ diasConRecordatorios }: Props) {
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-0.5">
+      <div className="grid grid-cols-7 gap-1">
         {diasDelMes.map((dia, i) => {
           if (dia === null) return <span key={`vacio-${i}`} />
 
           const esHoy = dia === diaHoy
-          const tieneRec = conjuntoConRec.has(dia)
+          const colores = diasConRecordatorios[dia] ?? []
+          const tieneRec = colores.length > 0
 
           return (
             <div key={dia} className="flex flex-col items-center gap-0.5 py-0.5">
               <span
                 className={cn(
-                  'w-6 h-6 flex items-center justify-center rounded-full text-[11px] font-medium',
+                  'w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium',
                   esHoy ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100',
                 )}
               >
                 {dia}
               </span>
               {tieneRec && !esHoy && (
-                <span className="w-1 h-1 rounded-full bg-purple-400" />
+                <div className="flex gap-0.5">
+                  {colores.slice(0, 3).map((c, idx) => (
+                    <span
+                      key={idx}
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
               )}
             </div>
           )

@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, count, lte, gte, or, ilike, isNotNull } from 'drizzle-orm'
+import { eq, and, desc, asc, count, lte, gte, or, ilike, isNotNull, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { recordatorios, categorias, perfiles } from '@/db/schema'
 import type { Recordatorio } from '@/types/reminder.types'
@@ -187,6 +187,7 @@ export async function buscarRecordatorios(
         or(
           ilike(recordatorios.titulo, termino),
           ilike(recordatorios.descripcion, termino),
+          sql`${recordatorios.metadatos}::text ILIKE ${termino}`,
         ),
       ),
     )

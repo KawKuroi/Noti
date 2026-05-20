@@ -331,6 +331,8 @@ export interface EntradaCrearLanzamiento {
   plataforma?: string
   director?: string
   temporada?: number
+  desarrolladora?: string
+  editorial?: string
 }
 
 export async function crearRecordatorioLanzamiento(
@@ -363,6 +365,8 @@ export async function crearRecordatorioLanzamiento(
     ...(input.plataforma ? { plataforma: input.plataforma } : {}),
     ...(input.director ? { director: input.director } : {}),
     ...(input.temporada ? { temporada: input.temporada } : {}),
+    ...(input.desarrolladora ? { desarrolladora: input.desarrolladora } : {}),
+    ...(input.editorial ? { editorial: input.editorial } : {}),
   }
 
   try {

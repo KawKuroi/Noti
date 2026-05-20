@@ -117,11 +117,12 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
             <Link
               key={cat.slug}
               href={`/${cat.slug}`}
+              style={{ '--cat-color': cat.color } as React.CSSProperties}
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                 estaActiva
                   ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                  : 'text-gray-600 hover:bg-[color:var(--cat-color)]/10 hover:text-[color:var(--cat-color)]',
               )}
             >
               {Icono && (

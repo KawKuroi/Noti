@@ -29,18 +29,8 @@ La ola priorizada original (Fases 0-19) esta completa. Las fases 20-23 son aditi
 - **Fase 17 — Rediseno del inicio:** Layout de dos columnas en `/inicio`. Saludo dinamico por hora local con nombre del usuario y resumen de recordatorios del dia. Input IA prominente (full-width) que abre el asistente compartiendo estado con Ctrl+I. Mini-calendario lateral del mes actual con dots en dias con recordatorios. Chips de categorias filtrables en sidebar derecho. Boton de nuevo recordatorio reubicado junto al saludo. Ampliacion 2026-05-19: saludo escalado a `text-4xl`, eliminacion del FAB de asistente, promocion de la barra "Que te recuerdo o agendo" a componente reutilizable (`BarraAsistente`) extendido a Inicio + Lanzamientos + categorias simples, calendario ocupa el alto completo, vista Semana refactorizada como timeline tipo Google Calendar con columna de horas a la izquierda y scroll inicial a 07:00, padding superior del dashboard ampliado (`pt-10`).
 - **Fase 18 — IA fechas naturales y edicion inline completa:** Utility `parsearFechaNatural` con tabla de meses ES que resuelve `dd/mm`, `dd-mm`, `dd mmm`, `mmm dd`, `dd de mmmm` y suma 1 ano cuando la fecha es anterior a hoy. Extractor IA gana campo `lanzamiento.fechaTentativa` y ejemplos en el prompt. Pipeline determinista aplica el parser como fallback cuando el LLM devuelve `null` y propaga `fechaTentativa` a candidatos sin fecha confirmada. Card de extraccion editable completa: anticipacion (`OPCIONES_ANTICIPACION`), tipo de lanzamiento, autor/artista/director condicionales. Card de candidato auto-abre el datepicker con la fecha tentativa cuando la fuente devuelve TBA. `crearRecordatorioDesdeIA` acepta `anticipacionMin?`. Ruteo dual en `confirmarRecordatorioEditado`: lanzamientos persisten metadatos JSONB via `crearRecordatorioLanzamiento` con `fuente='manual'`.
 - **Fase 19 — Landing enlace a GitHub:** Boton secundario "Ver en GitHub" (icono `Github` + texto outline) en el hero de la landing junto a los CTAs principales. Link con icono GitHub en el footer junto al texto del proyecto. Ambos abren el repositorio en nueva pestana.
-
----
-
-## Historico: Fase 20 completada (2026-05-20)
-
-**Auto-eliminacion de tareas completadas** — migracion `0006_auto_delete_tasks.sql` con columnas `auto_delete_completed_tasks_days` en `profiles` y `completed_at` en `reminders`; `alternarCompletado` graba la fecha de completado; cron `limpiar-tareas` diario a las 03:00 UTC; selector en settings (Nunca / 7 / 30 / 90 dias); countdown ambar en tarjetas cuando quedan 3 dias o menos.
-
----
-
-## Historico: Fase 21 completada (2026-05-20)
-
-**Entrada por audio en el asistente IA** — endpoint `src/app/api/ai/transcribir/route.ts` con `whisper-large-v3-turbo` y rate-limit 10 req/min; hook `src/hooks/use-audio-recorder.ts` con seleccion de mimeType por compatibilidad, timer, auto-stop a 60 s y manejo de permisos denegados; boton Mic integrado en `CommandPalette` con estados grabando (rojo + timer), procesando (loader purpura) y error inline bajo el header. Todos los checkboxes de la fase: [x].
+- **Fase 20 — Auto-eliminacion de tareas completadas** — migracion `0006_auto_delete_tasks.sql` con columnas `auto_delete_completed_tasks_days` en `profiles` y `completed_at` en `reminders`; `alternarCompletado` graba la fecha de completado; cron `limpiar-tareas` diario a las 03:00 UTC; selector en settings (Nunca / 7 / 30 / 90 dias); countdown ambar en tarjetas cuando quedan 3 dias o menos.
+- **Fase 21 — Entrada por audio en el asistente IA** — endpoint `src/app/api/ai/transcribir/route.ts` con `whisper-large-v3-turbo` y rate-limit 10 req/min; hook `src/hooks/use-audio-recorder.ts` con seleccion de mimeType por compatibilidad, timer, auto-stop a 60 s y manejo de permisos denegados; boton Mic integrado en `CommandPalette` con estados grabando (rojo + timer), procesando (loader purpura) y error inline bajo el header.
 
 ---
 
@@ -85,28 +75,20 @@ Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mim
 - [ ] Drag & drop para reordenar recordatorios dentro de una categoria
 - [ ] Optimistic updates en completar/eliminar - el item desaparece visualmente de inmediato sin esperar al servidor
 - [ ] Paginacion o infinite scroll en la lista de recordatorios para usuarios con muchos items
-- [ ] Atajos de teclado adicionales: `N` para nuevo recordatorio, `C` para ir al calendario
 
 ### Notificaciones y segundo plano
 - [ ] PWA Widget API (Windows 11 + Android) - widget nativo en la pantalla de inicio con los proximos recordatorios del dia (experimental, requiere Edge/Chrome reciente)
 - [ ] Share Target API - recibir texto desde otras apps para crear un recordatorio directamente
-- [ ] Notificacion por email como fallback cuando las push notifications estan bloqueadas
 - [ ] Recordatorio de cumpleanos con cuenta regresiva ("Faltan 3 dias para el cumpleanos de Juan")
 
 ### IA y contenido
 - [ ] Asistente IA conversacional en el dashboard (no solo single-shot) - historial de conversacion para refinar recordatorios
 - [ ] Deteccion automatica de duplicados al crear con IA - avisar si ya existe un recordatorio similar
-- [ ] Integracion con mas fuentes: eventos deportivos, lanzamientos de software, estrenos de temporadas de TV
 - [ ] Sugerencias de categoria inteligente al tipear en el formulario manual
-- [ ] Extender auto-eliminacion a otras categorias completadas (eventos pasados, lanzamientos viejos)
 
 ### Estadisticas
 - [ ] Pagina de estadisticas: recordatorios completados por semana, racha de dias activos, categoria mas usada
 - [ ] Resumen semanal - push notification cada domingo con el resumen de la semana pasada y los proximos 7 dias
-
-### Personalizacion
-- [ ] Categorias custom - el usuario puede crear y nombrar sus propias categorias con color e icono
-- [ ] Temas de color - no solo dark/light, sino paletas personalizables
 
 ### Tecnico
 - [ ] Internacionalizacion (i18n) - soporte para ingles ademas de espanol

@@ -11,6 +11,7 @@ interface Props {
   mostrarCategoria?: boolean
   mensajeVacio?: string
   diasAutoEliminar?: number | null
+  destacadoId?: string
 }
 
 function SeccionDia({
@@ -19,12 +20,14 @@ function SeccionDia({
   categorias,
   mostrarCategoria,
   diasAutoEliminar,
+  destacadoId,
 }: {
   titulo: string
   items: Recordatorio[]
   categorias: Categoria[]
   mostrarCategoria?: boolean
   diasAutoEliminar?: number | null
+  destacadoId?: string
 }) {
   if (items.length === 0) return null
 
@@ -41,6 +44,7 @@ function SeccionDia({
             categorias={categorias}
             mostrarCategoria={mostrarCategoria}
             diasAutoEliminar={diasAutoEliminar}
+            destacado={rec.id === destacadoId}
           />
         ))}
       </div>
@@ -55,6 +59,7 @@ export function ListaRecordatorios({
   mostrarCategoria = false,
   mensajeVacio,
   diasAutoEliminar,
+  destacadoId,
 }: Props) {
   if (recordatorios.length === 0) {
     return (
@@ -80,6 +85,7 @@ export function ListaRecordatorios({
             categorias={categorias}
             mostrarCategoria={mostrarCategoria}
             diasAutoEliminar={diasAutoEliminar}
+            destacado={rec.id === destacadoId}
           />
         ))}
       </div>
@@ -104,10 +110,10 @@ export function ListaRecordatorios({
 
   return (
     <div className="space-y-6">
-      <SeccionDia titulo="Hoy" items={grupos.hoy} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} />
-      <SeccionDia titulo="Manana" items={grupos.manana} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} />
-      <SeccionDia titulo="Esta semana" items={grupos.estaSemana} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} />
-      <SeccionDia titulo="Mas adelante" items={grupos.masAdelante} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} />
+      <SeccionDia titulo="Hoy" items={grupos.hoy} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} destacadoId={destacadoId} />
+      <SeccionDia titulo="Manana" items={grupos.manana} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} destacadoId={destacadoId} />
+      <SeccionDia titulo="Esta semana" items={grupos.estaSemana} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} destacadoId={destacadoId} />
+      <SeccionDia titulo="Mas adelante" items={grupos.masAdelante} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} destacadoId={destacadoId} />
     </div>
   )
 }

@@ -25,10 +25,12 @@ const ICONOS: Record<string, React.ComponentType<{ size?: number; className?: st
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ destacado?: string }>
 }
 
-export default async function PaginaCategoria({ params }: Props) {
+export default async function PaginaCategoria({ params, searchParams }: Props) {
   const { slug } = await params
+  const { destacado } = await searchParams
 
   if (!SLUGS_VALIDOS.includes(slug as (typeof SLUGS_VALIDOS)[number]) || slug === 'notes') {
     notFound()
@@ -81,6 +83,7 @@ export default async function PaginaCategoria({ params }: Props) {
         categorias={categorias}
         mensajeVacio={`Sin recordatorios en ${categoria.nombre}`}
         diasAutoEliminar={perfil?.autoEliminarTareasCompletadasDias ?? null}
+        destacadoId={destacado}
       />
     </div>
   )

@@ -37,6 +37,10 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
   const [autor, setAutor] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [director, setDirector] = useState('')
+  const [plataforma, setPlataforma] = useState('')
+  const [desarrolladora, setDesarrolladora] = useState('')
+  const [temporada, setTemporada] = useState('')
+  const [editorial, setEditorial] = useState('')
   const [pending, startTransition] = useTransition()
 
   function resetear() {
@@ -46,6 +50,10 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
     setAutor('')
     setDescripcion('')
     setDirector('')
+    setPlataforma('')
+    setDesarrolladora('')
+    setTemporada('')
+    setEditorial('')
   }
 
   function manejarEnvio(e: React.FormEvent) {
@@ -64,6 +72,11 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
         ...((tipo === 'movie' || tipo === 'tv') && director.trim()
           ? { director: director.trim() }
           : {}),
+        ...(tipo === 'tv' && plataforma.trim() ? { plataforma: plataforma.trim() } : {}),
+        ...(tipo === 'tv' && temporada.trim() ? { temporada: Number(temporada) } : {}),
+        ...(tipo === 'game' && plataforma.trim() ? { plataforma: plataforma.trim() } : {}),
+        ...(tipo === 'game' && desarrolladora.trim() ? { desarrolladora: desarrolladora.trim() } : {}),
+        ...(tipo === 'book' && editorial.trim() ? { editorial: editorial.trim() } : {}),
       })
 
       if (resultado.ok) {
@@ -81,6 +94,10 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
   const mostrarAutor = tipo === 'book'
   const mostrarArtista = tipo === 'album'
   const mostrarDirector = tipo === 'movie' || tipo === 'tv'
+  const mostrarPlataforma = tipo === 'tv' || tipo === 'game'
+  const mostrarDesarrolladora = tipo === 'game'
+  const mostrarTemporada = tipo === 'tv'
+  const mostrarEditorial = tipo === 'book'
   const etiquetaExtra = mostrarAutor ? 'Autor' : mostrarArtista ? 'Artista / Banda' : null
   const etiquetaDirector = tipo === 'tv' ? 'Showrunner' : 'Director'
 
@@ -148,6 +165,57 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
                   value={director}
                   onChange={(e) => setDirector(e.target.value)}
                   placeholder={tipo === 'tv' ? 'Ej: Vince Gilligan' : 'Ej: Denis Villeneuve'}
+                />
+              </div>
+            )}
+
+            {mostrarPlataforma && (
+              <div className="space-y-1.5">
+                <Label htmlFor="plataforma-lanzamiento">Plataforma (opcional)</Label>
+                <Input
+                  id="plataforma-lanzamiento"
+                  value={plataforma}
+                  onChange={(e) => setPlataforma(e.target.value)}
+                  placeholder={tipo === 'game' ? 'Ej: PS5, PC, Xbox' : 'Ej: Netflix, HBO Max'}
+                />
+              </div>
+            )}
+
+            {mostrarTemporada && (
+              <div className="space-y-1.5">
+                <Label htmlFor="temporada-lanzamiento">Temporada (opcional)</Label>
+                <Input
+                  id="temporada-lanzamiento"
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={temporada}
+                  onChange={(e) => setTemporada(e.target.value)}
+                  placeholder="Ej: 2"
+                />
+              </div>
+            )}
+
+            {mostrarDesarrolladora && (
+              <div className="space-y-1.5">
+                <Label htmlFor="desarrolladora-lanzamiento">Desarrolladora (opcional)</Label>
+                <Input
+                  id="desarrolladora-lanzamiento"
+                  value={desarrolladora}
+                  onChange={(e) => setDesarrolladora(e.target.value)}
+                  placeholder="Ej: Rockstar Games"
+                />
+              </div>
+            )}
+
+            {mostrarEditorial && (
+              <div className="space-y-1.5">
+                <Label htmlFor="editorial-lanzamiento">Editorial (opcional)</Label>
+                <Input
+                  id="editorial-lanzamiento"
+                  value={editorial}
+                  onChange={(e) => setEditorial(e.target.value)}
+                  placeholder="Ej: Tor Books"
                 />
               </div>
             )}

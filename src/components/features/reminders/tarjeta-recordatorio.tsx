@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Check, Pencil, Trash2, RotateCcw, Clock, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -24,12 +24,22 @@ interface Props {
   categorias: Categoria[]
   mostrarCategoria?: boolean
   diasAutoEliminar?: number | null
+  destacado?: boolean
 }
 
-export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria, diasAutoEliminar }: Props) {
+export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria, diasAutoEliminar, destacado }: Props) {
   const [editarAbierto, setEditarAbierto] = useState(false)
   const [eliminarAbierto, setEliminarAbierto] = useState(false)
   const [cargando, setCargando] = useState(false)
+  const [mostrarRing, setMostrarRing] = useState(destacado ?? false)
+  const tarjetaRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!destacado) return
+    tarjetaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    const t = setTimeout(() => setMostrarRing(false), 3000)
+    return () => clearTimeout(t)
+  }, [destacado])
 
   const categoria = categorias.find((c) => c.id === recordatorio.categoriaId)
   const slug = categoria?.slug ?? 'events'
@@ -92,11 +102,12 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
   return (
     <>
       <div
+        ref={tarjetaRef}
         className={`group flex items-start gap-3 p-4 bg-white rounded-xl border transition-colors ${
           recordatorio.estaCompletado
             ? 'border-gray-100 opacity-60'
             : 'border-gray-100 hover:border-gray-200'
-        }`}
+        } ${mostrarRing ? 'ring-2 ring-purple-400 ring-offset-2' : ''}`}
         style={colorAcento ? { borderLeftColor: colorAcento, borderLeftWidth: '3px' } : undefined}
       >
         {/* Boton completar — solo para recordatorios no recurrentes */}

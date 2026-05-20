@@ -5,6 +5,7 @@ import { Search, X, Mic, Square, Loader2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useAudioRecorder } from '@/hooks/use-audio-recorder'
+import { SLUGS_LANZAMIENTO } from '@/lib/utils/constants'
 import type { Categoria } from '@/types/category.types'
 
 interface ResultadoBusqueda {
@@ -13,6 +14,16 @@ interface ResultadoBusqueda {
   descripcion: string | null
   fechaVencimiento: string
   categoria: Categoria | null
+}
+
+function construirHref(r: ResultadoBusqueda): string {
+  if (!r.categoria) return '/inicio'
+  const slug = r.categoria.slug
+  if (slug === 'notes') return `/notes/${r.id}`
+  if ((SLUGS_LANZAMIENTO as readonly string[]).includes(slug)) {
+    return `/lanzamientos?tab=${slug}&destacado=${r.id}`
+  }
+  return `/${slug}?destacado=${r.id}`
 }
 
 export function BusquedaGlobal() {
@@ -163,7 +174,7 @@ export function BusquedaGlobal() {
               {resultados.map((r) => (
                 <li key={r.id}>
                   <a
-                    href={`/inicio?categoria=${r.categoria?.id ?? ''}`}
+                    href={construirHref(r)}
                     onClick={() => setAbierto(false)}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                   >
