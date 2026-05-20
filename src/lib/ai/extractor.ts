@@ -44,7 +44,7 @@ export const esquemaExtraccion = z.object({
 
 export type Extraccion = z.infer<typeof esquemaExtraccion>
 
-const PROMPT = `Eres un clasificador estructurado para una app de recordatorios. Tu unica tarea es leer el texto del usuario y devolver un objeto JSON con la intencion y los datos extraidos. NUNCA inventes fechas: si la fecha no esta clara, devuelve null.
+const PROMPT = `Eres un clasificador estructurado para una app de recordatorios. Tu unica tarea es leer el texto del usuario y devolver un objeto JSON con la intencion y los datos extraidos. NUNCA inventes fechas ni horas: si no estan claras, devuelve null.
 
 Las cuatro intenciones posibles:
 
@@ -52,6 +52,17 @@ Las cuatro intenciones posibles:
    - categoriaSlug debe ser uno de: birthdays | study | tasks | events | notes
    - Si la fecha es relativa ("manana", "el viernes", "la proxima semana"), calculala a partir de la fecha actual.
    - Si la fecha viene en formato natural corto ("nov 19", "20/06", "3 mar", "19 de noviembre", "viernes 21"), conviertela a YYYY-MM-DD. Si el dia ya paso este ano, usa el proximo ano disponible.
+   - HORA (horaVencimiento): si el texto contiene una hora explicita, conviertela a formato 24h "HH:mm". Ejemplos:
+       "5am" → "05:00"
+       "5:30 am" → "05:30"
+       "a las 3 de la tarde" → "15:00"
+       "8pm" → "20:00"
+       "21:30" → "21:30"
+       "medianoche" → "00:00"
+       "mediodia" → "12:00"
+       "noche" sin numero → null (impreciso)
+       "manana temprano" sin numero → null
+     Si NO hay senal explicita de hora, horaVencimiento=null. NUNCA inventes una hora por defecto.
    - Para cumpleanos y aniversarios CON FECHA mencionada: esRecurrente=true, reglaRecurrencia="yearly:DD-MM", fechaVencimiento=proximo aniversario (este año si aun no paso, sino el siguiente).
    - Para clases o eventos semanales: esRecurrente=true, reglaRecurrencia="weekly:1,3" (dias ISO numericos: lunes=1, martes=2, miercoles=3, jueves=4, viernes=5, sabado=6, domingo=7). Ejemplo: lunes y miercoles → "weekly:1,3". OBLIGATORIO: fechaVencimiento DEBE ser la proxima fecha futura (incluyendo hoy si aun no pasa la hora) que caiga en el primer dia listado. NUNCA dejes fechaVencimiento=null si la regla es semanal.
    - Para notas sin fecha: categoriaSlug="notes", fechaVencimiento=null.
@@ -72,7 +83,7 @@ Las cuatro intenciones posibles:
 
 Reglas de oro:
 - Solo llena el sub-objeto correspondiente a la intencion. Los demas en null.
-- NUNCA inventes fechas. Si no hay senal de fecha, fechaVencimiento=null.
+- NUNCA inventes fechas ni horas. Si no hay senal explicita, devuelve null en ese campo.
 - Para fechas relativas, usa la fecha actual provista.
 - Devuelve siempre todos los campos del schema, usando null cuando no apliquen.`
 

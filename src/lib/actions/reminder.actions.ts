@@ -125,6 +125,15 @@ export async function actualizarRecordatorio(
   }
 
   try {
+    const [previo] = await db
+      .select({ metadatos: recordatorios.metadatos })
+      .from(recordatorios)
+      .where(and(eq(recordatorios.id, id), eq(recordatorios.usuarioId, usuarioId)))
+      .limit(1)
+
+    const metadatosPrevios = (previo?.metadatos as Record<string, unknown> | null) ?? {}
+    const metadatosFusionados = { ...metadatosPrevios, ...metadatos }
+
     const [fila] = await db
       .update(recordatorios)
       .set({
@@ -135,7 +144,7 @@ export async function actualizarRecordatorio(
         notificarEn,
         esRecurrente: Boolean(datos.esRecurrente),
         reglaRecurrencia: datos.reglaRecurrencia ?? null,
-        metadatos: Object.keys(metadatos).length > 0 ? metadatos : null,
+        metadatos: Object.keys(metadatosFusionados).length > 0 ? metadatosFusionados : null,
         actualizadoEn: new Date(),
       })
       .where(and(eq(recordatorios.id, id), eq(recordatorios.usuarioId, usuarioId)))
@@ -243,6 +252,7 @@ export interface EntradaRecordatorioIA {
   esRecurrente?: boolean
   reglaRecurrencia?: string | null
   anticipacionMin?: number
+  metadatos?: Record<string, unknown>
 }
 
 export async function crearRecordatorioDesdeIA(
@@ -275,6 +285,11 @@ export async function crearRecordatorioDesdeIA(
     return { ok: false, error: 'La fecha es requerida' }
   }
 
+  const metadatosFinal: Record<string, unknown> = { ...(input.metadatos ?? {}) }
+  if (esNota && !input.fechaVencimiento && metadatosFinal.recordarme === undefined) {
+    metadatosFinal.recordarme = false
+  }
+
   try {
     const [fila] = await db
       .insert(recordatorios)
@@ -288,7 +303,7 @@ export async function crearRecordatorioDesdeIA(
         esRecurrente: Boolean(input.esRecurrente),
         reglaRecurrencia: input.reglaRecurrencia ?? null,
         estaCompletado: false,
-        metadatos: esNota && !input.fechaVencimiento ? { recordarme: false } : null,
+        metadatos: Object.keys(metadatosFinal).length > 0 ? metadatosFinal : null,
       })
       .returning()
 

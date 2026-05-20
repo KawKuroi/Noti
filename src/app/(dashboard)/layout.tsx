@@ -3,10 +3,7 @@ import { getCategorias } from '@/lib/queries/category.queries'
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { Sidebar } from '@/components/features/sidebar'
 import { BusquedaGlobal } from '@/components/features/busqueda-global'
-import {
-  AsistenteProvider,
-  CommandPalette,
-} from '@/components/features/asistente'
+import { AsistenteProvider } from '@/components/features/asistente'
 
 interface Props {
   children: React.ReactNode
@@ -24,7 +21,6 @@ export default async function LayoutDashboard({ children }: Props) {
         <main className="flex-1 overflow-y-auto px-6 pt-10 pb-6">{children}</main>
       </div>
       <BusquedaGlobal />
-      <CommandPalette />
     </AsistenteProvider>
   )
 }

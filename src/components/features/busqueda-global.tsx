@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Search, X } from 'lucide-react'
+import { Search, X, Mic, Square, Loader2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useAudioRecorder } from '@/hooks/use-audio-recorder'
 import type { Categoria } from '@/types/category.types'
 
 interface ResultadoBusqueda {
@@ -63,6 +64,26 @@ export function BusquedaGlobal() {
     }, 300)
   }, [])
 
+  const onTranscripcion = useCallback(
+    (texto: string) => {
+      const limpio = texto.trim()
+      if (!limpio) return
+      setQuery(limpio)
+      buscar(limpio)
+    },
+    [buscar],
+  )
+
+  const {
+    estadoGrabacion,
+    segundosGrabando,
+    errorGrabacion,
+    iniciarGrabacion,
+    detenerGrabacion,
+  } = useAudioRecorder(onTranscripcion)
+
+  const micDeshabilitado = cargando || estadoGrabacion === 'procesando'
+
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     setQuery(e.target.value)
     buscar(e.target.value)
@@ -88,6 +109,32 @@ export function BusquedaGlobal() {
             placeholder="Buscar recordatorios..."
             className="flex-1 text-sm outline-none text-gray-900 placeholder:text-gray-400"
           />
+
+          {estadoGrabacion === 'grabando' ? (
+            <button
+              type="button"
+              onClick={detenerGrabacion}
+              className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-500 hover:bg-red-100 transition-colors shrink-0"
+              title="Detener grabacion"
+            >
+              <Square size={12} />
+              {segundosGrabando}s
+            </button>
+          ) : estadoGrabacion === 'procesando' ? (
+            <Loader2 size={14} className="text-purple-500 animate-spin shrink-0" />
+          ) : (
+            <button
+              type="button"
+              onClick={iniciarGrabacion}
+              disabled={micDeshabilitado}
+              className="p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+              title="Dictado por voz"
+              aria-label="Dictado por voz"
+            >
+              <Mic size={14} />
+            </button>
+          )}
+
           <button
             onClick={() => setAbierto(false)}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -95,6 +142,12 @@ export function BusquedaGlobal() {
             <X size={16} />
           </button>
         </div>
+
+        {errorGrabacion && (
+          <div className="px-4 py-2 bg-red-50 border-b border-red-100">
+            <p className="text-xs text-red-600">{errorGrabacion}</p>
+          </div>
+        )}
 
         <div className="max-h-72 overflow-y-auto">
           {cargando && (

@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import { addMonths, addWeeks, isSameDay } from 'date-fns'
 import { Button } from '@/components/ui/button'
-import { EmptyState } from '@/components/features/empty-state'
 import { VistaMes } from './vista-mes'
 import { VistaSemana } from './vista-semana'
 import { DialogDia } from './dialog-dia'
@@ -124,8 +123,9 @@ export function VistaCalendario({
         onChange={setCategoriasSeleccionadas}
       />
 
-      {/* Vista activa */}
-      <div className="flex-1 min-h-0">
+      {/* Vista activa: ocupa siempre el alto disponible; el mensaje de "sin recordatorios" flota
+          encima sin alterar el layout. */}
+      <div className="relative flex-1 min-h-0">
         {vista === 'mes' ? (
           <VistaMes
             referencia={referencia}
@@ -141,14 +141,16 @@ export function VistaCalendario({
             onDiaClick={setDiaAbierto}
           />
         )}
-      </div>
 
-      {recordatoriosFiltrados.length === 0 && (
-        <EmptyState
-          titulo="Nada agendado en este periodo"
-          descripcion="Crea un recordatorio desde el inicio o cualquier categoria para verlo aqui."
-        />
-      )}
+        {recordatoriosFiltrados.length === 0 && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
+            <div className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs text-gray-500 shadow-sm ring-1 ring-gray-200 backdrop-blur">
+              <Info size={12} />
+              Sin recordatorios en este filtro
+            </div>
+          </div>
+        )}
+      </div>
 
       <DialogDia
         dia={diaAbierto}

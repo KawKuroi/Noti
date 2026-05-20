@@ -91,6 +91,160 @@ function CamposEstudio({ duracionInicial }: { duracionInicial?: number }) {
   )
 }
 
+function CamposPelicula({ directorInicial }: { directorInicial?: string }) {
+  return (
+    <>
+      <input type="hidden" name="meta_tipo" value="movie" />
+      <div className="space-y-1">
+        <Label htmlFor="meta_director">Director (opcional)</Label>
+        <Input
+          id="meta_director"
+          name="meta_director"
+          placeholder="Ej: Denis Villeneuve"
+          maxLength={120}
+          defaultValue={directorInicial ?? ''}
+        />
+      </div>
+    </>
+  )
+}
+
+function CamposSerie({
+  directorInicial,
+  plataformaInicial,
+  temporadaInicial,
+}: {
+  directorInicial?: string
+  plataformaInicial?: string
+  temporadaInicial?: number
+}) {
+  return (
+    <>
+      <input type="hidden" name="meta_tipo" value="tv" />
+      <div className="space-y-1">
+        <Label htmlFor="meta_director">Showrunner (opcional)</Label>
+        <Input
+          id="meta_director"
+          name="meta_director"
+          placeholder="Ej: Vince Gilligan"
+          maxLength={120}
+          defaultValue={directorInicial ?? ''}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label htmlFor="meta_plataforma">Plataforma (opcional)</Label>
+          <Input
+            id="meta_plataforma"
+            name="meta_plataforma"
+            placeholder="Ej: Netflix"
+            maxLength={80}
+            defaultValue={plataformaInicial ?? ''}
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="meta_temporada">Temporada</Label>
+          <Input
+            id="meta_temporada"
+            name="meta_temporada"
+            type="number"
+            min={1}
+            max={99}
+            placeholder="Ej: 2"
+            defaultValue={temporadaInicial}
+          />
+        </div>
+      </div>
+    </>
+  )
+}
+
+function CamposJuego({
+  plataformaInicial,
+  desarrolladoraInicial,
+}: {
+  plataformaInicial?: string
+  desarrolladoraInicial?: string
+}) {
+  return (
+    <>
+      <input type="hidden" name="meta_tipo" value="game" />
+      <div className="space-y-1">
+        <Label htmlFor="meta_plataforma">Plataforma (opcional)</Label>
+        <Input
+          id="meta_plataforma"
+          name="meta_plataforma"
+          placeholder="Ej: PS5, PC, Switch"
+          maxLength={80}
+          defaultValue={plataformaInicial ?? ''}
+        />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="meta_desarrolladora">Desarrolladora (opcional)</Label>
+        <Input
+          id="meta_desarrolladora"
+          name="meta_desarrolladora"
+          placeholder="Ej: Rockstar Games"
+          maxLength={120}
+          defaultValue={desarrolladoraInicial ?? ''}
+        />
+      </div>
+    </>
+  )
+}
+
+function CamposMusica({ artistaInicial }: { artistaInicial?: string }) {
+  return (
+    <>
+      <input type="hidden" name="meta_tipo" value="album" />
+      <div className="space-y-1">
+        <Label htmlFor="meta_artista">Artista (opcional)</Label>
+        <Input
+          id="meta_artista"
+          name="meta_artista"
+          placeholder="Ej: Bad Bunny"
+          maxLength={120}
+          defaultValue={artistaInicial ?? ''}
+        />
+      </div>
+    </>
+  )
+}
+
+function CamposLibro({
+  autorInicial,
+  editorialInicial,
+}: {
+  autorInicial?: string
+  editorialInicial?: string
+}) {
+  return (
+    <>
+      <input type="hidden" name="meta_tipo" value="book" />
+      <div className="space-y-1">
+        <Label htmlFor="meta_autor">Autor (opcional)</Label>
+        <Input
+          id="meta_autor"
+          name="meta_autor"
+          placeholder="Ej: Brandon Sanderson"
+          maxLength={120}
+          defaultValue={autorInicial ?? ''}
+        />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="meta_editorial">Editorial (opcional)</Label>
+        <Input
+          id="meta_editorial"
+          name="meta_editorial"
+          placeholder="Ej: Tor Books"
+          maxLength={120}
+          defaultValue={editorialInicial ?? ''}
+        />
+      </div>
+    </>
+  )
+}
+
 function BloqueCondicional({
   slug,
   metadatos,
@@ -107,6 +261,32 @@ function BloqueCondicional({
       return <CamposEventos ubicacionInicial={metadatos?.ubicacion as string | undefined} />
     case 'study':
       return <CamposEstudio duracionInicial={metadatos?.duracionMin as number | undefined} />
+    case 'movies':
+      return <CamposPelicula directorInicial={metadatos?.director as string | undefined} />
+    case 'tv':
+      return (
+        <CamposSerie
+          directorInicial={metadatos?.director as string | undefined}
+          plataformaInicial={metadatos?.plataforma as string | undefined}
+          temporadaInicial={metadatos?.temporada as number | undefined}
+        />
+      )
+    case 'games':
+      return (
+        <CamposJuego
+          plataformaInicial={metadatos?.plataforma as string | undefined}
+          desarrolladoraInicial={metadatos?.desarrolladora as string | undefined}
+        />
+      )
+    case 'music':
+      return <CamposMusica artistaInicial={metadatos?.artista as string | undefined} />
+    case 'books':
+      return (
+        <CamposLibro
+          autorInicial={metadatos?.autor as string | undefined}
+          editorialInicial={metadatos?.editorial as string | undefined}
+        />
+      )
     default:
       return null
   }

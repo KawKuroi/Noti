@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,6 +39,10 @@ export interface DatosFormulario {
   autor: string | null
   artista: string | null
   director: string | null
+  edad: number | null
+  ubicacion: string | null
+  duracionMin: number | null
+  prioridad: 'baja' | 'media' | 'alta' | null
 }
 
 interface Props {
@@ -97,7 +101,19 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
   const [autor, setAutor] = useState(inicial.autor ?? '')
   const [artista, setArtista] = useState(inicial.artista ?? '')
   const [director, setDirector] = useState(inicial.director ?? '')
+  const [edad, setEdad] = useState<string>(inicial.edad != null ? String(inicial.edad) : '')
+  const [ubicacion, setUbicacion] = useState(inicial.ubicacion ?? '')
+  const [duracionMin, setDuracionMin] = useState<string>(
+    inicial.duracionMin != null ? String(inicial.duracionMin) : '',
+  )
+  const [prioridad, setPrioridad] = useState<'baja' | 'media' | 'alta'>(
+    inicial.prioridad ?? 'media',
+  )
   const [error, setError] = useState<string | null>(null)
+  // Guard contra doble submit: aunque `creando` cambia a true tras un await,
+  // un doble click sincrono puede colarse antes del re-render. El ref bloquea
+  // entradas concurrentes al mismo handler.
+  const enviandoRef = useRef(false)
 
   const esNota = categoriaSlug === 'notes'
   const esLanzamientoCategoria = SLUGS_LANZAMIENTO_SET.has(categoriaSlug)
@@ -112,6 +128,14 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       setTipoLanzamiento(null)
     }
   }, [categoriaSlug, esLanzamientoCategoria, tipoLanzamiento])
+
+  // Libera el guard de envio cuando el provider deja de estar en estado "creando"
+  // (caso exitoso desmonta la card; caso de error la mantiene pero permite reintento).
+  useEffect(() => {
+    if (!creando) {
+      enviandoRef.current = false
+    }
+  }, [creando])
 
   function toggleDia(dia: string) {
     setDiasSemana((prev) =>
@@ -134,6 +158,7 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
   }
 
   function handleGuardar() {
+    if (enviandoRef.current || creando) return
     if (titulo.trim().length < 2) {
       setError('El título es requerido')
       return
@@ -151,6 +176,11 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       return
     }
     setError(null)
+    enviandoRef.current = true
+    // Si el provider llama a setEstado('listo') tras un error, `creando` vuelve a false
+    // y el guard debe liberarse para permitir reintento. El useEffect de abajo lo maneja.
+    const edadNumero = edad.trim() === '' ? null : Number(edad)
+    const duracionNumero = duracionMin.trim() === '' ? null : Number(duracionMin)
     onGuardar({
       titulo: titulo.trim(),
       categoriaSlug,
@@ -164,6 +194,11 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       autor: autor.trim() || null,
       artista: artista.trim() || null,
       director: director.trim() || null,
+      edad: edadNumero != null && !Number.isNaN(edadNumero) ? edadNumero : null,
+      ubicacion: ubicacion.trim() || null,
+      duracionMin:
+        duracionNumero != null && !Number.isNaN(duracionNumero) ? duracionNumero : null,
+      prioridad: categoriaSlug === 'tasks' ? prioridad : null,
     })
   }
 
@@ -315,10 +350,11 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
             </div>
           )}
 
-          {tipoLanzamiento === 'movie' && (
+          {(tipoLanzamiento === 'movie' || tipoLanzamiento === 'tv') && (
             <div>
               <label className="text-xs text-gray-500 mb-1 block">
-                Director <span className="text-gray-400">(opcional)</span>
+                {tipoLanzamiento === 'tv' ? 'Showrunner' : 'Director'}{' '}
+                <span className="text-gray-400">(opcional)</span>
               </label>
               <Input
                 value={director}
@@ -327,6 +363,75 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
               />
             </div>
           )}
+        </div>
+      )}
+
+      {categoriaSlug === 'birthdays' && (
+        <div>
+          <label className="text-xs text-gray-500 mb-1 block">
+            Edad <span className="text-gray-400">(opcional)</span>
+          </label>
+          <Input
+            type="number"
+            min={0}
+            max={150}
+            value={edad}
+            onChange={(e) => setEdad(e.target.value)}
+            disabled={creando}
+            placeholder="Ej: 25"
+          />
+        </div>
+      )}
+
+      {categoriaSlug === 'events' && (
+        <div>
+          <label className="text-xs text-gray-500 mb-1 block">
+            Ubicación <span className="text-gray-400">(opcional)</span>
+          </label>
+          <Input
+            value={ubicacion}
+            onChange={(e) => setUbicacion(e.target.value)}
+            disabled={creando}
+            placeholder="Ej: Calle 72 con Carrera 10"
+            maxLength={200}
+          />
+        </div>
+      )}
+
+      {categoriaSlug === 'study' && (
+        <div>
+          <label className="text-xs text-gray-500 mb-1 block">
+            Duración estimada (minutos) <span className="text-gray-400">(opcional)</span>
+          </label>
+          <Input
+            type="number"
+            min={1}
+            max={480}
+            value={duracionMin}
+            onChange={(e) => setDuracionMin(e.target.value)}
+            disabled={creando}
+            placeholder="Ej: 90"
+          />
+        </div>
+      )}
+
+      {categoriaSlug === 'tasks' && (
+        <div>
+          <label className="text-xs text-gray-500 mb-1 block">Prioridad</label>
+          <Select
+            value={prioridad}
+            onValueChange={(v) => setPrioridad(v as 'baja' | 'media' | 'alta')}
+            disabled={creando}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="baja">Baja</SelectItem>
+              <SelectItem value="media">Media</SelectItem>
+              <SelectItem value="alta">Alta</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
 

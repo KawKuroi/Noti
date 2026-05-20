@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import {
   startOfWeek,
   endOfWeek,
@@ -22,8 +21,6 @@ interface Props {
   onDiaClick: (dia: Date) => void
 }
 
-// Altura en pixeles asignada a cada hora del timeline. Define la densidad vertical.
-const ALTO_FILA = 48
 const HORAS = Array.from({ length: 24 }, (_, indice) => indice)
 
 function esTodoElDia(fecha: Date): boolean {
@@ -39,15 +36,6 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
   for (const cat of categorias) {
     coloresPorCategoria.set(cat.id, cat.color)
   }
-
-  const refScroll = useRef<HTMLDivElement>(null)
-
-  // Posicionar el timeline a las 07:00 al montar la vista para no aparecer en madrugada vacia.
-  useEffect(() => {
-    if (refScroll.current) {
-      refScroll.current.scrollTop = 7 * ALTO_FILA
-    }
-  }, [])
 
   function recordatoriosDelDia(dia: Date): Recordatorio[] {
     return recordatorios
@@ -131,62 +119,67 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
         </div>
       )}
 
-      {/* Cuerpo scrolleable con timeline horario. */}
-      <div ref={refScroll} className="flex-1 min-h-0 overflow-y-auto">
+      {/* Cuerpo del timeline horario sin scroll: las 24 h se reparten el alto disponible. */}
+      <div className="flex-1 min-h-0 overflow-hidden">
         <div
-          className="grid grid-cols-[60px_repeat(7,1fr)]"
-          style={{ height: 24 * ALTO_FILA }}
+          className="grid grid-cols-[60px_repeat(7,1fr)] h-full"
+          style={{ gridTemplateRows: 'repeat(24, minmax(0, 1fr))' }}
         >
-          {/* Columna de horas */}
-          <div className="relative">
-            {HORAS.map((hora) => (
-              <div
-                key={`hora-${hora}`}
-                className="text-xs text-gray-400 text-right pr-2 -mt-2"
-                style={{ height: ALTO_FILA }}
-              >
-                {hora === 0 ? '' : `${String(hora).padStart(2, '0')}:00`}
-              </div>
-            ))}
-          </div>
+          {/* Columna de horas (24 celdas, una por fila del grid) */}
+          {HORAS.map((hora) => (
+            <div
+              key={`hora-${hora}`}
+              className="text-[10px] text-gray-400 text-right pr-2 leading-none -translate-y-1.5"
+              style={{ gridColumn: '1', gridRow: `${hora + 1}` }}
+            >
+              {hora === 0 ? '' : `${String(hora).padStart(2, '0')}:00`}
+            </div>
+          ))}
 
-          {/* Una columna por dia con eventos posicionados absolutamente.
-              El manejo de eventos solapados queda fuera de alcance: si dos eventos comparten hora se renderizan apilados con overlap visual. */}
-          {eventosPorDia.map(({ dia, conHora }) => (
+          {/* Una columna por dia: ocupa las 24 filas del grid y posiciona eventos en porcentaje. */}
+          {eventosPorDia.map(({ dia, conHora }, indiceDia) => (
             <div
               key={`col-${dia.toISOString()}`}
               className="relative border-l border-gray-50"
-              style={{ height: 24 * ALTO_FILA }}
+              style={{ gridColumn: `${indiceDia + 2}`, gridRow: '1 / span 24' }}
             >
               {/* Lineas guia horizontales por cada hora. */}
               {HORAS.map((hora) => (
                 <div
                   key={`linea-${dia.toISOString()}-${hora}`}
-                  className="border-t border-gray-50"
-                  style={{ height: ALTO_FILA }}
+                  className="absolute left-0 right-0 border-t border-gray-50"
+                  style={{ top: `${(hora / 24) * 100}%` }}
                 />
               ))}
 
-              {/* Eventos del dia posicionados por hora. */}
+              {/* Eventos del dia posicionados por hora en porcentaje sobre el alto disponible. */}
               {conHora.map((rec) => {
-                const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento!)
+                const fecha =
+                  rec.fechaVencimiento instanceof Date
+                    ? rec.fechaVencimiento
+                    : new Date(rec.fechaVencimiento!)
                 const color = coloresPorCategoria.get(rec.categoriaId) ?? '#6b7280'
-                const posicionTop = (fecha.getHours() + fecha.getMinutes() / 60) * ALTO_FILA
+                const posicionTop =
+                  ((fecha.getHours() + fecha.getMinutes() / 60) / 24) * 100
 
                 return (
                   <button
                     key={`${rec.id}-${fecha.getTime()}`}
                     onClick={() => onDiaClick(dia)}
-                    className="absolute left-1 right-1 rounded-md px-1.5 py-1 text-left hover:opacity-80 transition-opacity overflow-hidden"
+                    className="absolute left-1 right-1 rounded-md px-1.5 text-left hover:opacity-80 transition-opacity overflow-hidden"
                     style={{
-                      top: posicionTop,
-                      height: ALTO_FILA - 4,
+                      top: `${posicionTop}%`,
+                      height: `${(1 / 24) * 100}%`,
                       backgroundColor: `${color}18`,
                       borderLeft: `2px solid ${color}`,
                     }}
                   >
-                    <p className="text-xs font-medium text-gray-900 truncate">{rec.titulo}</p>
-                    <p className="text-xs text-gray-400">{formatearHora(fecha)}</p>
+                    <p className="text-[11px] font-medium text-gray-900 truncate leading-tight">
+                      {rec.titulo}
+                    </p>
+                    <p className="text-[10px] text-gray-400 leading-tight">
+                      {formatearHora(fecha)}
+                    </p>
                   </button>
                 )
               })}

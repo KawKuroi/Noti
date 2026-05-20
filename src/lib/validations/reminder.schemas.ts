@@ -32,9 +32,44 @@ export const esquemaMetadatosEstudio = z.object({
   ),
 })
 
+const tipoLanzamientoOpcional = z
+  .preprocess(
+    (v) => (v === '' || v === undefined || v === null ? undefined : v),
+    z.enum(['movie', 'tv', 'game', 'album', 'book']).optional(),
+  )
+
 export const esquemaMetadatosPelicula = z.object({
+  tipo: tipoLanzamientoOpcional,
+  director: z.string().max(120).optional(),
   posterPath: z.string().optional(),
   fechaEstreno: z.string().optional(),
+})
+
+export const esquemaMetadatosSerie = z.object({
+  tipo: tipoLanzamientoOpcional,
+  director: z.string().max(120).optional(),
+  plataforma: z.string().max(80).optional(),
+  temporada: z.preprocess(
+    (v) => (v === '' || v === undefined || v === null ? undefined : Number(v)),
+    z.number().int().min(1).max(99).optional(),
+  ),
+})
+
+export const esquemaMetadatosJuego = z.object({
+  tipo: tipoLanzamientoOpcional,
+  plataforma: z.string().max(80).optional(),
+  desarrolladora: z.string().max(120).optional(),
+})
+
+export const esquemaMetadatosMusica = z.object({
+  tipo: tipoLanzamientoOpcional,
+  artista: z.string().max(120).optional(),
+})
+
+export const esquemaMetadatosLibros = z.object({
+  tipo: tipoLanzamientoOpcional,
+  autor: z.string().max(120).optional(),
+  editorial: z.string().max(120).optional(),
 })
 
 export const esquemaMetadatosNotas = z.object({
@@ -51,6 +86,10 @@ const esquemasMetadatosPorSlug = {
   events: esquemaMetadatosEventos,
   study: esquemaMetadatosEstudio,
   movies: esquemaMetadatosPelicula,
+  tv: esquemaMetadatosSerie,
+  games: esquemaMetadatosJuego,
+  music: esquemaMetadatosMusica,
+  books: esquemaMetadatosLibros,
   notes: esquemaMetadatosNotas,
 } as const
 

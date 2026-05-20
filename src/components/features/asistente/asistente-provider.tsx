@@ -30,6 +30,10 @@ interface AsistenteContextValue {
   cerrar: () => void
   alternar: () => void
 
+  // Las paginas que montan la barra `<BarraAsistente />` se registran aqui
+  // para que el atajo global Ctrl+I solo dispare cuando hay un ancla visible.
+  registrarBarra: () => () => void
+
   query: string
   setQuery: (v: string) => void
   estado: Estado
@@ -68,6 +72,10 @@ function inicialVacia(query: string): DatosFormulario {
     autor: null,
     artista: null,
     director: null,
+    edad: null,
+    ubicacion: null,
+    duracionMin: null,
+    prioridad: null,
   }
 }
 
@@ -87,6 +95,10 @@ function inicialDesdeExtraccion(extraccion: Extraccion, query: string): DatosFor
       autor: null,
       artista: null,
       director: null,
+      edad: null,
+      ubicacion: null,
+      duracionMin: null,
+      prioridad: r.categoriaSlug === 'tasks' ? 'media' : null,
     }
   }
 
@@ -116,6 +128,10 @@ function inicialDesdeExtraccion(extraccion: Extraccion, query: string): DatosFor
       autor,
       artista,
       director: null,
+      edad: null,
+      ubicacion: null,
+      duracionMin: null,
+      prioridad: null,
     }
   }
 
@@ -168,9 +184,22 @@ export function AsistenteProvider({ children }: Props) {
   const cerrar = useCallback(() => setAbierto(false), [])
   const alternar = useCallback(() => setAbierto((v) => !v), [])
 
+  // Contador de instancias de la barra montadas. Solo cuando >0 el atajo Ctrl+I
+  // actua, ya que el dropdown necesita un ancla DOM para posicionarse.
+  const barrasMontadasRef = useRef(0)
+  const registrarBarra = useCallback(() => {
+    barrasMontadasRef.current += 1
+    return () => {
+      barrasMontadasRef.current = Math.max(0, barrasMontadasRef.current - 1)
+      // Si la pagina cambio y ya no hay barras, cerrar el dropdown abierto.
+      if (barrasMontadasRef.current === 0) setAbierto(false)
+    }
+  }, [])
+
   useEffect(() => {
     function manejarTecla(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'i') {
+        if (barrasMontadasRef.current === 0) return
         e.preventDefault()
         setAbierto((v) => !v)
       }
@@ -373,15 +402,42 @@ export function AsistenteProvider({ children }: Props) {
         return false
       }
 
+      const metadatos: Record<string, unknown> = {}
+      if (datos.categoriaSlug === 'birthdays' && datos.edad != null) {
+        metadatos.edad = datos.edad
+      }
+      if (datos.categoriaSlug === 'events' && datos.ubicacion) {
+        metadatos.ubicacion = datos.ubicacion
+      }
+      if (datos.categoriaSlug === 'study' && datos.duracionMin != null) {
+        metadatos.duracionMin = datos.duracionMin
+      }
+      if (datos.categoriaSlug === 'tasks' && datos.prioridad) {
+        metadatos.prioridad = datos.prioridad
+      }
+
+      // Construir fechaHoraUtc en cliente respetando la zona horaria local.
+      // `new Date('YYYY-MM-DDTHH:mm:00')` se interpreta como hora local del navegador,
+      // y `.toISOString()` devuelve el UTC equivalente — coherente con el form manual.
+      // Si no hay hora explicita, usamos 09:00 LOCAL del usuario (no del servidor).
+      let fechaHoraUtc: string | undefined
+      if (datos.fechaVencimiento) {
+        const horaParaCombinar = datos.horaVencimiento ?? '09:00'
+        const d = new Date(`${datos.fechaVencimiento}T${horaParaCombinar}:00`)
+        if (!isNaN(d.getTime())) fechaHoraUtc = d.toISOString()
+      }
+
       const resultado = await crearRecordatorioDesdeIA({
         titulo: datos.titulo,
         categoriaSlug: datos.categoriaSlug,
         fechaVencimiento: datos.fechaVencimiento,
         horaVencimiento: datos.horaVencimiento,
+        fechaHoraUtc,
         esRecurrente: datos.esRecurrente,
         reglaRecurrencia: datos.reglaRecurrencia,
         descripcion: datos.descripcion,
         anticipacionMin: datos.anticipacionMin,
+        metadatos: Object.keys(metadatos).length > 0 ? metadatos : undefined,
       })
       if (resultado.ok) {
         toast.success('Recordatorio creado')
@@ -409,6 +465,7 @@ export function AsistenteProvider({ children }: Props) {
       abrir,
       cerrar,
       alternar,
+      registrarBarra,
       query,
       setQuery,
       estado,
@@ -426,6 +483,7 @@ export function AsistenteProvider({ children }: Props) {
       abrir,
       cerrar,
       alternar,
+      registrarBarra,
       query,
       setQuery,
       estado,
