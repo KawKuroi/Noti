@@ -39,8 +39,11 @@ function metadatosPorTipo(c: ResultadoLanzamiento): string[] {
 
 export function CandidatoCard({ candidato, seleccionado, creando, onSeleccionar, onConfirmar }: Props) {
   const tentativa = esTentativa(candidato)
-  const [editandoFecha, setEditandoFecha] = useState(false)
-  const [fechaEditada, setFechaEditada] = useState(candidato.fechaLanzamiento ?? '')
+  const fechaInicialEditada = candidato.fechaLanzamiento ?? candidato.fechaTentativa ?? ''
+  const [editandoFecha, setEditandoFecha] = useState(
+    !candidato.fechaLanzamiento && Boolean(candidato.fechaTentativa),
+  )
+  const [fechaEditada, setFechaEditada] = useState(fechaInicialEditada)
 
   function handleConfirmar() {
     const fechaFinal = editandoFecha ? fechaEditada : candidato.fechaLanzamiento

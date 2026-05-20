@@ -240,6 +240,7 @@ export interface EntradaRecordatorioIA {
   descripcion?: string | null
   esRecurrente?: boolean
   reglaRecurrencia?: string | null
+  anticipacionMin?: number
 }
 
 export async function crearRecordatorioDesdeIA(
@@ -266,7 +267,7 @@ export async function crearRecordatorioDesdeIA(
       input.fechaHoraUtc && !isNaN(new Date(input.fechaHoraUtc).getTime())
         ? new Date(input.fechaHoraUtc)
         : combinarFechaHora(input.fechaVencimiento, hora)
-    const anticipacionMs = 15 * 60 * 1000
+    const anticipacionMs = (input.anticipacionMin ?? 15) * 60 * 1000
     notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
   } else if (!esNota) {
     return { ok: false, error: 'La fecha es requerida' }

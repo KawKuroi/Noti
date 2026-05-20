@@ -3,17 +3,20 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { Extraccion } from '@/lib/ai/extractor'
-import type { ResultadoLanzamiento, FuenteLanzamiento } from '@/types/release.types'
+import type { ResultadoLanzamiento, FuenteLanzamiento, TipoLanzamiento } from '@/types/release.types'
 import {
   crearRecordatorioDesdeIA,
   crearRecordatorioLanzamiento,
 } from '@/lib/actions/reminder.actions'
-import { TIPO_LANZAMIENTO_A_SLUG } from '@/lib/utils/constants'
+import { SLUGS_LANZAMIENTO, TIPO_LANZAMIENTO_A_SLUG } from '@/lib/utils/constants'
+import { parsearFechaNatural } from '@/lib/utils/parsear-fecha-natural'
 import type { DatosFormulario } from './recordatorio-form-card'
 
 const CLAVE_STORAGE = 'noti:asistente:ultimo'
 
 type Estado = 'idle' | 'extrayendo' | 'buscando' | 'listo' | 'creando' | 'error'
+
+const SLUGS_LANZAMIENTO_SET = new Set<string>(SLUGS_LANZAMIENTO)
 
 interface EstadoPersistido {
   query: string
@@ -60,6 +63,11 @@ function inicialVacia(query: string): DatosFormulario {
     esRecurrente: false,
     reglaRecurrencia: null,
     descripcion: null,
+    anticipacionMin: 15,
+    tipoLanzamiento: null,
+    autor: null,
+    artista: null,
+    director: null,
   }
 }
 
@@ -74,6 +82,11 @@ function inicialDesdeExtraccion(extraccion: Extraccion, query: string): DatosFor
       esRecurrente: r.esRecurrente,
       reglaRecurrencia: r.reglaRecurrencia,
       descripcion: r.descripcion,
+      anticipacionMin: 15,
+      tipoLanzamiento: null,
+      autor: null,
+      artista: null,
+      director: null,
     }
   }
 
@@ -88,18 +101,32 @@ function inicialDesdeExtraccion(extraccion: Extraccion, query: string): DatosFor
     const descPartes: string[] = []
     if (l.artista) descPartes.push(l.artista)
     if (l.contexto && l.titulo && l.contexto !== l.titulo) descPartes.push(l.contexto)
+    const autor = l.tipo === 'book' ? l.artista ?? null : null
+    const artista = l.tipo === 'album' ? l.artista ?? null : null
     return {
       titulo,
       categoriaSlug: slug,
-      fechaVencimiento: null,
+      fechaVencimiento: l.fechaTentativa,
       horaVencimiento: null,
       esRecurrente: false,
       reglaRecurrencia: null,
       descripcion: descPartes.length > 0 ? descPartes.join(' · ') : null,
+      anticipacionMin: 15,
+      tipoLanzamiento: l.tipo,
+      autor,
+      artista,
+      director: null,
     }
   }
 
   return inicialVacia(query)
+}
+
+function tipoDesdeSlug(slug: string): TipoLanzamiento | null {
+  const entrada = (Object.entries(TIPO_LANZAMIENTO_A_SLUG) as [TipoLanzamiento, string][]).find(
+    ([, valor]) => valor === slug,
+  )
+  return entrada ? entrada[0] : null
 }
 
 export function AsistenteProvider({ children }: Props) {
@@ -202,6 +229,32 @@ export function AsistenteProvider({ children }: Props) {
       }
 
       const datosExtraccion = (await resExt.json()) as Extraccion
+
+      // Fallback determinista: si el LLM no devolvio fecha pero el texto la contiene,
+      // intentar parseo natural antes de continuar.
+      if (
+        datosExtraccion.intencion === 'recordatorio_personal' &&
+        datosExtraccion.recordatorio &&
+        datosExtraccion.recordatorio.fechaVencimiento === null
+      ) {
+        const fechaParseada = parsearFechaNatural(trimmed, hoy)
+        if (fechaParseada) {
+          datosExtraccion.recordatorio.fechaVencimiento = fechaParseada
+        }
+      }
+
+      if (
+        (datosExtraccion.intencion === 'lanzamiento_especifico' ||
+          datosExtraccion.intencion === 'lanzamiento_generico') &&
+        datosExtraccion.lanzamiento &&
+        datosExtraccion.lanzamiento.fechaTentativa === null
+      ) {
+        const fechaParseada = parsearFechaNatural(trimmed, hoy)
+        if (fechaParseada) {
+          datosExtraccion.lanzamiento.fechaTentativa = fechaParseada
+        }
+      }
+
       setExtraccion(datosExtraccion)
 
       if (datosExtraccion.intencion === 'recordatorio_personal') {
@@ -231,7 +284,17 @@ export function AsistenteProvider({ children }: Props) {
       const { candidatos: nuevos } = (await resCand.json()) as {
         candidatos: ResultadoLanzamiento[]
       }
-      setCandidatos(nuevos)
+
+      // Propagar fechaTentativa a candidatos cuya fuente no confirmo la fecha,
+      // para que la CandidatoCard pre-rellene el datepicker.
+      const fechaTentativa = datosExtraccion.lanzamiento?.fechaTentativa ?? null
+      const enriquecidos: ResultadoLanzamiento[] = fechaTentativa
+        ? nuevos.map((c) =>
+            !c.fechaLanzamiento || c.tba ? { ...c, fechaTentativa } : c,
+          )
+        : nuevos
+
+      setCandidatos(enriquecidos)
       setEstado('listo')
     } catch (e) {
       console.error(e)
@@ -282,6 +345,34 @@ export function AsistenteProvider({ children }: Props) {
   const confirmarRecordatorioEditado = useCallback(
     async (datos: DatosFormulario): Promise<boolean> => {
       setEstado('creando')
+
+      const esLanzamientoCategoria = SLUGS_LANZAMIENTO_SET.has(datos.categoriaSlug)
+      const tipoEfectivo = datos.tipoLanzamiento ?? tipoDesdeSlug(datos.categoriaSlug)
+
+      if (esLanzamientoCategoria && tipoEfectivo && datos.fechaVencimiento) {
+        const resultado = await crearRecordatorioLanzamiento({
+          titulo: datos.titulo,
+          tipo: tipoEfectivo,
+          fechaLanzamiento: datos.fechaVencimiento,
+          fuente: 'manual',
+          descripcion: datos.descripcion ?? undefined,
+          autor: datos.autor ?? undefined,
+          artista: datos.artista ?? undefined,
+          director: datos.director ?? undefined,
+        })
+        if (resultado.ok) {
+          toast.success('Lanzamiento agregado al calendario')
+          limpiar()
+          setAbierto(false)
+          return true
+        }
+        const msg = typeof resultado.error === 'string' ? resultado.error : 'No se pudo agregar'
+        toast.error(msg)
+        setError(msg)
+        setEstado('listo')
+        return false
+      }
+
       const resultado = await crearRecordatorioDesdeIA({
         titulo: datos.titulo,
         categoriaSlug: datos.categoriaSlug,
@@ -290,6 +381,7 @@ export function AsistenteProvider({ children }: Props) {
         esRecurrente: datos.esRecurrente,
         reglaRecurrencia: datos.reglaRecurrencia,
         descripcion: datos.descripcion,
+        anticipacionMin: datos.anticipacionMin,
       })
       if (resultado.ok) {
         toast.success('Recordatorio creado')

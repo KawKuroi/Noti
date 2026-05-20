@@ -2,142 +2,149 @@
 
 ## Solicitud original (usuario, 2026-05-19)
 
-> Hacer el titulo del inicio mas grande. Eliminar el boton flotante de asistente IA (FabAsistente) y reemplazarlo por la barra "Que te recuerdo o agendo" implementada en las distintas pestanas de categorias. El calendario debe ocupar todo el espacio vertical de la pagina. La vista de semana debe mostrar las horas del dia a la izquierda (timeline tipo Google Calendar).
+> Ejecuta la Fase 18 del roadmap: que la IA entienda fechas naturales en el texto (nov 19, 20/06, 3 mar, viernes 21) sin re-prompt, y que la card de extraccion permita editar cualquier campo antes de confirmar.
 
 ## Decisiones acordadas con el usuario
 
-- La barra de asistente aparece en: Inicio (ya existe), Lanzamientos, Pendientes, Estudio, Cumpleanos, Eventos.
-- La barra NO aparece en: Calendario, Notas, Ajustes (settings).
-- Vista Semana: timeline real estilo Google Calendar con columna de horas 00-23 a la izquierda y eventos posicionados verticalmente segun su `fechaVencimiento`.
-- Calendario: se mantienen el titulo "Calendario" y el subtitulo descriptivo; la grilla (mes o semana) ocupa el resto de la altura disponible de la pagina con scroll interno si hace falta.
-- El boton flotante `FabAsistente` se elimina por completo del dashboard. El acceso al asistente queda disponible via Ctrl+I (CommandPalette ya montado en el layout) y via las barras inline.
+- Flujo de fecha tentativa COMPLETO: el extractor gana `lanzamiento.fechaTentativa`, el pipeline parsea con `parsearFechaNatural` cuando viene null y el texto contiene token de fecha, y la `CandidatoCard` pre-rellena el datepicker con la fecha tentativa cuando la fuente devuelve TBA o sin fecha.
+- Anticipacion editable: nuevo Select con `OPCIONES_ANTICIPACION` en la card; `crearRecordatorioDesdeIA` acepta `anticipacionMin` opcional (default 15).
+- Autor/artista/director/tipo de lanzamiento editables en la card cuando la categoria seleccionada es un slug de lanzamiento (`movies`, `tv`, `games`, `music`, `books`). Se persisten en metadatos via `crearRecordatorioLanzamiento` con `fuente='manual'`.
 
 ## 1. Contexto y Archivos Afectados
 
-La solicitud agrupa cuatro cambios de UI sobre el dashboard. Por la naturaleza transversal del rediseno se exceden los 5 archivos atomicos del protocolo del Lector porque cada cambio toca un modulo distinto y no hay archivos irrelevantes en la lista. El planificador debera respetar este alcance sin agregar mas.
+La tarea es transversal: cubre capa IA (prompt + schema), utility de parsing, pipeline cliente (provider), UI de edicion (form-card), UI de candidatos (candidato-card) y server action. Por la naturaleza cohesiva del refactor se exceden los 5 archivos atomicos del protocolo del Lector con justificacion explicita: cada archivo toca un modulo distinto y no hay forma de consolidar sin perder cohesion.
 
-### Cambio A — Titulo de inicio mas grande
-- [src/components/features/inicio/saludo-dinamico.tsx](src/components/features/inicio/saludo-dinamico.tsx) — el `<h1>` usa `text-2xl font-bold`. Hay que escalarlo (objetivo: `text-4xl` o `text-5xl`) sin romper el layout de dos columnas de `/inicio`. El resumen (`<p>`) puede crecer ligeramente para mantener jerarquia.
+### Cambio A - Utility de parsing de fechas naturales
 
-### Cambio B — Eliminar FAB y promover la barra de asistente
-- [src/app/(dashboard)/layout.tsx](src/app/(dashboard)/layout.tsx) — actualmente renderiza `<FabAsistente />` junto a `<CommandPalette />` y `<BusquedaGlobal />`. Hay que eliminar el FAB (boton flotante) y el import asociado.
-- [src/components/features/asistente/index.ts](src/components/features/asistente/index.ts) — barrel que reexporta `FabAsistente`. Limpiar el export huerfano tras quitar el FAB.
-- [src/components/features/asistente/fab-asistente.tsx](src/components/features/asistente/fab-asistente.tsx) — componente que queda sin consumidores tras el cambio; eliminar el archivo.
-- [src/components/features/inicio/input-asistente-inicio.tsx](src/components/features/inicio/input-asistente-inicio.tsx) — la barra "Que te recuerdo o agendo" hoy vive en la carpeta `inicio/` con nombre especifico de esa pagina. Hay que promoverla a un componente reutilizable bajo `src/components/features/asistente/barra-asistente.tsx` (renombrado para reflejar su nuevo alcance) y reexportarla desde el index del asistente. El archivo original se borra para evitar duplicacion.
-- [src/app/(dashboard)/inicio/page.tsx](src/app/(dashboard)/inicio/page.tsx) — actualizar el import de `InputAsistenteInicio` por el nuevo `BarraAsistente`.
-- [src/app/(dashboard)/[slug]/page.tsx](src/app/(dashboard)/[slug]/page.tsx) — pagina dinamica que sirve `pendientes`, `estudio`, `cumpleanos`, `eventos`. Insertar la `<BarraAsistente />` debajo del header (entre el bloque del titulo de categoria y la `<ListaRecordatorios />`).
-- [src/app/(dashboard)/lanzamientos/page.tsx](src/app/(dashboard)/lanzamientos/page.tsx) — actualmente muestra `<BotonAbrirAsistente />` en la esquina superior derecha. Reemplazar el boton por la `<BarraAsistente />` ubicada debajo del header (mismo patron que `/inicio` y `/[slug]`). Verificar si `BotonAbrirAsistente` queda huerfano para limpiar.
+- [src/lib/utils/parsear-fecha-natural.ts](src/lib/utils/parsear-fecha-natural.ts) - CREAR. Funcion `parsearFechaNatural(texto: string, hoy: Date): string | null` que devuelve `YYYY-MM-DD` o `null`. Cubre los formatos: `dd/mm`, `dd-mm`, `dd mmm`, `mmm dd`, `dd de mmmm`. Inferencia de ano: si la fecha resultante es estrictamente anterior a `hoy`, suma 1 ano. Usa `date-fns/parse` con `locale/es`. Reconoce abreviaciones de meses comunes (`ene`, `feb`, `mar`, ..., `dic`) y nombres completos. NO maneja dias de la semana relativos (`viernes 21`) en esta iteracion para evitar complejidad ambigua; el extractor LLM ya resuelve dias relativos via la regla "fecha relativa, calculala desde la fecha actual".
 
-### Cambio C — Calendario ocupa todo el alto de la pagina
-- [src/app/(dashboard)/layout.tsx](src/app/(dashboard)/layout.tsx) — el `<main>` ya es `flex-1 overflow-y-auto p-6`. La pagina del calendario necesita propagar `h-full` para que los hijos puedan crecer con flex.
-- [src/app/(dashboard)/calendar/page.tsx](src/app/(dashboard)/calendar/page.tsx) — el contenedor raiz usa `space-y-6` sin altura. Convertirlo a un layout flex columnar `h-full` que pase el alto a `<VistaCalendario />`.
-- [src/components/features/calendar/vista-calendario.tsx](src/components/features/calendar/vista-calendario.tsx) — wrapper `space-y-4` sin control de alto. El bloque de la vista activa (`VistaMes` / `VistaSemana`) debe estar dentro de un contenedor `flex-1 min-h-0` para que la grilla rellene el espacio disponible. El `EmptyState` debe convivir con el layout flex sin colapsarlo.
-- [src/components/features/calendar/vista-mes.tsx](src/components/features/calendar/vista-mes.tsx) — actualmente las celdas tienen `min-h-[72px]` fijo. Cambiar el grid a uno con filas iguales (`grid-rows-6`, `h-full`) para que las semanas se repartan la altura proporcionalmente sin scroll innecesario.
+### Cambio B - Extender extractor con ejemplos y fecha tentativa
 
-### Cambio E — Mas aire en la parte superior de las pestanas
-- [src/app/(dashboard)/layout.tsx](src/app/(dashboard)/layout.tsx) — el `<main>` usa `p-6` (24px en los 4 lados). El usuario percibe el contenido pegado al techo. Aumentar el padding-top a `pt-10` o `pt-12` manteniendo `px-6 pb-6` para conservar margenes laterales y respiracion inferior.
-- Verificar que el cambio no rompa el calendario (Cambio C): el calendario calcula su altura con flex sobre la altura del `<main>`, por lo que el padding extra arriba reduce ligeramente el alto disponible pero no rompe la grilla.
-- Verificar que el sidebar derecho de `/inicio` (sticky `top-4`) sigue alineado correctamente con el nuevo padding del main; si se nota desfase, ajustar el `top` del aside.
+- [src/lib/ai/extractor.ts](src/lib/ai/extractor.ts) - Anadir al schema `lanzamiento.fechaTentativa: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable()`. En el prompt, anadir bloque de ejemplos para que el LLM reconozca `"nov 19"`, `"20/06"`, `"3 mar"`, `"viernes 21"` y los devuelva en `fechaTentativa` (lanzamientos) o `fechaVencimiento` (recordatorios) usando fecha absoluta `YYYY-MM-DD`. Mantener la regla anti-alucinacion: si no hay senal de fecha, devolver `null`.
 
-### Cambio D — Vista Semana como timeline con horas a la izquierda
-- [src/components/features/calendar/vista-semana.tsx](src/components/features/calendar/vista-semana.tsx) — refactor mayor. Pasar de "7 columnas de tarjetas apiladas" a "1 columna de horas (24h) + 7 columnas de slots verticales". Cada evento se posiciona en la columna del dia y a la altura `hora * altoFila` segun su `fechaVencimiento`. Considerar:
-  - Eventos sin hora (`fechaVencimiento` a 00:00 sin minutos definidos) — agruparlos en una fila all-day arriba o usar un placeholder neutro.
-  - Eventos solapados en el mismo dia — basta apilarlos lado a lado o aceptar overlap si la fase no exige polish.
-  - Scroll interno vertical para que el timeline no fuerce la pagina entera a hacer scroll.
-  - Posicionamiento inicial: hacer scroll auto a la hora actual (o a las 07:00) cuando se monta la vista.
-  - Reutilizar `formatearHora` y `coloresPorCategoria` ya presentes en el archivo.
+### Cambio C - Pipeline aplica fallback y propaga fechaTentativa
+
+- [src/components/features/asistente/asistente-provider.tsx](src/components/features/asistente/asistente-provider.tsx):
+  - Tras `generateObject` (recibir `Extraccion`): si la intencion es `recordatorio_personal` y `recordatorio.fechaVencimiento` viene `null`, intentar `parsearFechaNatural(textoOriginal, hoy)` antes de marcar listo. Si devuelve fecha, mutarla en la extraccion antes de `setExtraccion`.
+  - Si la intencion es `lanzamiento_*` y `lanzamiento.fechaTentativa` viene `null`, aplicar el mismo fallback.
+  - Al recibir candidatos del backend, mapearlos y propagar la `fechaTentativa` de la extraccion a CADA candidato cuyo `fechaLanzamiento` sea `null` o que tenga `tba=true`. La propagacion permite que `CandidatoCard` muestre la fecha tentativa pre-rellenada.
+  - En `confirmarRecordatorioEditado`: si `categoriaSlug` es un slug de lanzamiento Y la card recibe `tipoLanzamiento`, rutear a `crearRecordatorioLanzamiento` con `fuente='manual'`; si no, mantener la ruta actual a `crearRecordatorioDesdeIA` con `anticipacionMin`.
+  - `inicialDesdeExtraccion`: pre-rellenar `fechaVencimiento` con `lanzamiento.fechaTentativa` cuando aplica, copiar `tipoLanzamiento`, `autor`, `artista` desde la extraccion al formulario.
+
+### Cambio D - Form card editable completo
+
+- [src/components/features/asistente/recordatorio-form-card.tsx](src/components/features/asistente/recordatorio-form-card.tsx):
+  - Extender `DatosFormulario` con: `anticipacionMin: number`, `tipoLanzamiento: TipoLanzamiento | null`, `autor: string | null`, `artista: string | null`, `director: string | null`.
+  - Anadir Select de anticipacion (debajo de Hora) con `OPCIONES_ANTICIPACION`. Default 15.
+  - Cuando `categoriaSlug` esta en `SLUGS_LANZAMIENTO_SET`: mostrar Select de tipo de lanzamiento (mapeo `SlugLanzamiento -> TipoLanzamiento` automatico al cambiar categoria) e inputs opcionales segun tipo:
+    - `book`: `autor`.
+    - `album`: `artista`.
+    - `movie`: `director`.
+    - `tv` / `game`: sin input adicional por ahora (campos `temporada`/`plataforma` son numericos/derivados y no aportan en edicion manual).
+  - Validacion: si la categoria es de lanzamiento y `tipoLanzamiento` esta vacio, error claro.
+  - Mantener la firma de `onGuardar(datos)` y `onCancelar()`. El provider decide la ruta de guardado.
+
+### Cambio E - Candidato pre-rellena datepicker con fecha tentativa
+
+- [src/components/features/asistente/candidato-card.tsx](src/components/features/asistente/candidato-card.tsx):
+  - Si `candidato.fechaTentativa` existe y `esTentativa(candidato)` es true, inicializar `fechaEditada` con `candidato.fechaTentativa` y `editandoFecha` con `true` para que el usuario vea la fecha pre-rellenada y solo tenga que confirmar. Si el usuario no edita, al confirmar usar la fecha tentativa con `fuente='manual'`.
+  - Mantener todo lo demas igual; el cambio es minimo y compatible.
+
+### Cambio F - Acción server acepta anticipación
+
+- [src/lib/actions/reminder.actions.ts](src/lib/actions/reminder.actions.ts) - Funcion `crearRecordatorioDesdeIA`:
+  - Anadir `anticipacionMin?: number` a `EntradaRecordatorioIA`.
+  - Reemplazar `const anticipacionMs = 15 * 60 * 1000` por `const anticipacionMs = (input.anticipacionMin ?? 15) * 60 * 1000`.
+  - Mantener todo el resto del flujo intacto.
+
+### Cambio G - Tipo de candidato gana fechaTentativa
+
+- [src/types/release.types.ts](src/types/release.types.ts) - Anadir `fechaTentativa?: string` a `ResultadoLanzamiento` como campo opcional documentado: "fecha pre-rellenada desde el texto natural del usuario cuando la fuente no la confirma (Fase 18)".
 
 ## Notas para el Planificador
 
-- No introducir dependencias nuevas. `date-fns` ya esta disponible para manipular horas.
-- Respetar la regla de "cambios con impacto global" de `GLOBAL.md`: al renombrar `InputAsistenteInicio` -> `BarraAsistente`, verificar con grep que no haya otros consumidores ademas de `/inicio/page.tsx`.
-- Mantener tipografia, espaciados y paleta actuales (minimalismo de la Fase 17).
-- Esta tarea NO altera schema, queries ni server actions: es 100% UI.
-- Esta tarea es de Fase 17 ampliada (no hay numero de fase nuevo aun en `ROADMAP.md`); el Completador decidira si abrir Fase 17.1 o registrar como pulido.
-
-## Decisiones finales del Planificador (acordadas con el usuario)
-
-- Timeline vista Semana: rango fijo 00:00 a 23:00 con scroll vertical interno; al montar el componente hacer scroll automatico a las 07:00.
-- Eventos sin hora (`fechaVencimiento` a las 00:00 en punto): se renderizan en una fila "Todo el dia" horizontal sobre el timeline, no en el slot de medianoche.
-- Padding del `<main>` del dashboard: `pt-10 px-6 pb-6` (40px arriba, 24px en los demas lados).
-- Confirmado por grep: `BotonAbrirAsistente`, `InputAsistenteInicio` y `FabAsistente` no tienen consumidores fuera de lo listado en seccion 1. Se pueden eliminar sin romper otras vistas.
+- No introducir dependencias nuevas. `date-fns` v3 ya esta disponible y expone `parse` y `locale/es`.
+- Regla "cambios con impacto global": `DatosFormulario` es consumida por `recordatorio-form-card.tsx`, `asistente-provider.tsx`. Verificado con grep antes de planear; ambos archivos estan en el plan.
+- Esta tarea NO toca DB ni migraciones: anticipacion ya esta soportada via `notify_at` calculado en server; los metadatos de lanzamiento ya existen en columna JSONB.
+- Esta tarea cierra la Fase 18 completa segun el roadmap. El Completador debera marcar todos los checkboxes de Fase 18 y mover la fase al historico si queda completa.
 
 ## 2. Plan de Accion Detallado
 
-Secuencia ordenada para evitar imports rotos: primero crear el nuevo componente compartido, luego eliminar el antiguo y limpiar consumidores. El refactor del calendario se hace al final porque vive aislado del cambio del asistente.
+Secuencia: utility -> tipos -> extractor -> action -> form-card -> candidato-card -> provider. Cada paso es atomico.
 
-### Bloque 1 — Aire arriba del dashboard (Cambio E)
+### Bloque 1 - Utility de parseo de fechas naturales
 
-- [x] **Paso 1: `src/app/(dashboard)/layout.tsx`** Cambiar la clase del `<main>` de `flex-1 overflow-y-auto p-6` a `flex-1 overflow-y-auto px-6 pt-10 pb-6` para que el contenido de cada pestana respire 40px del borde superior. No tocar el resto del layout.
+- [x] **Paso 1: `src/lib/utils/parsear-fecha-natural.ts`** Crear archivo nuevo. Exportar `parsearFechaNatural(texto: string, hoy: Date): string | null`. Implementacion:
+  - Tabla de meses en espanol: `{ ene: 0, feb: 1, mar: 2, abr: 3, may: 4, jun: 5, jul: 6, ago: 7, sep: 8, set: 8, oct: 9, nov: 10, dic: 11 }`. Tambien nombres completos: `enero`, `febrero`, etc.
+  - Normalizar `texto`: lowercase, quitar acentos via `String.prototype.normalize('NFD').replace(/[̀-ͯ]/g, '')`.
+  - Probar regex en orden:
+    1. `(\d{1,2})[\/\-](\d{1,2})` -> dia/mes numerico.
+    2. `(\d{1,2})\s+(?:de\s+)?([a-z]{3,9})` -> dia + mes textual ("3 mar", "19 de noviembre").
+    3. `([a-z]{3,9})\s+(\d{1,2})` -> mes + dia ("nov 19", "noviembre 3").
+  - Si match: extraer dia y mes; validar dia 1-31 y mes en tabla.
+  - Construir candidato `new Date(hoy.getFullYear(), mes, dia)`. Si es estrictamente menor que `hoy` (a nivel dia), sumar 1 ano.
+  - Devolver `YYYY-MM-DD` con `padStart(2, '0')`.
+  - Si nada matchea, devolver `null`.
+  - NO usar `date-fns` para esta utility (evita conflictos con zona horaria); todo manual con `Date` local. El JSDoc explica el porque en espanol.
 
-### Bloque 2 — Titulo de inicio mas grande (Cambio A)
+### Bloque 2 - Tipo compartido
 
-- [x] **Paso 2: `src/components/features/inicio/saludo-dinamico.tsx`** Cambiar el `<h1>` de `text-2xl font-bold text-gray-900` a `text-4xl font-bold text-gray-900 tracking-tight` y el `<p>` de `text-sm text-gray-500 mt-1` a `text-base text-gray-500 mt-2` para conservar la jerarquia visual. Mantener la logica de `obtenerSaludo` y la firma de props.
+- [x] **Paso 2: `src/types/release.types.ts`** Anadir campo opcional `fechaTentativa?: string` a `ResultadoLanzamiento` con comentario corto en espanol: "Fecha pre-rellenada desde el texto natural del usuario cuando la fuente no la confirma (Fase 18)".
 
-### Bloque 3 — Promover la barra del asistente y eliminar el FAB (Cambio B)
+### Bloque 3 - Extractor con ejemplos y fechaTentativa
 
-- [x] **Paso 3: `src/components/features/asistente/barra-asistente.tsx`** Crear archivo nuevo. Copiar el contenido actual de `src/components/features/inicio/input-asistente-inicio.tsx` y renombrar la funcion exportada a `BarraAsistente`. Mantener exactamente la misma UI (icono `Sparkles` morado, placeholder "Que te recuerdo o agendo?", kbd `Ctrl+I`) y el hook `useAsistente` con `abrir`. No agregar props nuevas: el componente sigue siendo full-width.
+- [x] **Paso 3: `src/lib/ai/extractor.ts`** Anadir al schema de `lanzamiento`: `fechaTentativa: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable()`. Actualizar el prompt:
+  - En el bloque del intent `lanzamiento_especifico`/`generico`, anadir reglas: "Si el texto contiene una fecha natural (`nov 19`, `20/06`, `3 mar`), conviertela a fecha absoluta `YYYY-MM-DD` y devuelvela en `lanzamiento.fechaTentativa`. Si no, deja `fechaTentativa=null`. Si la fecha cae en el pasado respecto a la fecha actual, usa el proximo ano disponible (suma 1 al ano)."
+  - En el bloque de `recordatorio_personal`, ampliar los ejemplos del campo `fechaVencimiento` con: `nov 19`, `20/06`, `3 mar`, `viernes 21`.
+  - Recordar la regla anti-alucinacion: si no hay senal de fecha, devolver `null`.
 
-- [x] **Paso 4: `src/components/features/asistente/index.ts`** Reemplazar el reexport de `FabAsistente` por `BarraAsistente`. Estado final del archivo: exportar `AsistenteProvider`, `CommandPalette`, `BarraAsistente` (y cualquier otro export ya presente que no sea `FabAsistente`).
+### Bloque 4 - Acción server con anticipación
 
-- [x] **Paso 5: `src/components/features/asistente/fab-asistente.tsx`** Eliminar el archivo. Ya no hay consumidores tras el Paso 4.
+- [x] **Paso 4: `src/lib/actions/reminder.actions.ts`** En la interfaz `EntradaRecordatorioIA`, anadir `anticipacionMin?: number`. En `crearRecordatorioDesdeIA`, reemplazar la linea `const anticipacionMs = 15 * 60 * 1000` por `const anticipacionMs = (input.anticipacionMin ?? 15) * 60 * 1000`. No tocar nada mas de la funcion.
 
-- [x] **Paso 6: `src/components/features/inicio/input-asistente-inicio.tsx`** Eliminar el archivo. Su funcionalidad migro al Paso 3.
+### Bloque 5 - Form card editable completo
 
-- [x] **Paso 7: `src/app/(dashboard)/layout.tsx`** Quitar `FabAsistente` del import desde `@/components/features/asistente` y eliminar `<FabAsistente />` del JSX. El layout queda con `AsistenteProvider`, `Sidebar`, `<main>{children}</main>`, `BusquedaGlobal` y `CommandPalette`.
+- [x] **Paso 5: `src/components/features/asistente/recordatorio-form-card.tsx`** Extender `DatosFormulario`:
+  - Anadir campos: `anticipacionMin: number`, `tipoLanzamiento: TipoLanzamiento | null`, `autor: string | null`, `artista: string | null`, `director: string | null`.
+  - Imports: `TipoLanzamiento` desde `@/types/release.types`, `OPCIONES_ANTICIPACION` desde `@/lib/utils/constants`. Tambien importar `TIPOS_LANZAMIENTO` para el Select.
+  - Mapeo `slug -> tipo` reusando `TIPO_LANZAMIENTO_A_SLUG` de constants (invertido localmente como `Record<SlugLanzamiento, TipoLanzamiento>`).
+  - Estados nuevos: `anticipacionMin`, `tipoLanzamiento`, `autor`, `artista`, `director`.
+  - UI nueva:
+    - Bajo el bloque `grid-cols-2` de fecha/hora, anadir un Select de anticipacion con label "Avisar".
+    - Bloque condicional `esLanzamientoCategoria = SLUGS_LANZAMIENTO_SET.has(categoriaSlug)`:
+      - Select de tipo de lanzamiento (`movie`, `tv`, `game`, `album`, `book`) con etiquetas de `ETIQUETAS_TIPO_LANZAMIENTO`.
+      - Inputs condicionales por tipo: `book` -> `autor`, `album` -> `artista`, `movie` -> `director`. Cada uno opcional.
+    - Cuando el usuario cambia `categoriaSlug` a un slug de lanzamiento, derivar `tipoLanzamiento` con el mapeo inverso y pre-rellenar (si quedo `null`).
+  - Validacion en `handleGuardar`:
+    - Si la categoria es de lanzamiento, exigir `tipoLanzamiento` no nulo (error: "Selecciona el tipo de lanzamiento").
+  - Propagacion en `onGuardar`: pasar el objeto extendido con todos los campos nuevos.
 
-- [x] **Paso 8: `src/app/(dashboard)/inicio/page.tsx`** Reemplazar el import `import { InputAsistenteInicio } from '@/components/features/inicio/input-asistente-inicio'` por `import { BarraAsistente } from '@/components/features/asistente'`. Sustituir `<InputAsistenteInicio />` por `<BarraAsistente />` en el JSX (sigue debajo del bloque saludo + boton nuevo recordatorio).
+### Bloque 6 - Candidato pre-rellena datepicker
 
-- [x] **Paso 9: `src/app/(dashboard)/[slug]/page.tsx`** Importar `BarraAsistente` desde `@/components/features/asistente`. Insertar `<BarraAsistente />` justo debajo del bloque header (el `<div className="flex items-center justify-between mb-6">...`) y antes de `<ListaRecordatorios />`. Envolver la barra con `<div className="mb-6"><BarraAsistente /></div>` para conservar el espaciado vertical con la lista. Aplica a las 4 categorias servidas por la ruta dinamica (Pendientes, Estudio, Cumpleanos, Eventos); Notas queda excluida porque `slug === 'notes'` ya devuelve `notFound()`.
+- [x] **Paso 6: `src/components/features/asistente/candidato-card.tsx`** Modificaciones minimas:
+  - Estado `fechaEditada`: inicializar con `candidato.fechaLanzamiento ?? candidato.fechaTentativa ?? ''`.
+  - Estado `editandoFecha`: inicializar con `!candidato.fechaLanzamiento && Boolean(candidato.fechaTentativa)` (true cuando hay tentativa pero no fecha confirmada). Esto auto-abre el datepicker con la fecha pre-rellenada para que el usuario solo confirme.
+  - La logica de `handleConfirmar` queda igual: si la fecha final difiere de `candidato.fechaLanzamiento`, fuente cambia a `'manual'`.
+  - El badge "Tentativa" sigue mostrandose; nada mas cambia.
 
-- [x] **Paso 10: `src/app/(dashboard)/lanzamientos/page.tsx`** Quitar el import y el uso de `BotonAbrirAsistente`. En su lugar importar `BarraAsistente` desde `@/components/features/asistente`. El header pasa de tener un boton a la derecha a quedar solo con el bloque icono+titulo+subtitulo (`<div className="flex items-center gap-3">...</div>`). Insertar `<BarraAsistente />` debajo del header y antes de `<section>`, envuelta en un wrapper que respete el `space-y-8` ya existente del contenedor padre (no requiere wrapper extra porque el `space-y-8` se aplica al `<div>` raiz).
+### Bloque 7 - Provider: fallback de parseo y nuevo ruteo de guardado
 
-- [x] **Paso 11: `src/components/features/lanzamientos/boton-abrir-asistente.tsx`** Eliminar el archivo (sin consumidores tras el Paso 10).
+- [x] **Paso 7: `src/components/features/asistente/asistente-provider.tsx`** Ampliar logica:
+  - Imports nuevos: `parsearFechaNatural` desde `@/lib/utils/parsear-fecha-natural`, `SLUGS_LANZAMIENTO`, `TIPO_LANZAMIENTO_A_SLUG` (ya existe). Construir constante `SLUGS_LANZAMIENTO_SET = new Set<string>(SLUGS_LANZAMIENTO)` al nivel de modulo.
+  - Helper local `slugAtipo(slug: string): TipoLanzamiento | null` que devuelve el tipo inverso buscando en `TIPO_LANZAMIENTO_A_SLUG`.
+  - `inicialVacia(query)`: devolver tambien `anticipacionMin: 15`, `tipoLanzamiento: null`, `autor: null`, `artista: null`, `director: null`.
+  - `inicialDesdeExtraccion`:
+    - Caso `recordatorio_personal`: agregar `anticipacionMin: 15`, `tipoLanzamiento: null`, `autor: null`, `artista: null`, `director: null`.
+    - Caso `lanzamiento_*`: usar `l.fechaTentativa` como `fechaVencimiento` inicial; setear `tipoLanzamiento = l.tipo`; setear `autor`/`artista` desde `l.artista` (no hay distincion clara en el extractor; cuando tipo es `book` usar como `autor`, cuando es `album` usar como `artista`, cuando es `movie` propagar a `descripcion` si esta vacio). Anticipacion: para lanzamientos la usaremos solo si se rutea a `crearRecordatorioDesdeIA`, asi que el default 15 esta bien.
+  - En `procesar`, tras recibir `datosExtraccion`:
+    - Si `intencion === 'recordatorio_personal'` y `recordatorio.fechaVencimiento === null`, llamar `parsearFechaNatural(trimmed, hoy)`. Si devuelve fecha, mutar `datosExtraccion.recordatorio.fechaVencimiento` antes de `setExtraccion`.
+    - Si `intencion` es `lanzamiento_*` y `lanzamiento.fechaTentativa === null`, igual: aplicar fallback y mutar `datosExtraccion.lanzamiento.fechaTentativa`.
+  - En `procesar`, tras recibir candidatos: mapear `nuevos.map(c => ({ ...c, fechaTentativa: c.fechaLanzamiento === null || c.tba ? datosExtraccion.lanzamiento?.fechaTentativa ?? undefined : undefined }))` antes de `setCandidatos`.
+  - `confirmarRecordatorioEditado`: si `datos.categoriaSlug` esta en `SLUGS_LANZAMIENTO_SET` y `datos.tipoLanzamiento` no es null y hay `datos.fechaVencimiento`, rutear a `crearRecordatorioLanzamiento({ titulo, tipo: datos.tipoLanzamiento, fechaLanzamiento: datos.fechaVencimiento, fuente: 'manual', autor: datos.autor ?? undefined, artista: datos.artista ?? undefined, director: datos.director ?? undefined, descripcion: datos.descripcion ?? undefined })`. Mostrar `toast.success('Lanzamiento agregado al calendario')`. Si no, mantener la ruta actual a `crearRecordatorioDesdeIA` agregando el campo `anticipacionMin: datos.anticipacionMin`.
 
-### Bloque 4 — Calendario al alto completo (Cambio C)
+### Bloque 8 - Verificacion final
 
-- [x] **Paso 12: `src/app/(dashboard)/calendar/page.tsx`** Cambiar el contenedor raiz de `<div className="space-y-6">` a `<div className="flex flex-col gap-6 h-full">`. El bloque de titulo + subtitulo queda como esta. Envolver `<VistaCalendario />` en un `<div className="flex-1 min-h-0">` para que el calendario reciba el alto restante del `<main>` (que ya es `flex-1 overflow-y-auto` desde el layout). Esto permite que la grilla mes/semana crezca a la altura disponible.
-
-- [x] **Paso 13: `src/components/features/calendar/vista-calendario.tsx`** Cambiar el wrapper raiz de `<div className="space-y-4">` a `<div className="flex flex-col gap-4 h-full min-h-0">`. La cabecera (controles + toggle) y el `<FiltroCalendario />` permanecen igual. Envolver el bloque condicional `vista === 'mes' ? <VistaMes /> : <VistaSemana />` dentro de `<div className="flex-1 min-h-0">` para que la vista activa reciba el alto sobrante. El `EmptyState` ya no se renderiza superpuesto a la grilla: dejarlo como overlay condicional fuera del flex (o moverlo dentro del wrapper de la vista activa si esta vacio, lo que sea consistente con el comportamiento actual de no mostrar grilla vacia es aceptable). Decision: mantener el `<EmptyState />` despues del wrapper de la vista, igual que ahora; el flex-1 garantiza que la grilla se extienda incluso cuando hay 0 recordatorios.
-
-- [x] **Paso 14: `src/components/features/calendar/vista-mes.tsx`** Cambiar la estructura para que el grid de dias rellene el alto disponible. Concretamente:
-  - El contenedor exterior pasa de `<div>` simple a `<div className="flex flex-col h-full">`.
-  - La cabecera de dias (`DIAS_CABECERA`) mantiene `grid grid-cols-7 mb-1`.
-  - La grilla de dias cambia de `grid grid-cols-7 gap-px ... rounded-xl overflow-hidden` a `grid grid-cols-7 grid-rows-[repeat(var(--filas),minmax(0,1fr))] gap-px ... rounded-xl overflow-hidden flex-1 min-h-0`. Calcular `const filas = dias.length / 7` y pasarlo como CSS variable via `style={{ ['--filas' as string]: filas }}` (o usar `grid-rows-5` / `grid-rows-6` segun longitud).
-  - Las celdas dejan de tener `min-h-[72px]` y solo conservan padding y layout interno; el alto lo decide el grid. Para evitar overflow vertical en celdas con muchos dots, mantener `flex flex-col items-start gap-1` y considerar `overflow-hidden` en el `<button>`.
-
-- [x] **Paso 15: `src/components/features/calendar/vista-mes.tsx` (continuacion del Paso 14)** Revisar que la firma de props no cambie. Si TypeScript se queja por el cast de `'--filas' as string`, usar un objeto tipado: `{ ['--filas' as unknown as string]: filas }` o pasar `style={{ gridTemplateRows: \`repeat(\${filas}, minmax(0, 1fr))\` }}` directamente para evitar el truco de CSS variable. Preferir la segunda forma por simplicidad.
-
-### Bloque 5 — Timeline real en vista Semana (Cambio D)
-
-- [x] **Paso 16: `src/components/features/calendar/vista-semana.tsx`** Refactor completo del componente. Mantener la firma de props (`referencia`, `recordatorios`, `categorias`, `onDiaClick`). Estructura nueva:
-  1. Constantes locales: `const HORAS = Array.from({ length: 24 }, (_, i) => i)`, `const ALTO_FILA = 48` (px por hora; valor inicial razonable).
-  2. Funciones helper internas:
-     - `esTodoElDia(fecha: Date): boolean` -> devuelve `true` si `fecha.getHours() === 0 && fecha.getMinutes() === 0`.
-     - `recordatoriosDelDia(dia: Date)` -> ya existe, mantener.
-     - Separar por dia en dos buckets: `eventosConHora` y `eventosTodoElDia`.
-  3. Layout JSX:
-     - Wrapper raiz `<div className="flex flex-col h-full min-h-0 border border-gray-100 rounded-xl overflow-hidden bg-white">`.
-     - Cabecera fija arriba: grid `grid grid-cols-[60px_repeat(7,1fr)]`. Primera celda vacia (sobre la columna de horas). Las 7 columnas de dias replican la cabecera actual (`EEE` + `d`) con highlight de hoy.
-     - Fila "Todo el dia": misma grilla `grid grid-cols-[60px_repeat(7,1fr)] border-b border-gray-100`. Primera celda con texto "Todo el dia" en `text-xs text-gray-400 px-2 py-1`. Las 7 columnas muestran los eventos de `eventosTodoElDia` apilados (igual estilo que las cards actuales). Solo renderizar la fila si al menos un dia de la semana tiene eventos all-day; ocultarla si todos los buckets `eventosTodoElDia` estan vacios para no desperdiciar espacio.
-     - Cuerpo scrolleable: `<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto">` que contiene la grilla del timeline.
-     - Dentro del scroll: grilla `grid grid-cols-[60px_repeat(7,1fr)]` con altura total `24 * ALTO_FILA`. Primera columna: 24 celdas con la etiqueta de hora (formato `HH:00`, `text-xs text-gray-400 text-right pr-2 -mt-2` para alinear visualmente con la linea). Cada una de las 7 columnas de dia es un `<div className="relative border-l border-gray-50" style={{ height: 24 * ALTO_FILA }}>` con lineas horizontales por hora (`<div className="border-t border-gray-50" style={{ height: ALTO_FILA }}>` x 24, o usar background-image repeating).
-     - Eventos con hora: posicion absoluta dentro de la columna del dia. `top = (hora + minutos/60) * ALTO_FILA`. Alto minimo: `ALTO_FILA - 4` (1 hora visual). Estilos identicos a la card actual (color por categoria con `${color}18` y borde lateral `${color}`). Click llama a `onDiaClick(dia)`.
-  4. `useEffect(() => { ... }, [])` que al montar haga `scrollRef.current?.scrollTo({ top: 7 * ALTO_FILA, behavior: 'instant' })` para posicionar la vista en las 07:00.
-  5. Eventos solapados: no se manejan en este refactor; se renderizan apilados con `z-index` por orden de llegada, aceptando overlap visual. Documentar en un comentario corto en espanol que el manejo de solapamientos queda fuera del alcance.
-  6. Mantener `useState`/`useRef` con imports adecuados (`useEffect`, `useRef` desde `react`).
-  7. Reutilizar `coloresPorCategoria` ya existente.
-  8. Mantener uso de `format` con locale `es` para las cabeceras de dia.
-
-### Bloque 6 — Verificacion final
-
-- [x] **Paso 17: Validacion manual rapida** Antes de cerrar la tarea, abrir en navegador (`pnpm dev` o equivalente) y comprobar:
-  - `/inicio`: saludo grande, barra IA, padding superior visible. Sin FAB.
-  - `/pendientes`, `/estudio`, `/cumpleanos`, `/eventos`: cada una muestra la BarraAsistente debajo del header.
-  - `/lanzamientos`: BarraAsistente en vez del boton "Abrir asistente". Sin FAB.
-  - `/notes`, `/calendar`, `/settings`: sin barra, sin FAB. Solo el atajo Ctrl+I sigue funcionando.
-  - `/calendar` vista Mes: grilla ocupa todo el alto disponible.
-  - `/calendar` vista Semana: columna de horas a la izquierda, eventos posicionados verticalmente segun hora, fila "Todo el dia" si aplica, scroll inicial a 07:00.
+- [x] **Paso 8: Validacion estatica** Ejecutar `npx tsc --noEmit` y `npx next lint --dir src/components/features/asistente --dir src/lib/ai --dir src/lib/utils --dir src/lib/actions --dir src/types`. Cero errores y cero warnings.
 
 ## 3. Reporte de Pruebas
 
@@ -145,38 +152,28 @@ Secuencia ordenada para evitar imports rotos: primero crear el nuevo componente 
 
 ### Auditoria de cumplimiento funcional
 
-Cada cambio del plan fue verificado por inspeccion estatica del codigo final:
-
-- **Cambio A (saludo grande):** `src/components/features/inicio/saludo-dinamico.tsx` aplica `text-4xl font-bold tracking-tight` al `<h1>` y `text-base mt-2` al resumen. Cumple Paso 2.
-- **Cambio B (FAB fuera, barra dentro):** `src/components/features/asistente/index.ts` ya no exporta `FabAsistente`. `src/app/(dashboard)/layout.tsx` no contiene `<FabAsistente />` ni el import. La nueva `BarraAsistente` se importa correctamente en `inicio/page.tsx`, `[slug]/page.tsx` y `lanzamientos/page.tsx`. Los archivos `fab-asistente.tsx`, `input-asistente-inicio.tsx` y `boton-abrir-asistente.tsx` ya no existen en el filesystem (verificado con `git status`). Sin consumidores huerfanos.
-- **Cambio C (calendario alto completo):** `calendar/page.tsx` envuelve `<VistaCalendario />` en `<div className="flex-1 min-h-0">` dentro de un raiz `flex flex-col gap-6 h-full`. `vista-calendario.tsx` usa `flex flex-col gap-4 h-full min-h-0` con la vista activa en un wrapper `flex-1 min-h-0`. `vista-mes.tsx` calcula `filas = dias.length / 7` y aplica `gridTemplateRows: repeat(filas, minmax(0, 1fr))` con `flex-1 min-h-0` para repartir altura. Las celdas perdieron el `min-h-[72px]` fijo.
-- **Cambio D (timeline semanal):** `vista-semana.tsx` reescrito con cabecera `grid-cols-[60px_repeat(7,1fr)]`, fila condicional "Todo el dia" (solo renderiza si `hayEventosTodoElDia`), cuerpo scrolleable con altura `24 * ALTO_FILA`, columna de horas con etiquetas `HH:00`, eventos posicionados absolutamente con `top = (hora + minutos/60) * ALTO_FILA` y `useEffect` que setea `scrollTop = 7 * ALTO_FILA` al montar.
-- **Cambio E (aire arriba):** `layout.tsx` aplica `px-6 pt-10 pb-6` al `<main>`. Cumple Paso 1.
+- **Cambio A (utility):** `parsearFechaNatural` resuelve `dd/mm`, `dd-mm`, `dd mmm`, `dd de mmmm`, `mmm dd` con normalizacion de acentos y tabla de meses ES. Ajusta ano cuando la fecha resultante es estrictamente anterior a hoy.
+- **Cambio B (extractor):** schema gana `lanzamiento.fechaTentativa: string|null`. Prompt incluye ejemplos `nov 19`, `20/06`, `3 mar`, `viernes 21`, regla de futuro y limpieza del titulo cuando la fecha esta pegada.
+- **Cambio C (pipeline):** `procesar` aplica `parsearFechaNatural(trimmed, hoy)` cuando `recordatorio.fechaVencimiento` o `lanzamiento.fechaTentativa` vienen `null`. Los candidatos sin fecha confirmada heredan `fechaTentativa` para que la `CandidatoCard` muestre el datepicker pre-rellenado.
+- **Cambio D (form card):** anticipacion via Select, tipo de lanzamiento + autor/artista/director condicionales por categoria, derivacion automatica slug-tipo via `useEffect`, validacion de tipo de lanzamiento obligatorio.
+- **Cambio E (candidato card):** auto-abre el datepicker con `fechaTentativa` cuando la fuente no confirma fecha. Si el usuario solo confirma, la fecha tentativa se persiste con `fuente='manual'`.
+- **Cambio F (acción server):** `crearRecordatorioDesdeIA` recibe `anticipacionMin?` y lo usa para calcular `notify_at`. Default 15 minutos.
+- **Cambio G (tipo):** `ResultadoLanzamiento.fechaTentativa?` documentado como canal de propagacion Fase 18.
 
 ### Auditoria de espanol absoluto
 
-Variables, funciones y constantes nuevas en `vista-semana.tsx`: `HORAS`, `ALTO_FILA`, `esTodoElDia`, `recordatoriosDelDia`, `coloresPorCategoria`, `refScroll`, `eventosPorDia`, `hayEventosTodoElDia`, `conHora`, `todoElDia`, `posicionTop`, `indice`, `dia`, `inicio`, `fin`, `linea`. Todas en espanol o terminos tecnicos universalmente aceptados (`top`, `scroll`, `linea`). Comentarios de codigo redactados en espanol. No se detectan identificadores en ingles introducidos por esta tarea. El archivo `barra-asistente.tsx` reutiliza la firma del componente original sin nombres nuevos.
+Identificadores nuevos: `parsearFechaNatural`, `MESES`, `normalizar`, `obtenerMes`, `fechaValida`, `ajustarAno`, `formatear`, `tipoDesdeSlug`, `esLanzamientoCategoria`, `tipoEfectivo`, `tipoDerivado`, `SLUG_A_TIPO`, `anticipacionMin`, `tipoLanzamiento`, `fechaTentativa`, `fechaInicialEditada`, `enriquecidos`. Todos en espanol o terminos universales (`Date`, `slug`, `set`, `record`). Comentarios redactados en espanol.
 
 ### Auditoria de seguridad y fugas
 
-Grep contra `api[_-]?key|secret|token|password|VAPID|SUPABASE.*KEY|GROQ_API|TMDB|RAWG` sobre los archivos modificados: cero coincidencias. Esta tarea es 100% UI; no toca rutas API, queries, server actions ni variables de entorno. Sin nuevas dependencias instaladas.
+Grep de patrones `api[_-]?key|secret|token|password|VAPID|SUPABASE.*KEY|GROQ_API|TMDB|RAWG` sobre los 7 archivos modificados: cero matches. Sin nuevas dependencias. Sin secretos hardcodeados. La tarea no toca rutas API, queries ni variables de entorno.
 
 ### Verificacion de consola
 
-- `npx tsc --noEmit`: ejecutado sin errores ni advertencias.
-- `npx next lint --dir src/components/features/calendar --dir src/components/features/asistente --dir src/components/features/inicio --dir 'src/app/(dashboard)'`: `No ESLint warnings or errors`.
-- Grep de referencias eliminadas (`FabAsistente|InputAsistenteInicio|BotonAbrirAsistente|input-asistente-inicio|fab-asistente|boton-abrir-asistente`): cero matches, no quedan imports rotos.
+- `npx tsc --noEmit`: salida vacia (sin errores).
+- `npx next lint --dir src/components/features/asistente --dir src/lib/ai --dir src/lib/utils --dir src/lib/actions --dir src/types`: `No ESLint warnings or errors`.
+- Grep de `any` en codigo nuevo: cero matches.
 
 ### Nota sobre validacion visual
 
-El Tester automatizado no dispone de navegador interactivo, por lo que el Paso 17 se valida mediante inspeccion estatica + lint + tipos + grep. El usuario es el arbitro final del aspecto visual antes de hacer commit; especificamente debe confirmar en navegador local (`pnpm dev`):
-
-- Saludo `text-4xl` en `/inicio` sin romper la columna lateral.
-- `BarraAsistente` visible en Inicio, Lanzamientos, Pendientes, Estudio, Cumpleanos y Eventos.
-- Ausencia del FAB en Calendario, Notas y Ajustes.
-- Calendario llena el alto disponible con scroll interno cuando aplica.
-- Vista Semana abre con scroll posicionado en las 07:00 y muestra eventos en sus horas.
-
-### Observacion menor (no bloqueante)
-
-`git status` lista `Docs/ACTIVE_TASK.md` con `D` mayuscula. En el filesystem case-insensitive de Windows apunta al mismo `docs/` ya existente; no afecta el funcionamiento ni el deploy a Vercel (Linux), pero conviene verificar al hacer commit que el path final usa la capitalizacion correcta (`docs/`) para evitar duplicacion accidental.
+Hay cambios de UI en `recordatorio-form-card.tsx` y `candidato-card.tsx`. Antes de cerrar la tarea, el usuario debe validar en navegador: que la card de extraccion muestra Select de anticipacion + bloque condicional de tipo de lanzamiento, y que la `CandidatoCard` abre con el datepicker pre-rellenado cuando la fuente devuelve TBA.

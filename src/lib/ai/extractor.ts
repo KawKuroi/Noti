@@ -33,6 +33,10 @@ export const esquemaExtraccion = z.object({
       titulo: z.string().nullable(),
       contexto: z.string().nullable(),
       artista: z.string().nullable(),
+      fechaTentativa: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .nullable(),
     })
     .nullable(),
   aclaracion: z.string().nullable(),
@@ -47,6 +51,7 @@ Las cuatro intenciones posibles:
 1) recordatorio_personal — el usuario quiere agendar algo personal (cumpleanos, clases, tareas, eventos, citas, notas). Llena el campo "recordatorio".
    - categoriaSlug debe ser uno de: birthdays | study | tasks | events | notes
    - Si la fecha es relativa ("manana", "el viernes", "la proxima semana"), calculala a partir de la fecha actual.
+   - Si la fecha viene en formato natural corto ("nov 19", "20/06", "3 mar", "19 de noviembre", "viernes 21"), conviertela a YYYY-MM-DD. Si el dia ya paso este ano, usa el proximo ano disponible.
    - Para cumpleanos y aniversarios CON FECHA mencionada: esRecurrente=true, reglaRecurrencia="yearly:DD-MM", fechaVencimiento=proximo aniversario (este año si aun no paso, sino el siguiente).
    - Para clases o eventos semanales: esRecurrente=true, reglaRecurrencia="weekly:1,3" (dias ISO numericos: lunes=1, martes=2, miercoles=3, jueves=4, viernes=5, sabado=6, domingo=7). Ejemplo: lunes y miercoles → "weekly:1,3". OBLIGATORIO: fechaVencimiento DEBE ser la proxima fecha futura (incluyendo hoy si aun no pasa la hora) que caiga en el primer dia listado. NUNCA dejes fechaVencimiento=null si la regla es semanal.
    - Para notas sin fecha: categoriaSlug="notes", fechaVencimiento=null.
@@ -54,12 +59,14 @@ Las cuatro intenciones posibles:
 
 2) lanzamiento_especifico — el usuario menciona un TITULO concreto de pelicula, serie, videojuego, album o libro ("GTA 6", "Avatar 4", "Stranger Things temporada 5", "Dune Messiah"). Llena el campo "lanzamiento" con titulo y tipo.
    - tipo: movie | tv | game | album | book. Si no estas seguro, deja tipo=null y la app buscara en todas las fuentes.
-   - titulo: el nombre del lanzamiento, limpio de frases interrogativas.
+   - titulo: el nombre del lanzamiento, limpio de frases interrogativas y SIN la fecha si aparece pegada al titulo.
    - artista: para albums/libros, nombre del artista o autor si el usuario lo da.
+   - fechaTentativa: si el texto contiene una fecha natural ("nov 19", "20/06", "3 mar", "19 de noviembre"), conviertela a YYYY-MM-DD y devuelvela aqui. Si el dia ya paso este ano, usa el proximo ano disponible (suma 1 al ano). Si NO hay senal de fecha, deja fechaTentativa=null. Ejemplo: "Lanzamiento de GTA 6 nov 19" -> titulo="GTA 6", fechaTentativa="<ano>-11-19".
 
 3) lanzamiento_generico — el usuario pregunta por el proximo lanzamiento de una FRANQUICIA o ARTISTA sin titulo especifico ("nuevo album de The Weeknd", "proximo Zelda", "ultimo libro de Sanderson"). Llena "lanzamiento" con tipo y contexto.
    - contexto: la franquicia o artista.
    - titulo: null.
+   - fechaTentativa: misma regla que en lanzamiento_especifico. Por defecto null.
 
 4) desconocido — texto vago o no clasificable. Llena solo "aclaracion" con una pregunta corta en espanol para que el usuario aclare.
 

@@ -20,6 +20,7 @@ export interface ResultadoLanzamiento {
   plataforma?: string
   director?: string
   temporada?: number
+  fechaTentativa?: string
 }
 
 export interface MetadatosLanzamiento {

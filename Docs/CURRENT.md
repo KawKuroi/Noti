@@ -5,8 +5,8 @@
 
 ## Fase activa
 
-**Activo:** Fase 18 (IA fechas naturales y edicion inline completa).
-**Estado general:** Fases 0–16 completadas + bugs de formularios resueltos. La nueva ola priorizada va de Fase 17 a Fase 19 (ver `ROADMAP.md`).
+**Activo:** Fase 19 (landing - enlace a GitHub).
+**Estado general:** Fases 0–18 completadas. Solo queda Fase 19 antes de cerrar la ola priorizada actual (ver `ROADMAP.md`).
 
 ## Bugs resueltos (sesión 2026-05-19)
 
@@ -14,6 +14,16 @@
 - **Bug B** — Formulario manual de lanzamientos no preseleccionaba la subcategoría activa. Fix: `hub-lanzamientos.tsx` mapea `tabActiva` → `TipoLanzamiento` y lo pasa como `tipoInicial` a `FormularioManualLanzamiento`.
 - **Bug C** — Editor no mostraba selector de categoría ni cargaba metadata existente. Fix: selector siempre visible, `anticipacionMin` inicializado desde el recordatorio, campos condicionales pre-llenados con metadata, `actualizarRecordatorio` ahora guarda `categoriaId`.
 - **Bug D** — `confirm()` nativo al eliminar. Fix: reemplazado con `Dialog` de confirmación con botones Cancelar / Eliminar.
+
+## Fase 18 completada (sesión 2026-05-19)
+
+- **Utility `parsearFechaNatural`** — nuevo `src/lib/utils/parsear-fecha-natural.ts` con tabla de meses ES; resuelve `dd/mm`, `dd-mm`, `dd mmm`, `mmm dd`, `dd de mmmm`. Suma 1 año si la fecha es estrictamente anterior a hoy.
+- **Extractor IA con `fechaTentativa`** — `src/lib/ai/extractor.ts` gana campo `lanzamiento.fechaTentativa: string|null` y el prompt incluye ejemplos `nov 19`, `20/06`, `3 mar`, `viernes 21` con regla anti-alucinación.
+- **Pipeline con fallback determinista** — `asistente-provider.tsx` aplica `parsearFechaNatural(texto, hoy)` cuando el LLM devuelve `null` y propaga `fechaTentativa` a los candidatos sin fecha confirmada.
+- **Card de extracción editable completa** — `recordatorio-form-card.tsx` ahora expone Select de anticipación (`OPCIONES_ANTICIPACION`), bloque condicional con tipo de lanzamiento + autor (libros) / artista (música) / director (películas).
+- **Card de candidato pre-rellenada** — `candidato-card.tsx` abre el datepicker en modo edición con `fechaTentativa` cuando la fuente devuelve TBA o sin fecha; al confirmar persiste con `fuente='manual'`.
+- **Server action con anticipación** — `crearRecordatorioDesdeIA` acepta `anticipacionMin?: number` opcional (default 15) que viaja al cálculo de `notify_at`.
+- **Ruteo dual de guardado** — `confirmarRecordatorioEditado` rutea a `crearRecordatorioLanzamiento` cuando la categoría es un slug de lanzamiento (persiste metadatos JSONB), o a `crearRecordatorioDesdeIA` para recordatorios personales.
 
 ## Cambios UI (sesión 2026-05-19, ampliación post-Fase 17)
 
@@ -39,7 +49,7 @@
 - [x] **Fase 15 — Sidebar**: Grupo "Herramientas" agrupa Calendario + Notas. Icono de lupa en sidebar abre Ctrl+K. Footer muestra nombre del usuario + engranaje. Cerrar sesión vive en `/settings`.
 - [x] **Fase 16 — Lanzamientos**: Pestaña "Todos" en `/lanzamientos`. Cards diferenciadas por color (negro/azul/verde/rojo/morado). Formulario manual pide artista/autor/descripción/director. Las portadas se ven en el palette IA pero la card guardada no muestra portada.
 - [x] **Fase 17 — Inicio**: Saludo dinámico, input IA grande, próximos recordatorios, mini-calendario lateral y chips de categorías visibles al entrar a `/inicio`.
-- [ ] **Fase 18 — IA fechas**: "Lanzamiento de GTA 6 nov 19" → la card de candidatos muestra fecha 19 noviembre. La card de edición permite cambiar cualquier campo antes de confirmar.
+- [ ] **Fase 18 — IA fechas**: "Lanzamiento de GTA 6 nov 19" → la card de candidatos muestra fecha 19 noviembre. La card de edición permite cambiar cualquier campo antes de confirmar. (Implementado 2026-05-19, pendiente validación visual.)
 - [ ] **Fase 19 — Landing**: Botón "Ver en GitHub" en hero y link en footer abren el repo en nueva pestaña.
 
 ## Deuda técnica conocida

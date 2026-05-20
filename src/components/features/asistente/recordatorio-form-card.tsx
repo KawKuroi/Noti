@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,7 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CATEGORIAS, SLUGS_LANZAMIENTO } from '@/lib/utils/constants'
+import {
+  CATEGORIAS,
+  ETIQUETAS_TIPO_LANZAMIENTO,
+  OPCIONES_ANTICIPACION,
+  SLUGS_LANZAMIENTO,
+  TIPOS_LANZAMIENTO,
+  TIPO_LANZAMIENTO_A_SLUG,
+} from '@/lib/utils/constants'
+import type { TipoLanzamiento } from '@/types/release.types'
 import { cn } from '@/lib/utils/cn'
 
 export interface DatosFormulario {
@@ -26,6 +34,11 @@ export interface DatosFormulario {
   esRecurrente: boolean
   reglaRecurrencia: string | null
   descripcion: string | null
+  anticipacionMin: number
+  tipoLanzamiento: TipoLanzamiento | null
+  autor: string | null
+  artista: string | null
+  director: string | null
 }
 
 interface Props {
@@ -59,6 +72,12 @@ function parsearRegla(regla: string | null): { tipo: TipoRecurrencia; dias: stri
 
 const SLUGS_LANZAMIENTO_SET = new Set<string>(SLUGS_LANZAMIENTO)
 
+const SLUG_A_TIPO: Record<string, TipoLanzamiento> = Object.fromEntries(
+  (Object.entries(TIPO_LANZAMIENTO_A_SLUG) as [TipoLanzamiento, string][]).map(
+    ([tipo, slug]) => [slug, tipo],
+  ),
+) as Record<string, TipoLanzamiento>
+
 export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCancelar }: Props) {
   const [titulo, setTitulo] = useState(inicial.titulo)
   const [categoriaSlug, setCategoriaSlug] = useState(inicial.categoriaSlug)
@@ -71,9 +90,28 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
   )
   const [diasSemana, setDiasSemana] = useState<string[]>(initRecurrencia.dias)
   const [descripcion, setDescripcion] = useState(inicial.descripcion ?? '')
+  const [anticipacionMin, setAnticipacionMin] = useState<number>(inicial.anticipacionMin)
+  const [tipoLanzamiento, setTipoLanzamiento] = useState<TipoLanzamiento | null>(
+    inicial.tipoLanzamiento,
+  )
+  const [autor, setAutor] = useState(inicial.autor ?? '')
+  const [artista, setArtista] = useState(inicial.artista ?? '')
+  const [director, setDirector] = useState(inicial.director ?? '')
   const [error, setError] = useState<string | null>(null)
 
   const esNota = categoriaSlug === 'notes'
+  const esLanzamientoCategoria = SLUGS_LANZAMIENTO_SET.has(categoriaSlug)
+
+  // Cuando la categoria se cambia a un slug de lanzamiento, derivar el tipo si esta vacio.
+  useEffect(() => {
+    if (esLanzamientoCategoria && !tipoLanzamiento) {
+      const tipoDerivado = SLUG_A_TIPO[categoriaSlug]
+      if (tipoDerivado) setTipoLanzamiento(tipoDerivado)
+    }
+    if (!esLanzamientoCategoria && tipoLanzamiento) {
+      setTipoLanzamiento(null)
+    }
+  }, [categoriaSlug, esLanzamientoCategoria, tipoLanzamiento])
 
   function toggleDia(dia: string) {
     setDiasSemana((prev) =>
@@ -108,6 +146,10 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       setError('Selecciona al menos un día de la semana')
       return
     }
+    if (esLanzamientoCategoria && !tipoLanzamiento) {
+      setError('Selecciona el tipo de lanzamiento')
+      return
+    }
     setError(null)
     onGuardar({
       titulo: titulo.trim(),
@@ -117,6 +159,11 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       esRecurrente: esRecurrente && tipoRec !== 'ninguna',
       reglaRecurrencia: construirRegla(),
       descripcion: descripcion.trim() || null,
+      anticipacionMin,
+      tipoLanzamiento,
+      autor: autor.trim() || null,
+      artista: artista.trim() || null,
+      director: director.trim() || null,
     })
   }
 
@@ -197,6 +244,91 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
           />
         </div>
       </div>
+
+      {!esNota && (
+        <div>
+          <label className="text-xs text-gray-500 mb-1 block">Avisar</label>
+          <Select
+            value={String(anticipacionMin)}
+            onValueChange={(v) => setAnticipacionMin(Number(v))}
+            disabled={creando}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {OPCIONES_ANTICIPACION.map((op) => (
+                <SelectItem key={op.valor} value={String(op.valor)}>
+                  {op.etiqueta}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {esLanzamientoCategoria && (
+        <div className="space-y-3 rounded-md border border-gray-100 bg-gray-50 p-3">
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Tipo de lanzamiento</label>
+            <Select
+              value={tipoLanzamiento ?? ''}
+              onValueChange={(v) => setTipoLanzamiento(v as TipoLanzamiento)}
+              disabled={creando}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                {TIPOS_LANZAMIENTO.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {ETIQUETAS_TIPO_LANZAMIENTO[t]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {tipoLanzamiento === 'book' && (
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">
+                Autor <span className="text-gray-400">(opcional)</span>
+              </label>
+              <Input
+                value={autor}
+                onChange={(e) => setAutor(e.target.value)}
+                disabled={creando}
+              />
+            </div>
+          )}
+
+          {tipoLanzamiento === 'album' && (
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">
+                Artista <span className="text-gray-400">(opcional)</span>
+              </label>
+              <Input
+                value={artista}
+                onChange={(e) => setArtista(e.target.value)}
+                disabled={creando}
+              />
+            </div>
+          )}
+
+          {tipoLanzamiento === 'movie' && (
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">
+                Director <span className="text-gray-400">(opcional)</span>
+              </label>
+              <Input
+                value={director}
+                onChange={(e) => setDirector(e.target.value)}
+                disabled={creando}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
