@@ -17,7 +17,6 @@ export const perfiles = pgTable('profiles', {
   nombreMostrado: text('display_name'),
   zonaHoraria: text('timezone').default('America/Bogota').notNull(),
   anticipacionNotificacion: integer('notification_advance').default(15).notNull(),
-  sonidoHabilitado: boolean('sound_enabled').default(true).notNull(),
   resumenDiario: boolean('daily_summary').default(false).notNull(),
   horaResumen: text('summary_hour').default('07:00').notNull(),
   creadoEn: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

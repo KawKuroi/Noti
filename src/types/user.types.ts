@@ -3,7 +3,6 @@ export interface Perfil {
   nombreMostrado: string | null
   zonaHoraria: string
   anticipacionNotificacion: number
-  sonidoHabilitado: boolean
   resumenDiario: boolean
   horaResumen: string
   creadoEn: Date

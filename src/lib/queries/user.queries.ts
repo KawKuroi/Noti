@@ -16,7 +16,6 @@ function mapearPerfil(fila: typeof perfiles.$inferSelect): Perfil {
     nombreMostrado: fila.nombreMostrado,
     zonaHoraria: fila.zonaHoraria,
     anticipacionNotificacion: fila.anticipacionNotificacion,
-    sonidoHabilitado: fila.sonidoHabilitado,
     resumenDiario: fila.resumenDiario,
     horaResumen: fila.horaResumen,
     creadoEn: fila.creadoEn,
