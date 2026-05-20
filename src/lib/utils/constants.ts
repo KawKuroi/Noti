@@ -82,6 +82,13 @@ export const DIAS_SEMANA: { valor: number; etiqueta: string; corto: string }[] =
   { valor: 7, etiqueta: 'Domingo', corto: 'Dom' },
 ]
 
+export const OPCIONES_AUTO_DELETE_TAREAS: { valor: number | null; etiqueta: string }[] = [
+  { valor: null, etiqueta: 'Nunca' },
+  { valor: 7, etiqueta: 'A los 7 dias' },
+  { valor: 30, etiqueta: 'A los 30 dias' },
+  { valor: 90, etiqueta: 'A los 90 dias' },
+]
+
 export const OPCIONES_ANTICIPACION: { valor: number; etiqueta: string }[] = [
   { valor: 5, etiqueta: '5 minutos antes' },
   { valor: 15, etiqueta: '15 minutos antes' },

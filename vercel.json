@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/resumen-diario",
       "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/cron/limpiar-tareas",
+      "schedule": "0 3 * * *"
     }
   ]
 }

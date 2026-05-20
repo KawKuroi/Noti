@@ -9,6 +9,7 @@ import {
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getRecordatoriosPorCategoria } from '@/lib/queries/reminder.queries'
+import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
 import { BarraAsistente } from '@/components/features/asistente'
@@ -40,7 +41,10 @@ export default async function PaginaCategoria({ params }: Props) {
 
   if (!categoria) notFound()
 
-  const recordatorios = await getRecordatoriosPorCategoria(user.id, categoria.id)
+  const [recordatorios, perfil] = await Promise.all([
+    getRecordatoriosPorCategoria(user.id, categoria.id),
+    slug === 'tasks' ? getPerfilDelUsuarioActual() : Promise.resolve(null),
+  ])
 
   const Icono = ICONOS[categoria.icono]
 
@@ -76,6 +80,7 @@ export default async function PaginaCategoria({ params }: Props) {
         recordatorios={recordatorios}
         categorias={categorias}
         mensajeVacio={`Sin recordatorios en ${categoria.nombre}`}
+        diasAutoEliminar={perfil?.autoEliminarTareasCompletadasDias ?? null}
       />
     </div>
   )

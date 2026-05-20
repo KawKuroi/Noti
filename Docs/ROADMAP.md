@@ -32,21 +32,9 @@ La ola priorizada original (Fases 0-19) esta completa. Las fases 20-23 son aditi
 
 ---
 
-## Fase 20: Auto-eliminacion de tareas completadas
+## Historico: Fase 20 completada (2026-05-20)
 
-**Objetivo:** el usuario configura cada cuanto se borran sus tareas completadas (7 / 30 / 90 dias o Nunca). Alcance limitado a la categoria `tasks`.
-
-- [ ] Migracion `0006_auto_delete_tasks.sql`: agregar columna `auto_delete_completed_tasks_days` en `profiles` y `completed_at` en `reminders`; indice parcial `idx_reminders_completed_at WHERE is_completed = true`
-- [ ] Actualizar `src/db/schema.ts` y types correspondientes
-- [ ] Modificar `alternarCompletado` para llenar `completed_at = NOW()` al completar y `NULL` al desmarcar
-- [ ] Nuevo cron `src/app/api/cron/limpiar-tareas/route.ts` protegido con `CRON_SECRET`
-- [ ] Agregar entrada en `vercel.json`: schedule `0 3 * * *` (diario, 03:00 UTC)
-- [ ] Nueva constante `OPCIONES_AUTO_DELETE_TAREAS` (Nunca / 7 / 30 / 90)
-- [ ] Nuevo `src/components/features/settings/formulario-auto-delete-tareas.tsx`
-- [ ] Server action `actualizarAutoDeleteTareas`
-- [ ] Mostrar "Se eliminara en X dias" en tarjetas de tareas completadas (color ambar si <= 3 dias)
-
-**Done when:** Configuro "A los 7 dias" en settings; marco una tarea como completada; al disparar el cron tras 8 dias la tarea desaparece. Cambiar a "Nunca" preserva el historial. Otras categorias completadas no se borran.
+**Auto-eliminacion de tareas completadas** — migracion `0006_auto_delete_tasks.sql` con columnas `auto_delete_completed_tasks_days` en `profiles` y `completed_at` en `reminders`; `alternarCompletado` graba la fecha de completado; cron `limpiar-tareas` diario a las 03:00 UTC; selector en settings (Nunca / 7 / 30 / 90 dias); countdown ambar en tarjetas cuando quedan 3 dias o menos.
 
 ---
 

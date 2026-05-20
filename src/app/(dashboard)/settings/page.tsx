@@ -7,6 +7,7 @@ import { ListaDispositivos } from '@/components/features/settings/lista-disposit
 
 import { FormularioPerfil } from '@/components/features/settings/formulario-perfil'
 import { FormularioResumenDiario } from '@/components/features/settings/formulario-resumen-diario'
+import { FormularioAutoDeleteTareas } from '@/components/features/settings/formulario-auto-delete-tareas'
 import { BotonCerrarSesion } from '@/components/features/settings/boton-cerrar-sesion'
 
 export const metadata: Metadata = { title: 'Configuracion | Noti' }
@@ -64,6 +65,14 @@ export default async function PaginaSettings() {
           activoActual={perfil?.resumenDiario ?? false}
           horaActual={perfil?.horaResumen ?? '07:00'}
         />
+      </section>
+
+      <section className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+        <h2 className="text-base font-semibold text-gray-900">Tareas completadas</h2>
+        <p className="text-sm text-gray-500">
+          Cuanto tiempo se conservan las tareas marcadas como completadas antes de eliminarse automaticamente.
+        </p>
+        <FormularioAutoDeleteTareas valorActual={perfil?.autoEliminarTareasCompletadasDias ?? null} />
       </section>
 
       <section className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">

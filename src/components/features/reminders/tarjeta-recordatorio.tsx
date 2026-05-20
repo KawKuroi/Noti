@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Check, Pencil, Trash2, RotateCcw, Clock } from 'lucide-react'
+import { Check, Pencil, Trash2, RotateCcw, Clock, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -23,9 +23,10 @@ interface Props {
   recordatorio: Recordatorio
   categorias: Categoria[]
   mostrarCategoria?: boolean
+  diasAutoEliminar?: number | null
 }
 
-export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria }: Props) {
+export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria, diasAutoEliminar }: Props) {
   const [editarAbierto, setEditarAbierto] = useState(false)
   const [eliminarAbierto, setEliminarAbierto] = useState(false)
   const [cargando, setCargando] = useState(false)
@@ -47,6 +48,16 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
   const temporada = metadatos?.temporada as number | undefined
 
   const colorAcento = tipoLanzamiento ? PALETA_LANZAMIENTOS[tipoLanzamiento] : undefined
+
+  const etiquetaAutoDelete = (() => {
+    if (!recordatorio.estaCompletado || !recordatorio.completadoEn || !diasAutoEliminar) return null
+    const fechaEliminar = new Date(
+      new Date(recordatorio.completadoEn).getTime() + diasAutoEliminar * 86400000,
+    )
+    const diasRestantes = Math.ceil((fechaEliminar.getTime() - Date.now()) / 86400000)
+    if (diasRestantes <= 0) return null
+    return { dias: diasRestantes, urgente: diasRestantes <= 3 }
+  })()
 
   async function manejarCompletar() {
     setCargando(true)
@@ -174,6 +185,18 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
               <span className="text-xs text-gray-400 flex items-center gap-1">
                 <RotateCcw size={10} />
                 Recurrente
+              </span>
+            )}
+
+            {etiquetaAutoDelete && (
+              <span
+                suppressHydrationWarning
+                className={`text-xs flex items-center gap-1 ${etiquetaAutoDelete.urgente ? 'text-amber-500' : 'text-gray-400'}`}
+              >
+                <Timer size={10} />
+                {etiquetaAutoDelete.dias === 1
+                  ? 'Se elimina manana'
+                  : `Se elimina en ${etiquetaAutoDelete.dias} dias`}
               </span>
             )}
           </div>

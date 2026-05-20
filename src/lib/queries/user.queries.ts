@@ -18,6 +18,7 @@ function mapearPerfil(fila: typeof perfiles.$inferSelect): Perfil {
     anticipacionNotificacion: fila.anticipacionNotificacion,
     resumenDiario: fila.resumenDiario,
     horaResumen: fila.horaResumen,
+    autoEliminarTareasCompletadasDias: fila.autoEliminarTareasCompletadasDias,
     creadoEn: fila.creadoEn,
     actualizadoEn: fila.actualizadoEn,
   }

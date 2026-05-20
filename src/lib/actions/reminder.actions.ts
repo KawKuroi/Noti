@@ -213,11 +213,13 @@ export async function alternarCompletado(
         })
         .where(eq(recordatorios.id, id))
     } else {
+      const ahora = new Date()
       await db
         .update(recordatorios)
         .set({
           estaCompletado: !actual.estaCompletado,
-          actualizadoEn: new Date(),
+          completadoEn: !actual.estaCompletado ? ahora : null,
+          actualizadoEn: ahora,
         })
         .where(eq(recordatorios.id, id))
     }

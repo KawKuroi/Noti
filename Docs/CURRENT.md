@@ -5,8 +5,12 @@
 
 ## Fase activa
 
-**Activo:** Fase 20 (auto-eliminacion de tareas completadas) — siguiente fase de la cola.
-**Estado general:** Fases 0–19 completadas. La ola priorizada original esta cerrada. Proximas fases son aditivas (ver `ROADMAP.md`).
+**Activo:** Fase 21 (entrada por audio en el asistente IA) — siguiente fase de la cola.
+**Estado general:** Fases 0–20 completadas. La ola priorizada original esta cerrada. Proximas fases son aditivas (ver `ROADMAP.md`).
+
+## Fase 20 completada (sesion 2026-05-20)
+
+- **Auto-eliminacion de tareas completadas** — columna `auto_delete_completed_tasks_days` en `profiles` y `completed_at` en `reminders`; migracion `0006_auto_delete_tasks.sql`; `alternarCompletado` graba la fecha de completado; cron `limpiar-tareas` diario a las 03:00 UTC elimina tareas segun config del perfil; selector en settings (Nunca / 7 / 30 / 90 dias); countdown ambar en tarjetas de tareas completadas cuando quedan 3 dias o menos.
 
 ## Fase 19 completada (sesion 2026-05-20)
 
@@ -39,6 +43,8 @@
 - **Aire superior en el dashboard** — `<main>` del layout pasa de `p-6` a `px-6 pt-10 pb-6` para despegar el contenido del borde superior.
 
 ## Pendientes manuales bloqueantes
+
+- [ ] Aplicar migracion `src/db/migrations/0006_auto_delete_tasks.sql` en el SQL Editor de Supabase (requerida para que la Fase 20 funcione en produccion)
 
 - [ ] Aplicar migración `src/db/migrations/0003_lanzamientos.sql` en el SQL Editor de Supabase (requerida para que Fase 8 funcione correctamente en producción)
 - [ ] `getCategorias` usa `unstable_cache({ revalidate: false })` — tras el deploy, limpiar caché en Vercel o hacer redeploy para que los cambios de categorías de la Fase 14 se reflejen en el sidebar

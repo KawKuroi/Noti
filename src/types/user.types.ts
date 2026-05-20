@@ -5,6 +5,7 @@ export interface Perfil {
   anticipacionNotificacion: number
   resumenDiario: boolean
   horaResumen: string
+  autoEliminarTareasCompletadasDias: number | null
   creadoEn: Date
   actualizadoEn: Date
 }

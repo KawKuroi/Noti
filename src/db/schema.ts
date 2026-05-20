@@ -19,6 +19,7 @@ export const perfiles = pgTable('profiles', {
   anticipacionNotificacion: integer('notification_advance').default(15).notNull(),
   resumenDiario: boolean('daily_summary').default(false).notNull(),
   horaResumen: text('summary_hour').default('07:00').notNull(),
+  autoEliminarTareasCompletadasDias: integer('auto_delete_completed_tasks_days'),
   creadoEn: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   actualizadoEn: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
@@ -51,6 +52,7 @@ export const recordatorios = pgTable(
     esRecurrente: boolean('is_recurring').default(false).notNull(),
     reglaRecurrencia: text('recurrence_rule'),
     estaCompletado: boolean('is_completed').default(false).notNull(),
+    completadoEn: timestamp('completed_at', { withTimezone: true }),
     tmdbId: integer('tmdb_id'),
     metadatos: jsonb('metadata'),
     creadoEn: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -61,6 +63,7 @@ export const recordatorios = pgTable(
     idxNotificarEn: index('idx_reminders_notify_at').on(tabla.notificarEn),
     idxCategoria: index('idx_reminders_category').on(tabla.categoriaId),
     idxFechaVencimiento: index('idx_reminders_due_date').on(tabla.fechaVencimiento),
+    idxCompletadoEn: index('idx_reminders_completed_at').on(tabla.completadoEn),
   }),
 )
 

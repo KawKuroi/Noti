@@ -8,6 +8,26 @@ import { ZONA_HORARIA_DEFECTO, ANTICIPACION_DEFECTO } from '@/lib/utils/constant
 import { esquemaPerfil } from '@/lib/validations/user.schemas'
 import { obtenerUsuario } from '@/lib/auth'
 
+export async function actualizarAutoDeleteTareas(
+  dias: number | null,
+): Promise<{ ok: boolean; error?: string }> {
+  const usuario = await obtenerUsuario()
+  if (!usuario) return { ok: false, error: 'No autenticado' }
+
+  try {
+    await db
+      .update(perfiles)
+      .set({ autoEliminarTareasCompletadasDias: dias, actualizadoEn: new Date() })
+      .where(eq(perfiles.id, usuario.id))
+
+    revalidatePath('/settings')
+    return { ok: true }
+  } catch (e) {
+    console.error('Error en actualizarAutoDeleteTareas:', e)
+    return { ok: false, error: 'Error al guardar la configuracion' }
+  }
+}
+
 export async function upsertPerfil(
   usuarioId: string,
   nombreMostrado?: string | null,
