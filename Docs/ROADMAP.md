@@ -2,11 +2,11 @@
 
 ## Estado actual
 
-Las fases 15-19 son la nueva ola activa (reestructuracion de navegacion, rediseno del inicio, mejoras al asistente y landing). Las fases 20-23 son aditivas y quedan en cola para iteraciones posteriores. Estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion, y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo Fase 22 (notas multimedia), que depende de la Fase 9.
+Las fases 17-19 son la nueva ola activa (rediseno del inicio, mejoras al asistente y landing). Las fases 20-23 son aditivas y quedan en cola para iteraciones posteriores. Estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion, y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo Fase 22 (notas multimedia), que depende de la Fase 9.
 
 ---
 
-## Historico de fases completadas (0-14)
+## Historico de fases completadas (0-16)
 
 - **Fase 0 — Setup inicial:** PRD, Arquitectura, Roadmap, CLAUDE.md, .gitignore, .env.example, .editorconfig.
 - **Fase 1 — Foundation:** Next.js 15 + App Router + TypeScript + Tailwind, Supabase (DB + Auth), Drizzle, Google OAuth + email/password, middleware de proteccion, layouts auth/dashboard, seed de 6 categorias, PWA basica, primer deploy a Vercel.
@@ -24,44 +24,9 @@ Las fases 15-19 son la nueva ola activa (reestructuracion de navegacion, redisen
 - **Fase 12b — Pipeline deterministico + command palette:** Reemplazo del chat conversacional por pipeline de 3 pasos (extraccion estructurada, busqueda multi-candidato, UI de seleccion estilo Raycast). Precision ~95%.
 - **Fase 13 — Eliminar Pomodoro:** Retirado del producto todo lo relacionado con el temporizador Pomodoro.
 - **Fase 14 — Bugfixes criticos + refactor de categorias:** Cursor de recurrencia con avance estricto (bug 400 ocurrencias). Formulario de notas sin fecha obligatoria. Fusion `classes → study` en BD, constants, seed, extractor, validaciones y tipos. Rename "Tareas" → "Pendientes". Checkbox oculto en cards recurrentes.
-
----
-
-## Fase 15: Reestructuracion del sidebar y navegacion
-
-**Objetivo:** liberar espacio vertical en el dashboard moviendo la busqueda al sidebar, agrupar herramientas accesorias (Calendario + Notas) y mover el usuario al footer del sidebar.
-
-- [ ] Crear grupo "Herramientas" colapsable en `src/components/features/sidebar.tsx` que contenga `Calendario` y `Notas`. Las rutas `/calendar` y `/notes` no cambian.
-- [ ] Mover la busqueda global a un icono de lupa en el sidebar; al hacer click abre el modal Ctrl+K. Eliminar la barra superior de busqueda del dashboard (`src/app/(dashboard)/inicio/page.tsx`).
-- [ ] Footer del sidebar: mostrar nombre del usuario + icono engranaje al lado (link a `/settings`). Eliminar el bloque de usuario/logout que hoy vive en la esquina superior derecha.
-- [ ] Mover accion "Cerrar sesion" dentro de la pagina `/settings` (zona Cuenta).
-
-**Done when:** El sidebar incluye un grupo "Herramientas" con Calendario + Notas. La busqueda global solo se accede por la lupa del sidebar o `Ctrl+K`. El nombre del usuario aparece en el footer del sidebar con un engranaje al lado. La esquina superior derecha ya no muestra el bloque de usuario/logout. Logout se hace desde `/settings`.
-
----
-
-## Fase 16: Lanzamientos - pestana Todos, paleta de color, formulario completo, portadas no persistentes
-
-**Objetivo:** mejorar la experiencia del hub de lanzamientos con vision agregada, diferenciacion visual por tipo y formulario manual completo. Definir formalmente que las portadas son UX visual durante la seleccion, no datos persistidos.
-
-- [ ] Agregar pestana "Todos" en `/lanzamientos` que muestra todos los tipos mezclados, ordenados por fecha de lanzamiento.
-- [ ] Aplicar paleta de color por tipo (constantes nuevas en `src/lib/utils/constants.ts`):
-  - Peliculas `#0A0A0A` (negro)
-  - Series `#2563EB` (azul)
-  - Juegos `#16A34A` (verde)
-  - Musica `#DC2626` (rojo)
-  - Libros `#7C3AED` (morado)
-  - Usar el color como acento sutil (borde izquierdo, badge, dot). No fondos completos. Mantener minimalismo.
-- [ ] Extender `formulario-manual-lanzamiento.tsx` con campos faltantes:
-  - Descripcion (opcional, todas las categorias)
-  - Autor (solo `books`)
-  - Artista/Banda (solo `music`)
-  - Director/Showrunner (opcional, `movies`/`tv`)
-  - Persistir en `metadatos` (jsonb).
-- [ ] **Portadas no persistentes**: en el palette de candidatos IA se siguen mostrando las portadas (UX visual). Al guardar (`crearRecordatorioLanzamiento`), **no** se persiste la imagen. Ignorar/eliminar la columna `image_url` en escrituras.
-- [ ] Actualizar la card de lanzamiento para no leer `image_url` (placeholder de icono por tipo segun la paleta).
-
-**Done when:** En `/lanzamientos` aparece la pestana "Todos" con cards diferenciadas por color segun tipo. El formulario manual permite anadir artista/autor/descripcion y se persiste en `metadatos`. Al crear un lanzamiento via IA, en el palette se ven las portadas, pero la card guardada no muestra portada (icono por tipo). Ninguna ruta de creacion escribe `image_url`.
+- **Fase 15 — Reestructuracion del sidebar y navegacion:** Grupo "Herramientas" colapsable en el sidebar (Calendario + Notas). Busqueda global movida a un icono de lupa en el sidebar (Ctrl+K), eliminando la barra superior del dashboard. Footer del sidebar con nombre del usuario e icono de engranaje (settings) y boton de cerrar sesion reubicado dentro de la pagina de configuracion (`/settings`).
+- **Fase 16 — Lanzamientos - pestana Todos, paleta de color, formulario completo, portadas no persistentes:** Pestana "Todos" en `/lanzamientos` con orden cronologico. Paleta de colores sutiles por tipo de lanzamiento. Formulario manual extendido con descripcion, autor, artista/banda y director/showrunner persistidos en metadatos JSONB. Portadas visuales no persistentes al guardar (eliminado `image_url` en escrituras y reemplazo por iconos de tipo en las cards).
+- **Fase 17 — Rediseno del inicio:** Layout de dos columnas en `/inicio`. Saludo dinamico por hora local con nombre del usuario y resumen de recordatorios del dia. Input IA prominente (full-width) que abre el asistente compartiendo estado con Ctrl+I. Mini-calendario lateral del mes actual con dots en dias con recordatorios. Chips de categorias filtrables en sidebar derecho. Boton de nuevo recordatorio reubicado junto al saludo.
 
 ---
 
@@ -69,14 +34,14 @@ Las fases 15-19 son la nueva ola activa (reestructuracion de navegacion, redisen
 
 **Objetivo:** convertir `/inicio` en un panel personal con saludo dinamico, input IA prominente, lista de proximos recordatorios y widgets laterales (mini-calendario + chips de categorias). Mantener el minimalismo actual.
 
-- [ ] Reorganizar `src/app/(dashboard)/inicio/page.tsx` con la estructura:
+- [x] Reorganizar `src/app/(dashboard)/inicio/page.tsx` con la estructura:
   1. Saludo dinamico ("Buenos dias/tardes/noches, {nombre}") segun hora local.
   2. Subtitulo con resumen rapido ("Tienes X tareas para hoy y un evento proximo").
   3. Input IA prominente (mismo componente del asistente, full-width) con microfono.
   4. Seccion "Proximos Recordatorios" con link "Ver todos".
   5. Sidebar derecho con mini-calendario del mes actual + seccion "Categorias" con chips filtrables.
-- [ ] Mantener tipografia, espaciados y paleta actuales (minimalismo).
-- [ ] El input IA del inicio comparte estado con el palette Ctrl+I (no duplicar logica).
+- [x] Mantener tipografia, espaciados y paleta actuales (minimalismo).
+- [x] El input IA del inicio comparte estado con el palette Ctrl+I (no duplicar logica).
 
 **Done when:** Al entrar a `/inicio` se ve un saludo personalizado, el input IA grande, una lista de proximos recordatorios con la opcion "Ver todos", un mini-calendario lateral y los chips de categorias. La UI conserva el aire minimalista.
 
