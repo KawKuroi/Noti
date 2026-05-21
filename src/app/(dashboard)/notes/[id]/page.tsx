@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation'
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getRecordatorioPorId } from '@/lib/queries/reminder.queries'
-import { VisorNota } from '@/components/features/notas/visor-nota'
+import { obtenerEntradas } from '@/lib/queries/notas.queries'
+import { VistaChatNotas } from '@/components/features/notas/vista-chat'
+import type { CuadernoConPrevia } from '@/types/notas.types'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -13,16 +15,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const user = await requerirUsuario()
   const nota = await getRecordatorioPorId(user.id, id)
-  return { title: nota ? `${nota.titulo} | Noti` : 'Nota | Noti' }
+  return { title: nota ? `${nota.titulo} | Noti` : 'Cuaderno | Noti' }
 }
 
-export default async function PaginaNota({ params }: Props) {
+export default async function PaginaCuaderno({ params }: Props) {
   const { id } = await params
   const user = await requerirUsuario()
 
-  const [categorias, nota] = await Promise.all([
+  const [categorias, nota, entradas] = await Promise.all([
     getCategorias(),
     getRecordatorioPorId(user.id, id),
+    obtenerEntradas(id, user.id),
   ])
 
   if (!nota) notFound()
@@ -30,5 +33,14 @@ export default async function PaginaNota({ params }: Props) {
   const categoriaNotas = categorias.find((c) => c.slug === 'notes')
   if (!categoriaNotas || nota.categoriaId !== categoriaNotas.id) notFound()
 
-  return <VisorNota nota={nota} categorias={categorias} />
+  const cuaderno: CuadernoConPrevia = {
+    id: nota.id,
+    titulo: nota.titulo,
+    creadoEn: nota.creadoEn.toISOString(),
+    actualizadoEn: nota.actualizadoEn.toISOString(),
+    ultimaEntrada: entradas.length > 0 ? entradas[entradas.length - 1] : null,
+    totalEntradas: entradas.length,
+  }
+
+  return <VistaChatNotas cuaderno={cuaderno} entradasIniciales={entradas} />
 }

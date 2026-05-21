@@ -88,6 +88,24 @@ export const suscripcionesPush = pgTable(
   }),
 )
 
+export const notasEntradas = pgTable(
+  'note_entries',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    cuadernoId: uuid('cuaderno_id')
+      .notNull()
+      .references(() => recordatorios.id, { onDelete: 'cascade' }),
+    contenido: text('content').notNull(),
+    creadoEn: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    actualizadoEn: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (tabla) => ({
+    idxCuaderno: index('idx_note_entries_cuaderno').on(tabla.cuadernoId),
+  }),
+)
+
 export const logNotificaciones = pgTable('notification_log', {
   id: uuid('id')
     .primaryKey()

@@ -5,8 +5,18 @@
 
 ## Fase activa
 
-**Activo:** Fase 22 (Notas multimedia) — siguiente fase de la cola.
-**Estado general:** Fases 0–21 completadas. La ola priorizada original esta cerrada. Proximas fases son aditivas (ver `ROADMAP.md`).
+**Activo:** Fase 22 (en progreso — 22.0 completada, pendientes 22.A, 22.B, 22.C, 22.D).
+**Estado general:** Fases 0–21 completadas + Fase 22.0 completada. La ola priorizada original esta cerrada. Proximas fases son aditivas.
+
+## Fase 22.0 completada (sesion 2026-05-21)
+
+- **Reestructuracion de notas a cuadernos tipo chat** — tabla `note_entries` (migracion `0008_note_entries.sql` — aplicar manualmente en Supabase); schema Drizzle `notasEntradas`; queries `obtenerCuadernos` y `obtenerEntradas`; acciones `crearCuaderno`, `renombrarCuaderno`, `eliminarCuaderno`, `crearEntrada`, `actualizarEntrada`, `eliminarEntrada`; lista de cuadernos en `/notes` estilo WhatsApp con avatar inicial, preview de ultimo mensaje y tiempo relativo; vista de chat en `/notes/[id]` con burbujas indigo alineadas a la derecha, edicion inline, envio con Enter, auto-scroll, renombrar y eliminar cuaderno desde la cabecera; modal de creacion con solo nombre del cuaderno; descripciones existentes migradas como primera entrada.
+
+## Pendientes manuales bloqueantes
+
+- [ ] Aplicar migracion `src/db/migrations/0008_note_entries.sql` en el SQL Editor de Supabase (requerida para que la Fase 22.0 funcione en produccion)
+
+- [ ] Aplicar migracion `src/db/migrations/0006_auto_delete_tasks.sql` en el SQL Editor de Supabase (requerida para que la Fase 20 funcione en produccion)
 
 ## Fase 21 completada (sesion 2026-05-20)
 

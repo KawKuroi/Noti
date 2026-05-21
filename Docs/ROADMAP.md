@@ -38,8 +38,8 @@ La ola priorizada original (Fases 0-19) esta completa. Las fases 20-23 son aditi
 
 **Objetivo:** convertir las notas en un baul de cosas - texto, imagenes, audio, documentos y video - implementado en sub-fases progresivas. Depende de la Fase 9.
 
-### Fase 22.0: Reestructuracion de notas
-Antes de cualquier cambio, quiero que las notas se parezcan a chats de whatsapp, que cada "chat" funcione como un "archivo" que se puede modificar su nombre y eliminar, dentro de cada "archivo" se puede guardar cualquier tipo de informacion, primero texto, luego el resto de caracteristicas que aparecen en la lista de las fases.
+### Fase 22.0: Reestructuracion de notas [x]
+Notas convertidas en cuadernos tipo chat de WhatsApp. Lista de cuadernos con avatar inicial, preview del ultimo mensaje y tiempo relativo. Vista de chat con burbujas alineadas a la derecha, edicion inline y envio con Enter. Cuadernos renombrables y eliminables. Nueva tabla `note_entries` con RLS y migracion de descripciones existentes.
 
 Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mime, tamano, creado_en)` (creada en 22.A) y la UI; cada una es un PR independiente.
 
