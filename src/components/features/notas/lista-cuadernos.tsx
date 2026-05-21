@@ -88,7 +88,7 @@ export function ListaCuadernos({ cuadernos: cuadernosIniciales }: Props) {
 
   return (
     <>
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-border">
         {lista.map((cuaderno) => (
           <ItemCuaderno
             key={cuaderno.id}

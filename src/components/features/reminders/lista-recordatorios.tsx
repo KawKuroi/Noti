@@ -33,7 +33,7 @@ function SeccionDia({
 
   return (
     <div>
-      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
         {titulo}
       </h3>
       <div className="space-y-2">
@@ -64,13 +64,13 @@ export function ListaRecordatorios({
   if (recordatorios.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-          <Bell className="w-6 h-6 text-gray-400" />
+        <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center mb-3">
+          <Bell className="w-6 h-6 text-muted-foreground" />
         </div>
-        <p className="text-sm font-medium text-gray-700">
+        <p className="text-sm font-medium text-foreground">
           {mensajeVacio ?? 'Sin recordatorios pendientes'}
         </p>
-        <p className="text-xs text-gray-400 mt-1">Los recordatorios creados apareceran aqui.</p>
+        <p className="text-xs text-muted-foreground mt-1">Los recordatorios creados apareceran aqui.</p>
       </div>
     )
   }
@@ -99,11 +99,11 @@ export function ListaRecordatorios({
   if (!hayContenido) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-          <Bell className="w-6 h-6 text-gray-400" />
+        <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center mb-3">
+          <Bell className="w-6 h-6 text-muted-foreground" />
         </div>
-        <p className="text-sm font-medium text-gray-700">Sin recordatorios proximos</p>
-        <p className="text-xs text-gray-400 mt-1">Todos tus recordatorios estan al dia.</p>
+        <p className="text-sm font-medium text-foreground">Sin recordatorios proximos</p>
+        <p className="text-xs text-muted-foreground mt-1">Todos tus recordatorios estan al dia.</p>
       </div>
     )
   }

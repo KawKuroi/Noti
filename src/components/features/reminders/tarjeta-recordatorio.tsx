@@ -116,10 +116,10 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
     <>
       <div
         ref={tarjetaRef}
-        className={`group flex items-start gap-3 p-4 bg-white rounded-xl border transition-colors ${
+        className={`group flex items-start gap-3 p-4 bg-card rounded-xl border transition-colors ${
           estaCompletado
-            ? 'border-gray-100 opacity-60'
-            : 'border-gray-100 hover:border-gray-200'
+            ? 'border-border opacity-60'
+            : 'border-border hover:border-border/80'
         } ${mostrarRing ? 'ring-2 ring-purple-400 ring-offset-2' : ''}`}
         style={colorAcento ? { borderLeftColor: colorAcento, borderLeftWidth: '3px' } : undefined}
       >
@@ -132,7 +132,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
             className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
               estaCompletado
                 ? 'border-green-500 bg-green-500'
-                : 'border-gray-300 hover:border-gray-500'
+                : 'border-border hover:border-foreground/50'
             }`}
           >
             {estaCompletado && <Check size={10} className="text-white" />}
@@ -143,8 +143,8 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <p
-              className={`text-sm font-medium text-gray-900 ${
-                estaCompletado ? 'line-through text-gray-400' : ''
+              className={`text-sm font-medium text-foreground ${
+                estaCompletado ? 'line-through text-muted-foreground' : ''
               }`}
             >
               {recordatorio.titulo}
@@ -174,11 +174,11 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
           </div>
 
           {recordatorio.descripcion && (
-            <p className="text-xs text-gray-500 mt-0.5 truncate">{recordatorio.descripcion}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">{recordatorio.descripcion}</p>
           )}
 
           {(director || artista || plataforma || temporada) && (
-            <p className="text-xs text-gray-500 mt-0.5 truncate">
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
               {[
                 director ? `Dir. ${director}` : null,
                 artista,
@@ -190,7 +190,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
 
           <div className="flex items-center gap-2 mt-1.5">
             {fechaFormateada && (
-              <span suppressHydrationWarning className="flex items-center gap-1 text-xs text-gray-400">
+              <span suppressHydrationWarning className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock size={10} />
                 {fechaFormateada}
               </span>
@@ -215,7 +215,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
             {etiquetaAutoDelete && (
               <span
                 suppressHydrationWarning
-                className={`text-xs flex items-center gap-1 ${etiquetaAutoDelete.urgente ? 'text-amber-500' : 'text-gray-400'}`}
+                className={`text-xs flex items-center gap-1 ${etiquetaAutoDelete.urgente ? 'text-amber-500' : 'text-muted-foreground'}`}
               >
                 <Timer size={10} />
                 {etiquetaAutoDelete.dias === 1

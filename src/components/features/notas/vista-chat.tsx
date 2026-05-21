@@ -190,18 +190,18 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
           </div>
         )}
         {/* Cabecera */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-white flex-shrink-0">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background flex-shrink-0">
           <Button
             variante="fantasma"
             tamano="sm"
             onClick={() => router.push('/notes')}
-            className="gap-1.5 text-gray-500 flex-shrink-0"
+            className="gap-1.5 text-muted-foreground flex-shrink-0"
           >
             <ArrowLeft size={15} />
             Notas
           </Button>
 
-          <h1 className="font-semibold text-gray-900 flex-1 truncate">{tituloCuaderno}</h1>
+          <h1 className="font-semibold text-foreground flex-1 truncate">{tituloCuaderno}</h1>
 
           <div className="flex items-center gap-1 flex-shrink-0">
             <Button
@@ -230,7 +230,7 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
         {/* Zona de mensajes */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
           {elementosTimeline.length === 0 && (
-            <p className="text-center text-sm text-gray-400 mt-10">
+            <p className="text-center text-sm text-muted-foreground mt-10">
               Aun no hay mensajes. Escribe el primero.
             </p>
           )}
@@ -254,7 +254,7 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
         </div>
 
         {/* Zona de entrada */}
-        <div className="border-t border-gray-100 bg-white px-4 py-3 flex items-end gap-2 flex-shrink-0">
+        <div className="border-t border-border bg-background px-4 py-3 flex items-end gap-2 flex-shrink-0">
           <SubirAdjunto subirArchivo={subirArchivo} subiendo={subiendo} />
           <Textarea
             value={textoNuevo}
