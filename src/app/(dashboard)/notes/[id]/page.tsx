@@ -4,6 +4,7 @@ import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getRecordatorioPorId } from '@/lib/queries/reminder.queries'
 import { obtenerEntradas } from '@/lib/queries/notas.queries'
+import { obtenerAdjuntos } from '@/lib/queries/adjuntos.queries'
 import { VistaChatNotas } from '@/components/features/notas/vista-chat'
 import type { CuadernoConPrevia } from '@/types/notas.types'
 
@@ -22,10 +23,11 @@ export default async function PaginaCuaderno({ params }: Props) {
   const { id } = await params
   const user = await requerirUsuario()
 
-  const [categorias, nota, entradas] = await Promise.all([
+  const [categorias, nota, entradas, adjuntos] = await Promise.all([
     getCategorias(),
     getRecordatorioPorId(user.id, id),
     obtenerEntradas(id, user.id),
+    obtenerAdjuntos(id, user.id),
   ])
 
   if (!nota) notFound()
@@ -42,5 +44,11 @@ export default async function PaginaCuaderno({ params }: Props) {
     totalEntradas: entradas.length,
   }
 
-  return <VistaChatNotas cuaderno={cuaderno} entradasIniciales={entradas} />
+  return (
+    <VistaChatNotas
+      cuaderno={cuaderno}
+      entradasIniciales={entradas}
+      adjuntosIniciales={adjuntos}
+    />
+  )
 }

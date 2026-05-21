@@ -14,3 +14,20 @@ export interface CuadernoConPrevia {
   ultimaEntrada: NotaEntrada | null
   totalEntradas: number
 }
+
+export type TipoAdjunto = 'imagen' | 'audio' | 'documento' | 'video'
+
+export interface AdjuntoNota {
+  id: string
+  cuadernoId: string
+  tipo: TipoAdjunto
+  url: string
+  nombreArchivo: string
+  mime: string
+  tamano: number
+  creadoEn: string
+}
+
+export type ElementoTimeline =
+  | { tipo: 'entrada'; datos: NotaEntrada }
+  | { tipo: 'adjunto'; datos: AdjuntoNota }

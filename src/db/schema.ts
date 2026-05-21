@@ -106,6 +106,27 @@ export const notasEntradas = pgTable(
   }),
 )
 
+export const notasAdjuntos = pgTable(
+  'note_attachments',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    cuadernoId: uuid('cuaderno_id')
+      .notNull()
+      .references(() => recordatorios.id, { onDelete: 'cascade' }),
+    tipo: text('tipo').notNull().$type<'imagen' | 'audio' | 'documento' | 'video'>(),
+    url: text('url').notNull(),
+    nombreArchivo: text('nombre_archivo').notNull(),
+    mime: text('mime').notNull(),
+    tamano: integer('tamano').notNull(),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (tabla) => ({
+    idxAdjuntosCuaderno: index('idx_note_attachments_cuaderno').on(tabla.cuadernoId),
+  }),
+)
+
 export const logNotificaciones = pgTable('notification_log', {
   id: uuid('id')
     .primaryKey()
