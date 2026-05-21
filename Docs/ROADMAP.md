@@ -31,6 +31,7 @@ La ola priorizada original (Fases 0-19) esta completa. Las fases 20-23 son aditi
 - **Fase 19 — Landing enlace a GitHub:** Boton secundario "Ver en GitHub" (icono `Github` + texto outline) en el hero de la landing junto a los CTAs principales. Link con icono GitHub en el footer junto al texto del proyecto. Ambos abren el repositorio en nueva pestana.
 - **Fase 20 — Auto-eliminacion de tareas completadas** — migracion `0006_auto_delete_tasks.sql` con columnas `auto_delete_completed_tasks_days` en `profiles` y `completed_at` en `reminders`; `alternarCompletado` graba la fecha de completado; cron `limpiar-tareas` diario a las 03:00 UTC; selector en settings (Nunca / 7 / 30 / 90 dias); countdown ambar en tarjetas cuando quedan 3 dias o menos.
 - **Fase 21 — Entrada por audio en el asistente IA** — endpoint `src/app/api/ai/transcribir/route.ts` con `whisper-large-v3-turbo` y rate-limit 10 req/min; hook `src/hooks/use-audio-recorder.ts` con seleccion de mimeType por compatibilidad, timer, auto-stop a 60 s y manejo de permisos denegados; boton Mic integrado en `CommandPalette` con estados grabando (rojo + timer), procesando (loader purpura) y error inline bajo el header.
+- **Fase 22 — Notas multimedia (22.0–22.D):** 22.0: cuadernos tipo chat WhatsApp con tabla `note_entries` (migracion `0008`). 22.A–22.D: adjuntos multimedia — tabla `note_attachments` (migracion `0009`), `@vercel/blob`, API route `/api/notas/adjunto` con token de subida, actions `registrarAdjunto` y `eliminarAdjunto`, componentes `VisorImagen`, `ReproductorAudio`, `VisorDocumento`, `ReproductorVideo`, `BurbujaAdjunto`, hook `useGrabadorAudioAdjunto`, `SubirAdjunto` con clip+mic. Timeline mezclada ordenada por `creadoEn` en `VistaChatNotas`.
 
 ---
 
@@ -44,23 +45,23 @@ Notas convertidas en cuadernos tipo chat de WhatsApp. Lista de cuadernos con ava
 Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mime, tamano, creado_en)` (creada en 22.A) y la UI; cada una es un PR independiente.
 
 ### Fase 22.A - Imagenes
-- [ ] Migracion `0005_note_attachments.sql`: CREATE TABLE `note_attachments`
-- [ ] Integracion con Vercel Blob (variable `BLOB_READ_WRITE_TOKEN`)
-- [ ] Server action `subirAdjunto` con validacion (JPG/PNG/WebP, max 5MB)
-- [ ] UI: drag & drop o input file, galeria con lightbox
-- [ ] Borrado de adjunto y de blob asociado
+- [x] Migracion `0009_note_attachments.sql`: CREATE TABLE `note_attachments`
+- [x] Integracion con Vercel Blob (variable `BLOB_READ_WRITE_TOKEN`)
+- [x] Server action `registrarAdjunto` con validacion (JPG/PNG/WebP, max 5MB) y `eliminarAdjunto`
+- [x] UI: boton clip + drag-and-drop, lightbox con Dialog
+- [x] Borrado de adjunto y de blob asociado via `del()` de @vercel/blob
 
 ### Fase 22.B - Audios
-- [ ] Aceptar MP3/OGG/WAV; reusar `MediaRecorder` para grabacion in-app
-- [ ] Reproductor con play/pause/seek
+- [x] Aceptar MP3/OGG/WAV/WebM; hook `useGrabadorAudioAdjunto` con `MediaRecorder`
+- [x] Reproductor con play/pause/seek y barra de progreso
 
 ### Fase 22.C - Documentos
-- [ ] Aceptar PDF/DOCX/TXT
-- [ ] Icono por tipo + boton de descarga; preview opcional para PDF
+- [x] Aceptar PDF/DOCX/TXT
+- [x] Icono por tipo + boton de descarga; preview de PDF con `<embed>` en Dialog
 
 ### Fase 22.D - Videos
-- [ ] Aceptar MP4/WebM con limite de tamano
-- [ ] Reproductor inline
+- [x] Aceptar MP4/WebM con limite de 25 MB
+- [x] Reproductor inline con controles nativos
 
 **Done when (toda la fase):** Una nota puede tener texto + cualquier combinacion de imagenes, audios, documentos y videos como un baul personal.
 

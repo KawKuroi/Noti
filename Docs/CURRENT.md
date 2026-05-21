@@ -5,14 +5,22 @@
 
 ## Fase activa
 
-**Activo:** Fase 22 (en progreso — 22.0 completada, pendientes 22.A, 22.B, 22.C, 22.D).
-**Estado general:** Fases 0–21 completadas + Fase 22.0 completada. La ola priorizada original esta cerrada. Proximas fases son aditivas.
+**Activo:** Fase 23 (mejoras futuras no priorizadas — ver ROADMAP).
+**Estado general:** Fases 0–22 completadas. La ola priorizada original esta cerrada. Proximas fases son aditivas no priorizadas.
+
+## Fase 22 completada (sesion 2026-05-21)
+
+- **Adjuntos multimedia en cuadernos (22.A–22.D)** — tabla `note_attachments` (migracion `0009_note_attachments.sql` — aplicar manualmente en Supabase); schema Drizzle `notasAdjuntos`; dependencia `@vercel/blob` instalada; API route `/api/notas/adjunto` con `handleUpload` para generacion de token de subida; actions `registrarAdjunto` y `eliminarAdjunto` (borra de BD y de Blob); query `obtenerAdjuntos`; tipos `AdjuntoNota`, `TipoAdjunto`, `ElementoTimeline`; componentes `VisorImagen` (lightbox), `ReproductorAudio` (play/pause/seek), `VisorDocumento` (icono+descarga+preview PDF), `ReproductorVideo` (inline); `BurbujaAdjunto` despacha por tipo; hook `useGrabadorAudioAdjunto` para grabacion de audio como adjunto; `SubirAdjunto` con boton clip, drag-and-drop y boton mic; timeline mezclada en `VistaChatNotas` con entradas y adjuntos ordenados por creadoEn.
 
 ## Fase 22.0 completada (sesion 2026-05-21)
 
 - **Reestructuracion de notas a cuadernos tipo chat** — tabla `note_entries` (migracion `0008_note_entries.sql` — aplicar manualmente en Supabase); schema Drizzle `notasEntradas`; queries `obtenerCuadernos` y `obtenerEntradas`; acciones `crearCuaderno`, `renombrarCuaderno`, `eliminarCuaderno`, `crearEntrada`, `actualizarEntrada`, `eliminarEntrada`; lista de cuadernos en `/notes` estilo WhatsApp con avatar inicial, preview de ultimo mensaje y tiempo relativo; vista de chat en `/notes/[id]` con burbujas indigo alineadas a la derecha, edicion inline, envio con Enter, auto-scroll, renombrar y eliminar cuaderno desde la cabecera; modal de creacion con solo nombre del cuaderno; descripciones existentes migradas como primera entrada.
 
 ## Pendientes manuales bloqueantes
+
+- [ ] Aplicar migracion `src/db/migrations/0009_note_attachments.sql` en el SQL Editor de Supabase (requerida para que la Fase 22.A–22.D funcione en produccion)
+
+- [ ] Agregar variable `BLOB_READ_WRITE_TOKEN` en Vercel Dashboard → Settings → Environment Variables (obtenida en Vercel → Storage → Blob)
 
 - [ ] Aplicar migracion `src/db/migrations/0008_note_entries.sql` en el SQL Editor de Supabase (requerida para que la Fase 22.0 funcione en produccion)
 

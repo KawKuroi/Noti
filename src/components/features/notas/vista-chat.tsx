@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { ArrowLeft, Pencil, Trash2, Send } from 'lucide-react'
@@ -26,21 +26,26 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { BurbujaEntrada } from './burbuja-entrada'
+import { BurbujaAdjunto } from './burbuja-adjunto'
+import { SubirAdjunto } from './subir-adjunto'
 import {
   crearEntrada,
   renombrarCuaderno,
   eliminarCuaderno,
 } from '@/lib/actions/notas.actions'
-import type { CuadernoConPrevia, NotaEntrada } from '@/types/notas.types'
+import { eliminarAdjunto } from '@/lib/actions/adjuntos.actions'
+import type { CuadernoConPrevia, NotaEntrada, AdjuntoNota, ElementoTimeline } from '@/types/notas.types'
 
 interface Props {
   cuaderno: CuadernoConPrevia
   entradasIniciales: NotaEntrada[]
+  adjuntosIniciales: AdjuntoNota[]
 }
 
-export function VistaChatNotas({ cuaderno, entradasIniciales }: Props) {
+export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales }: Props) {
   const router = useRouter()
   const [entradas, setEntradas] = useState<NotaEntrada[]>(entradasIniciales)
+  const [adjuntos, setAdjuntos] = useState<AdjuntoNota[]>(adjuntosIniciales)
   const [textoNuevo, setTextoNuevo] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [tituloCuaderno, setTituloCuaderno] = useState(cuaderno.titulo)
@@ -52,9 +57,22 @@ export function VistaChatNotas({ cuaderno, entradasIniciales }: Props) {
 
   const finRef = useRef<HTMLDivElement>(null)
 
+  const elementosTimeline = useMemo((): ElementoTimeline[] => {
+    const lista: ElementoTimeline[] = [
+      ...entradas.map((e): ElementoTimeline => ({ tipo: 'entrada', datos: e })),
+      ...adjuntos.map((a): ElementoTimeline => ({ tipo: 'adjunto', datos: a })),
+    ]
+    lista.sort((a, b) => {
+      const fechaA = a.tipo === 'entrada' ? a.datos.creadoEn : a.datos.creadoEn
+      const fechaB = b.tipo === 'entrada' ? b.datos.creadoEn : b.datos.creadoEn
+      return new Date(fechaA).getTime() - new Date(fechaB).getTime()
+    })
+    return lista
+  }, [entradas, adjuntos])
+
   useEffect(() => {
     finRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [entradas])
+  }, [elementosTimeline])
 
   const manejarEnviar = useCallback(async () => {
     const limpio = textoNuevo.trim()
@@ -78,6 +96,19 @@ export function VistaChatNotas({ cuaderno, entradasIniciales }: Props) {
 
   function manejarEliminarEntrada(id: string) {
     setEntradas((prev) => prev.filter((e) => e.id !== id))
+  }
+
+  function manejarAdjuntoSubido(adjunto: AdjuntoNota) {
+    setAdjuntos((prev) => [...prev, adjunto])
+  }
+
+  async function manejarEliminarAdjunto(id: string) {
+    const resultado = await eliminarAdjunto(id)
+    if (resultado.ok) {
+      setAdjuntos((prev) => prev.filter((a) => a.id !== id))
+    } else {
+      toast.error(resultado.error ?? 'No se pudo eliminar el adjunto')
+    }
   }
 
   async function manejarRenombrar() {
@@ -150,24 +181,33 @@ export function VistaChatNotas({ cuaderno, entradasIniciales }: Props) {
 
         {/* Zona de mensajes */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-          {entradas.length === 0 && (
+          {elementosTimeline.length === 0 && (
             <p className="text-center text-sm text-gray-400 mt-10">
               Aun no hay mensajes. Escribe el primero.
             </p>
           )}
-          {entradas.map((entrada) => (
-            <BurbujaEntrada
-              key={entrada.id}
-              entrada={entrada}
-              onActualizar={manejarActualizarEntrada}
-              onEliminar={manejarEliminarEntrada}
-            />
-          ))}
+          {elementosTimeline.map((elemento) =>
+            elemento.tipo === 'entrada' ? (
+              <BurbujaEntrada
+                key={`entrada-${elemento.datos.id}`}
+                entrada={elemento.datos}
+                onActualizar={manejarActualizarEntrada}
+                onEliminar={manejarEliminarEntrada}
+              />
+            ) : (
+              <BurbujaAdjunto
+                key={`adjunto-${elemento.datos.id}`}
+                adjunto={elemento.datos}
+                onEliminar={manejarEliminarAdjunto}
+              />
+            ),
+          )}
           <div ref={finRef} />
         </div>
 
         {/* Zona de entrada */}
         <div className="border-t border-gray-100 bg-white px-4 py-3 flex items-end gap-2 flex-shrink-0">
+          <SubirAdjunto cuadernoId={cuaderno.id} onAdjuntoSubido={manejarAdjuntoSubido} />
           <Textarea
             value={textoNuevo}
             onChange={(e) => setTextoNuevo(e.target.value)}
@@ -176,12 +216,12 @@ export function VistaChatNotas({ cuaderno, entradasIniciales }: Props) {
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
-                manejarEnviar()
+                void manejarEnviar()
               }
             }}
           />
           <Button
-            onClick={manejarEnviar}
+            onClick={() => void manejarEnviar()}
             disabled={!textoNuevo.trim() || enviando}
             className="flex-shrink-0 h-10 w-10 p-0"
             title="Enviar"
@@ -202,14 +242,14 @@ export function VistaChatNotas({ cuaderno, entradasIniciales }: Props) {
             value={nuevoNombre}
             onChange={(e) => setNuevoNombre(e.target.value)}
             maxLength={100}
-            onKeyDown={(e) => e.key === 'Enter' && manejarRenombrar()}
+            onKeyDown={(e) => e.key === 'Enter' && void manejarRenombrar()}
             autoFocus
           />
           <DialogFooter>
             <Button variante="contorno" onClick={() => setRenombrando(false)}>
               Cancelar
             </Button>
-            <Button onClick={manejarRenombrar} disabled={guardandoNombre || !nuevoNombre.trim()}>
+            <Button onClick={() => void manejarRenombrar()} disabled={guardandoNombre || !nuevoNombre.trim()}>
               {guardandoNombre ? 'Guardando...' : 'Guardar'}
             </Button>
           </DialogFooter>
@@ -222,13 +262,14 @@ export function VistaChatNotas({ cuaderno, entradasIniciales }: Props) {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar cuaderno</AlertDialogTitle>
             <AlertDialogDescription>
-              Se eliminaran todos los mensajes de este cuaderno. Esta accion no se puede deshacer.
+              Se eliminaran todos los mensajes y adjuntos de este cuaderno. Esta accion no se puede
+              deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={manejarEliminarCuaderno}
+              onClick={() => void manejarEliminarCuaderno()}
               disabled={eliminandoCuaderno}
               className="bg-red-500 hover:bg-red-600"
             >
