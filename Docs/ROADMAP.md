@@ -73,7 +73,7 @@ Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mim
 
 ### UX / Productividad
 - [x] Dark mode - Tailwind lo soporta nativamente, impacto visual alto
-- [ ] Optimistic updates en completar/eliminar - el item desaparece visualmente de inmediato sin esperar al servidor
+- [x] Optimistic updates en completar/eliminar - el item desaparece visualmente de inmediato sin esperar al servidor
 - [ ] Infinite scroll en la lista de recordatorios para usuarios con muchos items
 - [ ] Añadir una opción para ordenar los recordatorios segun la fecha, prioridad, estado o categoria
 

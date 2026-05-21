@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useOptimistic, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Check, Pencil, Trash2, RotateCcw, Clock, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -30,9 +30,18 @@ interface Props {
 export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria, diasAutoEliminar, destacado }: Props) {
   const [editarAbierto, setEditarAbierto] = useState(false)
   const [eliminarAbierto, setEliminarAbierto] = useState(false)
-  const [cargando, setCargando] = useState(false)
+  const [pending, startTransition] = useTransition()
   const [mostrarRing, setMostrarRing] = useState(destacado ?? false)
   const tarjetaRef = useRef<HTMLDivElement>(null)
+
+  const [estaCompletado, actualizarCompletado] = useOptimistic(
+    recordatorio.estaCompletado,
+    (_actual: boolean, siguiente: boolean) => siguiente,
+  )
+  const [eliminado, marcarEliminado] = useOptimistic(
+    false,
+    (_actual: boolean, nuevo: boolean) => nuevo,
+  )
 
   useEffect(() => {
     if (!destacado) return
@@ -40,6 +49,8 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
     const t = setTimeout(() => setMostrarRing(false), 3000)
     return () => clearTimeout(t)
   }, [destacado])
+
+  if (eliminado) return null
 
   const categoria = categorias.find((c) => c.id === recordatorio.categoriaId)
   const slug = categoria?.slug ?? 'events'
@@ -60,7 +71,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
   const colorAcento = tipoLanzamiento ? PALETA_LANZAMIENTOS[tipoLanzamiento] : undefined
 
   const etiquetaAutoDelete = (() => {
-    if (!recordatorio.estaCompletado || !recordatorio.completadoEn || !diasAutoEliminar) return null
+    if (!estaCompletado || !recordatorio.completadoEn || !diasAutoEliminar) return null
     const fechaEliminar = new Date(
       new Date(recordatorio.completadoEn).getTime() + diasAutoEliminar * 86400000,
     )
@@ -69,34 +80,36 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
     return { dias: diasRestantes, urgente: diasRestantes <= 3 }
   })()
 
-  async function manejarCompletar() {
-    setCargando(true)
-    const estabaCompletado = recordatorio.estaCompletado
-    const resultado = await alternarCompletado(recordatorio.id)
-    setCargando(false)
-    if (resultado.ok) {
-      if (estabaCompletado) {
-        toast.success('Recordatorio reabierto')
-      } else if (recordatorio.esRecurrente) {
-        toast.success('Avanzado a la proxima ocurrencia')
+  function manejarCompletar() {
+    startTransition(async () => {
+      const estabaCompletado = recordatorio.estaCompletado
+      actualizarCompletado(!estabaCompletado)
+      const resultado = await alternarCompletado(recordatorio.id)
+      if (resultado.ok) {
+        if (estabaCompletado) {
+          toast.success('Recordatorio reabierto')
+        } else if (recordatorio.esRecurrente) {
+          toast.success('Avanzado a la proxima ocurrencia')
+        } else {
+          toast.success('Recordatorio completado')
+        }
       } else {
-        toast.success('Recordatorio completado')
+        toast.error(resultado.error ?? 'No se pudo actualizar el recordatorio')
       }
-    } else {
-      toast.error(resultado.error ?? 'No se pudo actualizar el recordatorio')
-    }
+    })
   }
 
-  async function confirmarEliminar() {
+  function confirmarEliminar() {
     setEliminarAbierto(false)
-    setCargando(true)
-    const resultado = await eliminarRecordatorio(recordatorio.id)
-    setCargando(false)
-    if (resultado.ok) {
-      toast.success('Recordatorio eliminado')
-    } else {
-      toast.error(resultado.error ?? 'No se pudo eliminar el recordatorio')
-    }
+    startTransition(async () => {
+      marcarEliminado(true)
+      const resultado = await eliminarRecordatorio(recordatorio.id)
+      if (resultado.ok) {
+        toast.success('Recordatorio eliminado')
+      } else {
+        toast.error(resultado.error ?? 'No se pudo eliminar el recordatorio')
+      }
+    })
   }
 
   return (
@@ -104,7 +117,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
       <div
         ref={tarjetaRef}
         className={`group flex items-start gap-3 p-4 bg-white rounded-xl border transition-colors ${
-          recordatorio.estaCompletado
+          estaCompletado
             ? 'border-gray-100 opacity-60'
             : 'border-gray-100 hover:border-gray-200'
         } ${mostrarRing ? 'ring-2 ring-purple-400 ring-offset-2' : ''}`}
@@ -114,15 +127,15 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
         {!recordatorio.esRecurrente && (
           <button
             onClick={manejarCompletar}
-            disabled={cargando}
+            disabled={pending}
             title="Marcar como completado"
             className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-              recordatorio.estaCompletado
+              estaCompletado
                 ? 'border-green-500 bg-green-500'
                 : 'border-gray-300 hover:border-gray-500'
             }`}
           >
-            {recordatorio.estaCompletado && <Check size={10} className="text-white" />}
+            {estaCompletado && <Check size={10} className="text-white" />}
           </button>
         )}
 
@@ -131,7 +144,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
           <div className="flex items-start justify-between gap-2">
             <p
               className={`text-sm font-medium text-gray-900 ${
-                recordatorio.estaCompletado ? 'line-through text-gray-400' : ''
+                estaCompletado ? 'line-through text-gray-400' : ''
               }`}
             >
               {recordatorio.titulo}
@@ -151,7 +164,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
                 variante="fantasma"
                 tamano="icono"
                 onClick={() => setEliminarAbierto(true)}
-                disabled={cargando}
+                disabled={pending}
                 title="Eliminar"
                 className="hover:text-red-500"
               >
@@ -250,9 +263,9 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
             <Button
               className="flex-1 bg-red-600 hover:bg-red-700 text-white"
               onClick={confirmarEliminar}
-              disabled={cargando}
+              disabled={pending}
             >
-              {cargando ? 'Eliminando...' : 'Eliminar'}
+              {pending ? 'Eliminando...' : 'Eliminar'}
             </Button>
           </div>
         </DialogContent>
