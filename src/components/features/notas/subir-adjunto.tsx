@@ -1,107 +1,17 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef } from 'react'
 import { Paperclip, Mic, MicOff, Loader2 } from 'lucide-react'
-import { upload } from '@vercel/blob/client'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useGrabadorAudioAdjunto } from '@/hooks/use-grabador-audio-adjunto'
-import { registrarAdjunto } from '@/lib/actions/adjuntos.actions'
-import type { AdjuntoNota, TipoAdjunto } from '@/types/notas.types'
 
 interface Props {
-  cuadernoId: string
-  onAdjuntoSubido: (adjunto: AdjuntoNota) => void
+  subirArchivo: (archivo: File) => Promise<void>
+  subiendo: boolean
 }
 
-const LIMITE_MB: Record<TipoAdjunto, number> = {
-  imagen: 5,
-  audio: 10,
-  documento: 10,
-  video: 25,
-}
-
-const MIMES_A_TIPO: [string[], TipoAdjunto][] = [
-  [['image/jpeg', 'image/png', 'image/webp'], 'imagen'],
-  [['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/webm'], 'audio'],
-  [
-    [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain',
-    ],
-    'documento',
-  ],
-  [['video/mp4', 'video/webm'], 'video'],
-]
-
-function determinarTipo(mime: string): TipoAdjunto | null {
-  for (const [mimes, tipo] of MIMES_A_TIPO) {
-    if (mimes.includes(mime)) return tipo
-  }
-  return null
-}
-
-export function SubirAdjunto({ cuadernoId, onAdjuntoSubido }: Props) {
+export function SubirAdjunto({ subirArchivo, subiendo }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [subiendo, setSubiendo] = useState(false)
-
-  const subirArchivo = useCallback(
-    async (archivo: File) => {
-      const tipo = determinarTipo(archivo.type)
-      if (!tipo) {
-        toast.error('Tipo de archivo no soportado')
-        return
-      }
-
-      const limiteMb = LIMITE_MB[tipo]
-      if (archivo.size > limiteMb * 1024 * 1024) {
-        toast.error(`El archivo supera el limite de ${limiteMb} MB para ${tipo}`)
-        return
-      }
-
-      setSubiendo(true)
-      try {
-        const nombreUnico = `notas/${cuadernoId}/${Date.now()}-${archivo.name}`
-        const resultado = await upload(nombreUnico, archivo, {
-          access: 'public',
-          handleUploadUrl: '/api/notas/adjunto',
-          clientPayload: JSON.stringify({
-            cuadernoId,
-            tipo,
-            nombreArchivo: archivo.name,
-            tamano: archivo.size,
-          }),
-        })
-
-        const accion = await registrarAdjunto(
-          cuadernoId,
-          tipo,
-          resultado.url,
-          archivo.name,
-          archivo.type,
-          archivo.size,
-        )
-
-        if (accion.ok && accion.adjunto) {
-          onAdjuntoSubido(accion.adjunto)
-        } else {
-          toast.error(accion.error ?? 'Error al guardar el adjunto')
-        }
-      } catch {
-        toast.error('Error al subir el archivo')
-      } finally {
-        setSubiendo(false)
-      }
-    },
-    [cuadernoId, onAdjuntoSubido],
-  )
-
-  function manejarSeleccion(e: React.ChangeEvent<HTMLInputElement>) {
-    const archivo = e.target.files?.[0]
-    if (archivo) void subirArchivo(archivo)
-    e.target.value = ''
-  }
 
   const manejarBlobAudio = useCallback(
     (blob: Blob, mimeType: string) => {
@@ -114,6 +24,12 @@ export function SubirAdjunto({ cuadernoId, onAdjuntoSubido }: Props) {
 
   const { grabando, segundosGrabando, errorGrabacion, iniciarGrabacion, detenerGrabacion } =
     useGrabadorAudioAdjunto(manejarBlobAudio)
+
+  function manejarSeleccion(e: React.ChangeEvent<HTMLInputElement>) {
+    const archivo = e.target.files?.[0]
+    if (archivo) void subirArchivo(archivo)
+    e.target.value = ''
+  }
 
   function alternarGrabacion() {
     if (grabando) {

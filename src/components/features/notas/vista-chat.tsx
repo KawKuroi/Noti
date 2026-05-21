@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowLeft, Pencil, Trash2, Send } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2, Send, Upload } from 'lucide-react'
+import { useSubirAdjunto } from '@/hooks/use-subir-adjunto'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
@@ -36,6 +37,8 @@ import {
 import { eliminarAdjunto } from '@/lib/actions/adjuntos.actions'
 import type { CuadernoConPrevia, NotaEntrada, AdjuntoNota, ElementoTimeline } from '@/types/notas.types'
 
+const DRAG_ACCEPT = 'Files'
+
 interface Props {
   cuaderno: CuadernoConPrevia
   entradasIniciales: NotaEntrada[]
@@ -54,6 +57,8 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
   const [guardandoNombre, setGuardandoNombre] = useState(false)
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
   const [eliminandoCuaderno, setEliminandoCuaderno] = useState(false)
+  const [arrastrando, setArrastrando] = useState(false)
+  const contadorDragRef = useRef(0)
 
   const finRef = useRef<HTMLDivElement>(null)
 
@@ -102,6 +107,37 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
     setAdjuntos((prev) => [...prev, adjunto])
   }
 
+  const { subiendo, subirArchivo } = useSubirAdjunto(cuaderno.id, manejarAdjuntoSubido)
+
+  function manejarDragEnter(e: React.DragEvent) {
+    if (!e.dataTransfer.types.includes(DRAG_ACCEPT)) return
+    e.preventDefault()
+    contadorDragRef.current += 1
+    if (contadorDragRef.current === 1) setArrastrando(true)
+  }
+
+  function manejarDragOver(e: React.DragEvent) {
+    if (!e.dataTransfer.types.includes(DRAG_ACCEPT)) return
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+  }
+
+  function manejarDragLeave(e: React.DragEvent) {
+    if (!e.dataTransfer.types.includes(DRAG_ACCEPT)) return
+    contadorDragRef.current -= 1
+    if (contadorDragRef.current === 0) setArrastrando(false)
+  }
+
+  async function manejarDrop(e: React.DragEvent) {
+    e.preventDefault()
+    contadorDragRef.current = 0
+    setArrastrando(false)
+    const archivos = Array.from(e.dataTransfer.files)
+    for (const archivo of archivos) {
+      await subirArchivo(archivo)
+    }
+  }
+
   async function manejarEliminarAdjunto(id: string) {
     const resultado = await eliminarAdjunto(id)
     if (resultado.ok) {
@@ -140,7 +176,19 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
 
   return (
     <>
-      <div className="flex flex-col h-full">
+      <div
+        className="flex flex-col h-full relative"
+        onDragEnter={manejarDragEnter}
+        onDragOver={manejarDragOver}
+        onDragLeave={manejarDragLeave}
+        onDrop={(e) => void manejarDrop(e)}
+      >
+        {arrastrando && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-indigo-400 bg-indigo-50/90 pointer-events-none">
+            <Upload size={32} className="text-indigo-500" />
+            <p className="text-sm font-medium text-indigo-600">Suelta los archivos para adjuntarlos</p>
+          </div>
+        )}
         {/* Cabecera */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-white flex-shrink-0">
           <Button
@@ -207,7 +255,7 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
 
         {/* Zona de entrada */}
         <div className="border-t border-gray-100 bg-white px-4 py-3 flex items-end gap-2 flex-shrink-0">
-          <SubirAdjunto cuadernoId={cuaderno.id} onAdjuntoSubido={manejarAdjuntoSubido} />
+          <SubirAdjunto subirArchivo={subirArchivo} subiendo={subiendo} />
           <Textarea
             value={textoNuevo}
             onChange={(e) => setTextoNuevo(e.target.value)}
