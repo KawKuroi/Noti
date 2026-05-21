@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { Toaster } from 'sonner'
 import './globals.css'
 import { RegistrarSW } from '@/components/features/registrar-sw'
+import { ProvedorTema } from '@/components/providers/proveedor-tema'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -49,14 +50,16 @@ interface Props {
 
 export default function LayoutRaiz({ children }: Props) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
       </head>
       <body className={inter.className}>
-        <RegistrarSW />
-        {children}
-        <Toaster richColors position="top-right" />
+        <ProvedorTema>
+          <RegistrarSW />
+          {children}
+          <Toaster richColors position="top-right" />
+        </ProvedorTema>
       </body>
     </html>
   )

@@ -72,24 +72,18 @@ Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mim
 **No priorizado - oportunidades de mejora identificadas:**
 
 ### UX / Productividad
-- [ ] Dark mode - Tailwind lo soporta nativamente, impacto visual alto
-- [ ] Drag & drop para reordenar recordatorios dentro de una categoria
+- [x] Dark mode - Tailwind lo soporta nativamente, impacto visual alto
 - [ ] Optimistic updates en completar/eliminar - el item desaparece visualmente de inmediato sin esperar al servidor
-- [ ] Paginacion o infinite scroll en la lista de recordatorios para usuarios con muchos items
+- [ ] Infinite scroll en la lista de recordatorios para usuarios con muchos items
+- [ ] Añadir una opción para ordenar los recordatorios segun la fecha, prioridad, estado o categoria
 
 ### Notificaciones y segundo plano
 - [ ] PWA Widget API (Windows 11 + Android) - widget nativo en la pantalla de inicio con los proximos recordatorios del dia (experimental, requiere Edge/Chrome reciente)
-- [ ] Share Target API - recibir texto desde otras apps para crear un recordatorio directamente
 - [ ] Recordatorio de cumpleanos con cuenta regresiva ("Faltan 3 dias para el cumpleanos de Juan")
 
 ### IA y contenido
-- [ ] Asistente IA conversacional en el dashboard (no solo single-shot) - historial de conversacion para refinar recordatorios
 - [ ] Deteccion automatica de duplicados al crear con IA - avisar si ya existe un recordatorio similar
 - [ ] Sugerencias de categoria inteligente al tipear en el formulario manual
-
-### Estadisticas
-- [ ] Pagina de estadisticas: recordatorios completados por semana, racha de dias activos, categoria mas usada
-- [ ] Resumen semanal - push notification cada domingo con el resumen de la semana pasada y los proximos 7 dias
 
 ### Tecnico
 - [ ] Internacionalizacion (i18n) - soporte para ingles ademas de espanol

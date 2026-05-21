@@ -16,7 +16,7 @@ export default async function LayoutDashboard({ children }: Props) {
 
   return (
     <AsistenteProvider>
-      <div className="flex h-screen overflow-hidden bg-gray-50">
+      <div className="flex h-screen overflow-hidden bg-background">
         <Sidebar categorias={categorias} usuario={user} nombrePerfil={perfil?.nombreMostrado} />
         <main className="flex-1 overflow-y-auto px-6 pt-10 pb-6">{children}</main>
       </div>

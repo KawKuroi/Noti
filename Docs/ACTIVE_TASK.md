@@ -2,97 +2,51 @@
 
 ## Solicitud original (usuario, 2026-05-21)
 
-> Ejecuta todo el current, es decir todas las secciones de la fase 22
+> Ve en orden parte por parte (Fase 23 — primer item: Dark mode)
 
 ## 1. Contexto y Archivos Afectados
 
-Fases 22.A + 22.B + 22.C + 22.D implementan adjuntos multimedia en los cuadernos de notas.
-`note_attachments` se crea en 22.A y cada sub-fase agrega soporte para un tipo de archivo.
-Los adjuntos pertenecen al cuaderno (FK cuaderno_id → reminders.id), se muestran como burbujas
-en la misma timeline que los mensajes de texto, mezclados cronologicamente.
+Dark mode via `next-themes` + variables CSS semánticas de shadcn/ui.
+`tailwind.config.ts` ya tiene `darkMode: ['class']`.
+`globals.css` tiene variables `:root` pero sin bloque `.dark`.
+El shell (sidebar + layout dashboard) usa clases gray hardcodeadas que se migran
+a tokens semánticos (bg-background, text-foreground, border-border, etc.) para que
+el toggle de tema las invierta automáticamente.
+El toggle (Sol/Luna) se ubica en el footer del sidebar junto al engranaje.
 
-La subida se hace client-side via `@vercel/blob/client` (upload) para evitar el limite de 4.5 MB
-de funciones serverless. El endpoint `/api/notas/adjunto` genera el token de carga con validaciones
-de tipo y tamano. Tras el upload, el cliente llama a la action `registrarAdjunto` para escribir la
-fila en BD y revalidar la ruta.
-
-Limites por tipo: imagen 5 MB, audio 10 MB, documento 10 MB, video 25 MB.
-
-Justificacion de exceder 5 archivos: la tarea abarca 4 sub-fases completas (22.A–22.D) con
-infraestructura de BD, API, 4 visualizadores, hook de grabacion y componente de subida.
-
-Archivos directamente involucrados (17):
-- `src/db/migrations/0009_note_attachments.sql` — nueva tabla con RLS
-- `src/db/schema.ts` — agregar tabla notasAdjuntos
-- `src/types/notas.types.ts` — agregar AdjuntoNota y ElementoTimeline
-- `src/lib/queries/adjuntos.queries.ts` — obtenerAdjuntos (nuevo)
-- `src/lib/actions/adjuntos.actions.ts` — registrarAdjunto, eliminarAdjunto (nuevo)
-- `src/app/api/notas/adjunto/route.ts` — handleUpload token endpoint (nuevo)
-- `src/components/features/notas/visor-imagen.tsx` — lightbox para imagenes (nuevo)
-- `src/components/features/notas/reproductor-audio.tsx` — player audio play/pause/seek (nuevo)
-- `src/components/features/notas/visor-documento.tsx` — icono + descarga + preview PDF (nuevo)
-- `src/components/features/notas/reproductor-video.tsx` — video player inline (nuevo)
-- `src/components/features/notas/burbuja-adjunto.tsx` — burbuja de adjunto por tipo (nuevo)
-- `src/hooks/use-grabador-audio-adjunto.ts` — graba audio y devuelve blob para adjunto (nuevo)
-- `src/components/features/notas/subir-adjunto.tsx` — boton clip + drag&drop + boton mic (nuevo)
-- `src/components/features/notas/vista-chat.tsx` — merge timeline entradas+adjuntos, boton subir
-- `src/app/(dashboard)/notes/[id]/page.tsx` — fetch adjuntos + pasar al componente
-- `.env.example` — agregar BLOB_READ_WRITE_TOKEN [HECHO]
-- `package.json` — dependencia @vercel/blob [HECHO]
+Archivos directamente involucrados (5 + 1 nuevo):
+- `src/app/globals.css` — agregar bloque .dark con variables oscuras estándar shadcn/ui
+- `src/components/providers/proveedor-tema.tsx` — nuevo: wrapper cliente de ThemeProvider de next-themes
+- `src/app/layout.tsx` — envolver con ProvedorTema; agregar suppressHydrationWarning al html
+- `src/components/features/sidebar.tsx` — reemplazar clases gray por tokens semánticos; agregar botón toggle en el footer
+- `src/app/(dashboard)/layout.tsx` — reemplazar bg-gray-50 por bg-background
 
 ## 3. Reporte de Pruebas
 
 **Estado:** [APROBADO]
 
-- **Cumplimiento funcional:** tabla `note_attachments` con RLS y migration `0009`; schema Drizzle `notasAdjuntos`; tipos `AdjuntoNota`, `TipoAdjunto`, `ElementoTimeline`; query `obtenerAdjuntos`; actions `registrarAdjunto` (con validacion de URL de Blob) y `eliminarAdjunto` (borra de BD y de Blob); API route `/api/notas/adjunto` con `handleUpload` de `@vercel/blob/client`; componentes `VisorImagen` (lightbox Dialog), `ReproductorAudio` (play/pause/seek), `VisorDocumento` (icono+descarga+preview PDF), `ReproductorVideo` (video inline); `BurbujaAdjunto` despacha por tipo; `useGrabadorAudioAdjunto` graba y devuelve Blob sin Whisper; `SubirAdjunto` con boton clip + boton mic + upload via `@vercel/blob/client`; `VistaChatNotas` merge timeline entradas+adjuntos por creadoEn ASC con `useMemo`; `notes/[id]/page.tsx` carga adjuntos en el `Promise.all`.
-- **Espanol absoluto:** identificadores: `notasAdjuntos`, `cuadernoId`, `nombreArchivo`, `tipoAdjunto`, `AdjuntoNota`, `ElementoTimeline`, `VisorImagen`, `ReproductorAudio`, `VisorDocumento`, `ReproductorVideo`, `BurbujaAdjunto`, `SubirAdjunto`, `useGrabadorAudioAdjunto`, `registrarAdjunto`, `eliminarAdjunto`, `obtenerAdjuntos`, `manejarAdjuntoSubido`, `manejarEliminarAdjunto`, `elementosTimeline`, `subirArchivo`, `manejarBlobAudio`, `formatearTiempo`.
-- **Seguridad:** `registrarAdjunto` valida URL con `urlEsDeBlob()` (patron *.vercel-storage.com); `onBeforeGenerateToken` verifica auth y propiedad del cuaderno; `eliminarAdjunto` verifica propiedad via JOIN; ningun secreto hardcodeado; `BLOB_READ_WRITE_TOKEN` solo via proceso.env.
-- **TSC:** `npx tsc --noEmit` — cero errores.
-- **Linter:** `npx next lint` — cero warnings.
-- **Sin `any`:** verificado por grep en todos los archivos nuevos.
-- **Nota UI:** archivos `.tsx` bajo `src/components/features/notas/` y `src/app/(dashboard)/notes/[id]/` — requiere validacion visual en navegador y aplicacion manual de migracion `0009_note_attachments.sql` en Supabase.
+- **Cumplimiento funcional:** `next-themes` instalado; bloque `.dark {}` con variables shadcn/ui estándar en `globals.css`; `ProvedorTema` wrapper cliente creado; `layout.tsx` envuelve con `ProvedorTema` y tiene `suppressHydrationWarning`; `sidebar.tsx` usa tokens semánticos (`bg-background`, `text-foreground`, `border-border`, `bg-accent`, `text-muted-foreground`) con botón Sol/Luna en el footer; `(dashboard)/layout.tsx` usa `bg-background`.
+- **Español absoluto:** `ProvedorTema`, `alternarTema`, `proveedor-tema.tsx` — todos en español.
+- **Seguridad:** sin secretos hardcodeados; sin `any`.
+- **TSC:** cero errores.
+- **Linter:** cero warnings.
+- **Ajuste post-feedback:** toggle reubicado a `/settings` (sección Apariencia con select Claro/Oscuro/Sistema); sidebar sin botón de tema; `settings/page.tsx` migrado a tokens semánticos (`bg-card`, `border-border`, `text-foreground`, `text-muted-foreground`); `formulario-apariencia.tsx` creado.
+- **Nota UI:** archivos `.tsx` modificados bajo `src/components/features/` y `src/app/` — requiere validación visual en navegador.
 
 ## 2. Plan de Accion Detallado
 
-### Bloque 1 - Base de datos
+### Bloque 1 - Infraestructura de tema
 
-- [x] **Paso 1: `src/db/migrations/0009_note_attachments.sql`** CREATE TABLE note_attachments con columnas id UUID PK, cuaderno_id UUID NOT NULL REFERENCES reminders(id) ON DELETE CASCADE, tipo TEXT NOT NULL CHECK (tipo IN ('imagen','audio','documento','video')), url TEXT NOT NULL, nombre_archivo TEXT NOT NULL, mime TEXT NOT NULL, tamano INTEGER NOT NULL, creado_en TIMESTAMPTZ NOT NULL DEFAULT NOW(). CREATE INDEX idx_note_attachments_cuaderno ON note_attachments(cuaderno_id). ALTER TABLE ENABLE ROW LEVEL SECURITY. CREATE POLICY para que el usuario solo vea sus adjuntos via cuaderno_id IN (SELECT id FROM reminders WHERE user_id = auth.uid()).
+- [x] **Paso 1: instalar next-themes** Ejecutar `npm install next-themes` en el directorio del proyecto.
 
-- [x] **Paso 2: `src/db/schema.ts`** Agregar exportacion `notasAdjuntos` con campos id, cuadernoId (FK→recordatorios.id CASCADE), tipo ($type<'imagen'|'audio'|'documento'|'video'>), url, nombreArchivo, mime, tamano (integer), creadoEn. Agregar index idxAdjuntosCuaderno.
+- [x] **Paso 2: `src/app/globals.css`** Agregar bloque `.dark {}` con las variables CSS oscuras estándar de shadcn/ui: --background: 222.2 84% 4.9%; --foreground: 210 40% 98%; --card: 222.2 84% 4.9%; --card-foreground: 210 40% 98%; --popover: 222.2 84% 4.9%; --popover-foreground: 210 40% 98%; --primary: 210 40% 98%; --primary-foreground: 222.2 47.4% 11.2%; --secondary: 217.2 32.6% 17.5%; --secondary-foreground: 210 40% 98%; --muted: 217.2 32.6% 17.5%; --muted-foreground: 215 20.2% 65.1%; --accent: 217.2 32.6% 17.5%; --accent-foreground: 210 40% 98%; --destructive: 0 62.8% 30.6%; --destructive-foreground: 210 40% 98%; --border: 217.2 32.6% 17.5%; --input: 217.2 32.6% 17.5%; --ring: 212.7 26.8% 83.9%.
 
-### Bloque 2 - Tipos, queries y acciones
+- [x] **Paso 3: `src/components/providers/proveedor-tema.tsx`** Crear nuevo componente cliente con 'use client'. Importar ThemeProvider de 'next-themes'. Exportar componente `ProvedorTema({ children }: { children: React.ReactNode })` que retorna `<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>{children}</ThemeProvider>`.
 
-- [x] **Paso 3: `src/types/notas.types.ts`** Agregar interfaz AdjuntoNota { id, cuadernoId, tipo ('imagen'|'audio'|'documento'|'video'), url, nombreArchivo, mime, tamano, creadoEn }. Agregar tipo ElementoTimeline = { tipo: 'entrada'; datos: NotaEntrada } | { tipo: 'adjunto'; datos: AdjuntoNota }.
+- [x] **Paso 4: `src/app/layout.tsx`** Importar ProvedorTema. Agregar `suppressHydrationWarning` al elemento `<html>`. Envolver `<body>` con `<ProvedorTema>`.
 
-- [x] **Paso 4: `src/lib/queries/adjuntos.queries.ts`** Crear archivo nuevo. Funcion `obtenerAdjuntos(cuadernoId: string, usuarioId: string): Promise<AdjuntoNota[]>`: verificar propiedad del cuaderno (SELECT recordatorios WHERE id AND usuarioId), luego SELECT notasAdjuntos WHERE cuadernoId ORDER BY creadoEn ASC.
+### Bloque 2 - Shell del dashboard
 
-- [x] **Paso 5: `src/lib/actions/adjuntos.actions.ts`** Crear archivo nuevo con 'use server'. (a) `registrarAdjunto(cuadernoId, tipo, url, nombreArchivo, mime, tamano)`: verificar auth, verificar propiedad del cuaderno, validar que url empiece con 'https://' y termine en dominio de blob de vercel (incluir patron *.vercel-storage.com y *.public.blob.vercel-storage.com), INSERT notasAdjuntos, UPDATE recordatorios.actualizadoEn, revalidatePath('/notes' y `/notes/${cuadernoId}`), retornar { ok, adjunto? }. (b) `eliminarAdjunto(id)`: verificar auth, buscar adjunto via JOIN con recordatorios para verificar propiedad, guardar la url, DELETE de notasAdjuntos, llamar `del(url)` de @vercel/blob para borrar del storage, revalidatePath, retornar { ok }.
+- [x] **Paso 5: `src/components/features/sidebar.tsx`** Reemplazar todas las clases gray hardcodeadas por tokens semánticos: `bg-white` → `bg-background`; `border-gray-100` → `border-border`; `text-gray-900` → `text-foreground`; `text-gray-600` → `text-muted-foreground`; `bg-gray-100` → `bg-accent`; `hover:bg-gray-50` → `hover:bg-accent/50`; `hover:text-gray-900` → `hover:text-foreground`; `text-gray-400` → `text-muted-foreground`; `text-gray-700` → `text-foreground`; `bg-gray-50` (en hover) → `hover:bg-accent/50`. Agregar importaciones de `Sun`, `Moon` y `useTheme` de 'next-themes'. En el footer, agregar botón de toggle al lado del engranaje: cuando tema es 'dark' mostrar icono Sun, sino Moon; onClick llama setTheme('dark'/'light').
 
-### Bloque 3 - API route
-
-- [x] **Paso 6: `src/app/api/notas/adjunto/route.ts`** Crear route handler. POST handler con `handleUpload` de @vercel/blob/client. En `onBeforeGenerateToken(pathname, clientPayload)`: obtener user con createClient de supabase/server; parsear clientPayload como { cuadernoId, tipo, nombreArchivo, tamano }; validar que tipo sea uno de los 4 validos; definir limites { imagen: 5MB, audio: 10MB, documento: 10MB, video: 25MB }; validar tamano contra limite; validar propiedad del cuaderno via Drizzle (SELECT recordatorios WHERE id=cuadernoId AND usuarioId); retornar { allowedContentTypes (segun tipo), maximumSizeInBytes, tokenPayload: JSON.stringify({...datos, usuarioId}) }. El onUploadCompleted solo llama revalidatePath (la insercion en BD la hace el cliente via registrarAdjunto). Retornar NextResponse.json(jsonResponse). En caso de error retornar NextResponse.json({ error }, { status: 400 }).
-
-### Bloque 4 - Componentes de visualizacion
-
-- [x] **Paso 7: `src/components/features/notas/visor-imagen.tsx`** Componente cliente `VisorImagen({ src, nombreArchivo, onEliminar? })`. Imagen thumbnail 200px clickeable que abre Dialog lightbox con imagen a tamano completo (max-w-3xl), boton cerrar y boton opcional de eliminar. Usar `<img>` nativo (no next/image) para evitar configuracion de dominios.
-
-- [x] **Paso 8: `src/components/features/notas/reproductor-audio.tsx`** Componente cliente `ReproductorAudio({ src, nombreArchivo, onEliminar? })`. Usa un `<audio>` ref invisible. Estado: reproduciendo, progreso (currentTime), duracion. Controles: boton play/pause (icono Play/Pause), barra de progreso tipo `<input type="range">` que actualiza currentTime via ref.current.currentTime. Muestra nombre del archivo y tiempo formato mm:ss. Boton opcional de eliminar. Llama `loadedmetadata` para obtener duracion.
-
-- [x] **Paso 9: `src/components/features/notas/visor-documento.tsx`** Componente cliente `VisorDocumento({ src, nombreArchivo, mime, onEliminar? })`. Muestra icono por tipo: FileText (PDF), FileType (DOCX), File (TXT). Nombre de archivo truncado. Boton de descarga (<a href={src} download={nombreArchivo}>). Para PDF: boton "Ver" que abre Dialog con <embed src={src} type="application/pdf"> a full height. Boton opcional de eliminar.
-
-- [x] **Paso 10: `src/components/features/notas/reproductor-video.tsx`** Componente cliente `ReproductorVideo({ src, nombreArchivo, onEliminar? })`. `<video controls src={src}>` con className max-w-full rounded-lg. Boton opcional de eliminar debajo. Tamano maximo en el chat: max-w-xs.
-
-- [x] **Paso 11: `src/components/features/notas/burbuja-adjunto.tsx`** Componente cliente `BurbujaAdjunto({ adjunto: AdjuntoNota, onEliminar })`. Burbuja alineada a la derecha (igual que BurbujaEntrada). Renderiza el componente correspondiente segun `adjunto.tipo`: 'imagen' → VisorImagen, 'audio' → ReproductorAudio, 'documento' → VisorDocumento, 'video' → ReproductorVideo. Pasa `onEliminar` al subcomponente. Muestra la hora relativa debajo de la burbuja igual que BurbujaEntrada.
-
-### Bloque 5 - Hook de grabacion y componente de subida
-
-- [x] **Paso 12: `src/hooks/use-grabador-audio-adjunto.ts`** Hook cliente `useGrabadorAudioAdjunto(onBlobListo: (blob: Blob, mimeType: string) => void)`. Reutiliza la logica de MediaRecorder de useAudioRecorder pero sin la llamada a Whisper. Estado: grabando (bool), segundosGrabando, error. Al detenerse, construye el Blob y llama onBlobListo(blob, mimeType). Auto-detiene a 60 s. Retorna { grabando, segundosGrabando, error, iniciarGrabacion, detenerGrabacion }.
-
-- [x] **Paso 13: `src/components/features/notas/subir-adjunto.tsx`** Componente cliente `SubirAdjunto({ cuadernoId, onAdjuntoSubido })`. Estado: subiendo (bool), errorSubida. Renderiza dos controles: (a) input type="file" oculto + Button con Paperclip que lo activa (acepta imagenes, audios, documentos, videos segun mimeTypes permitidos); (b) Button con Mic que usa useGrabadorAudioAdjunto. Funcion `subirArchivo(archivo: File, tipo: TipoAdjunto)`: validar tamano segun tipo (5/10/10/25 MB), llamar `upload(nombreUnico, archivo, { access: 'public', handleUploadUrl: '/api/notas/adjunto', clientPayload: JSON.stringify({cuadernoId, tipo, nombreArchivo: archivo.name, tamano: archivo.size}) })` de @vercel/blob/client, luego llamar `registrarAdjunto(...)` con el url devuelto, llamar onAdjuntoSubido con el AdjuntoNota resultante. Mostrar Loader mientras sube. Toast de error si falla.
-
-### Bloque 6 - Integracion en chat
-
-- [x] **Paso 14: `src/app/(dashboard)/notes/[id]/page.tsx`** Agregar importacion de `obtenerAdjuntos`. En el Promise.all, incluir `obtenerAdjuntos(id, user.id)`. Pasar `adjuntosIniciales={adjuntos}` a VistaChatNotas.
-
-- [x] **Paso 15: `src/components/features/notas/vista-chat.tsx`** (a) Agregar prop `adjuntosIniciales: AdjuntoNota[]`. (b) Estado `adjuntos` iniciado desde prop. (c) Funcion `manejarAdjuntoSubido(adj: AdjuntoNota)` que agrega al estado. (d) Funcion `manejarEliminarAdjunto(id)` que llama `eliminarAdjunto` y filtra estado. (e) Construir `elementosTimeline: ElementoTimeline[]` = mezcla de entradas y adjuntos ordenados por creadoEn ASC. (f) Zona de mensajes renderiza elementosTimeline: cada 'entrada' → BurbujaEntrada, cada 'adjunto' → BurbujaAdjunto con onEliminar=manejarEliminarAdjunto. (g) En zona de entrada, agregar `<SubirAdjunto cuadernoId={cuaderno.id} onAdjuntoSubido={manejarAdjuntoSubido} />` al lado del Textarea+boton enviar.
-
+- [x] **Paso 6: `src/app/(dashboard)/layout.tsx`** Reemplazar `bg-gray-50` por `bg-background` en el div raíz del layout.

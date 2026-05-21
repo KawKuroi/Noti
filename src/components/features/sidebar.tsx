@@ -43,7 +43,6 @@ interface Props {
 export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
   const ruta = usePathname()
   const [herramientasAbiertas, setHerramientasAbiertas] = useState(true)
-
   const categoriasGenerales = categorias.filter(
     (c) =>
       !(SLUGS_LANZAMIENTO as readonly string[]).includes(c.slug) &&
@@ -63,9 +62,9 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
   }
 
   return (
-    <aside className="w-60 h-screen bg-white border-r border-gray-100 flex flex-col sticky top-0">
-      <div className="px-6 py-5 border-b border-gray-100">
-        <span className="text-lg font-bold text-gray-900">Noti</span>
+    <aside className="w-60 h-screen bg-background border-r border-border flex flex-col sticky top-0">
+      <div className="px-6 py-5 border-b border-border">
+        <span className="text-lg font-bold text-foreground">Noti</span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
@@ -74,8 +73,8 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
           className={cn(
             'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
             ruta === '/inicio'
-              ? 'bg-gray-100 text-gray-900'
-              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              ? 'bg-accent text-foreground'
+              : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
           )}
         >
           <LayoutDashboard size={16} />
@@ -84,14 +83,14 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
 
         <button
           onClick={abrirBusqueda}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         >
           <Search size={16} />
           Buscar
         </button>
 
         <div className="pt-3 pb-1 px-3">
-          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
             Categorias
           </span>
         </div>
@@ -101,8 +100,8 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
           className={cn(
             'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
             ruta === '/lanzamientos'
-              ? 'bg-gray-100 text-gray-900'
-              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              ? 'bg-accent text-foreground'
+              : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
           )}
         >
           <Clapperboard size={16} />
@@ -121,8 +120,8 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                 estaActiva
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:bg-[color:var(--cat-color)]/10 hover:text-[color:var(--cat-color)]',
+                  ? 'bg-accent text-foreground'
+                  : 'text-muted-foreground hover:bg-[color:var(--cat-color)]/10 hover:text-[color:var(--cat-color)]',
               )}
             >
               {Icono && (
@@ -140,13 +139,13 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
             onClick={() => setHerramientasAbiertas((prev) => !prev)}
             className="flex items-center justify-between w-full group"
           >
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Herramientas
             </span>
             {herramientasAbiertas ? (
-              <ChevronDown size={12} className="text-gray-400 group-hover:text-gray-600" />
+              <ChevronDown size={12} className="text-muted-foreground group-hover:text-foreground" />
             ) : (
-              <ChevronRight size={12} className="text-gray-400 group-hover:text-gray-600" />
+              <ChevronRight size={12} className="text-muted-foreground group-hover:text-foreground" />
             )}
           </button>
         </div>
@@ -158,8 +157,8 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                 ruta === '/calendar'
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                  ? 'bg-accent text-foreground'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
               )}
             >
               <Calendar size={16} />
@@ -171,8 +170,8 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                 ruta === '/notes' || ruta.startsWith('/notes/')
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                  ? 'bg-accent text-foreground'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
               )}
             >
               <StickyNote size={16} />
@@ -182,15 +181,15 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
         )}
       </nav>
 
-      <div className="px-3 py-3 border-t border-gray-100 flex items-center gap-2">
-        <span className="flex-1 text-sm font-medium text-gray-700 px-3 truncate">{nombre}</span>
+      <div className="px-3 py-3 border-t border-border flex items-center gap-2">
+        <span className="flex-1 text-sm font-medium text-foreground px-3 truncate">{nombre}</span>
         <Link
           href="/settings"
           className={cn(
             'p-2 rounded-lg transition-colors shrink-0',
             ruta === '/settings'
-              ? 'bg-gray-100 text-gray-900'
-              : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50',
+              ? 'bg-accent text-foreground'
+              : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
           )}
           aria-label="Configuracion"
         >

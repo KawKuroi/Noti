@@ -6,7 +6,11 @@
 ## Fase activa
 
 **Activo:** Fase 23 (mejoras futuras no priorizadas — ver ROADMAP).
-**Estado general:** Fases 0–22 completadas. La ola priorizada original esta cerrada. Proximas fases son aditivas no priorizadas.
+**Estado general:** Fases 0–22 completadas. Fase 23 en progreso (dark mode completado).
+
+## Fase 23 — Dark mode (sesion 2026-05-21)
+
+- **Dark mode (23.1)** — `next-themes` instalado; variables CSS `.dark {}` con tokens shadcn/ui estándar en `globals.css`; `ProvedorTema` cliente en `src/components/providers/`; `layout.tsx` envuelve con el proveedor y tiene `suppressHydrationWarning`; sidebar migrado a tokens semánticos (`bg-background`, `text-foreground`, `border-border`, `bg-accent`, `text-muted-foreground`); `(dashboard)/layout.tsx` usa `bg-background`; sección "Apariencia" en `/settings` con selector Claro/Oscuro/Sistema (`formulario-apariencia.tsx`); `settings/page.tsx` migrado a tokens semánticos.
 
 ## Fase 22 completada (sesion 2026-05-21)
 
