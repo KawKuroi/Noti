@@ -35,7 +35,7 @@ export function FormularioPerfil({ nombreActual, zonaHorariaActual }: Props) {
   return (
     <form onSubmit={manejarEnvio} className="space-y-4">
       <div className="space-y-1">
-        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="nombre" className="block text-sm font-medium text-foreground">
           Nombre
         </label>
         <input
@@ -45,7 +45,7 @@ export function FormularioPerfil({ nombreActual, zonaHorariaActual }: Props) {
           onChange={(e) => setNombre(e.target.value)}
           maxLength={60}
           placeholder="Tu nombre"
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+          className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
@@ -57,7 +57,7 @@ export function FormularioPerfil({ nombreActual, zonaHorariaActual }: Props) {
           id="zona"
           value={zona}
           onChange={(e) => setZona(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900"
+          className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
           {ZONAS_HORARIAS_LATAM.map((tz) => (
             <option key={tz} value={tz}>
@@ -70,7 +70,7 @@ export function FormularioPerfil({ nombreActual, zonaHorariaActual }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+        className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
       >
         {pending ? 'Guardando...' : 'Guardar cambios'}
       </button>

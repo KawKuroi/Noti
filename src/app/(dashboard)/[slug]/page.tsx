@@ -65,8 +65,8 @@ export default async function PaginaCategoria({ params, searchParams }: Props) {
             </div>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{categoria.nombre}</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h1 className="text-2xl font-bold text-foreground">{categoria.nombre}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
               {recordatorios.length} recordatorio{recordatorios.length !== 1 ? 's' : ''}
             </p>
           </div>

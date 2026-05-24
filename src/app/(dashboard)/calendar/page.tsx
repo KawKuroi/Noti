@@ -60,8 +60,8 @@ export default async function PaginaCalendario({ searchParams }: Props) {
   return (
     <div className="flex flex-col gap-6 h-full">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Calendario</h1>
-        <p className="text-sm text-gray-500 mt-1">Vista mensual y semanal de todos tus recordatorios.</p>
+        <h1 className="text-2xl font-bold text-foreground">Calendario</h1>
+        <p className="text-sm text-muted-foreground mt-1">Vista mensual y semanal de todos tus recordatorios.</p>
       </div>
 
       <div className="flex-1 min-h-0">

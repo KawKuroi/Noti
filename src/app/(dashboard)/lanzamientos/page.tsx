@@ -32,14 +32,14 @@ export default async function PaginaLanzamientos() {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-50">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/10">
           <span className="text-purple-600">
             <Clapperboard size={20} />
           </span>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Lanzamientos</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-foreground">Lanzamientos</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Peliculas, series, videojuegos, musica y libros.
           </p>
         </div>
@@ -48,7 +48,7 @@ export default async function PaginaLanzamientos() {
       <BarraAsistente />
 
       <section>
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
           Mis lanzamientos seguidos
         </h2>
         <HubLanzamientos datos={datos} todos={todos} categorias={categorias} />
