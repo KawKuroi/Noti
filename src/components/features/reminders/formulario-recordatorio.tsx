@@ -15,6 +15,32 @@ import type { Recordatorio, EstadoAccionRecordatorio } from '@/types/reminder.ty
 
 const estadoInicial: EstadoAccionRecordatorio = { ok: false }
 
+const MAPA_PALABRAS_CLAVE: Array<{ palabras: string[]; slug: string }> = [
+  { palabras: ['cumpleanos', 'cumple', 'birthday', 'aniversario'], slug: 'birthdays' },
+  { palabras: ['estudiar', 'examen', 'clase', 'curso', 'practica', 'aprender'], slug: 'study' },
+  { palabras: ['pelicula', 'film', 'cine', 'estreno', 'movie'], slug: 'movies' },
+  { palabras: ['serie', 'temporada', 'episodio', 'netflix', 'hbo', 'disney', 'streaming'], slug: 'tv' },
+  { palabras: ['juego', 'videojuego', 'game', 'dlc', 'expansion'], slug: 'games' },
+  { palabras: ['libro', 'novela', 'editorial', 'author'], slug: 'books' },
+  { palabras: ['album', 'disco', 'cancion', 'concierto', 'musica', 'artista', 'banda'], slug: 'music' },
+  { palabras: ['tarea', 'pendiente', 'hacer', 'completar', 'entregar', 'enviar'], slug: 'tasks' },
+  { palabras: ['evento', 'reunion', 'conferencia', 'cita', 'fiesta', 'boda'], slug: 'events' },
+  { palabras: ['nota', 'apunte', 'memo', 'ideas'], slug: 'notes' },
+]
+
+function inferirCategoria(titulo: string): string | null {
+  const normalizado = titulo
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+  for (const regla of MAPA_PALABRAS_CLAVE) {
+    if (regla.palabras.some((p) => normalizado.includes(p))) {
+      return regla.slug
+    }
+  }
+  return null
+}
+
 function CamposTareas({ prioridadInicial }: { prioridadInicial?: string }) {
   return (
     <div className="space-y-1">
@@ -326,6 +352,7 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
     recordatorio?.metadatos as Record<string, unknown> | undefined,
   )
   const [slugInicialEdicion] = useState(categoriaInicial?.slug)
+  const [tituloActual, setTituloActual] = useState(recordatorio?.titulo ?? '')
 
   const onExitoRef = useRef(onExito)
   onExitoRef.current = onExito
@@ -376,6 +403,7 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
   }, [recordatorio])
 
   const tieneError = !estado.ok && estado.error && typeof estado.error === 'string'
+  const categoriaInferida = useMemo(() => inferirCategoria(tituloActual), [tituloActual])
 
   const metadatosParaCampos = slugActual === slugInicialEdicion ? metadatosIniciales : undefined
 
@@ -404,6 +432,15 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
             </button>
           ))}
         </div>
+        {categoriaInferida && categoriaInferida !== slugActual && (
+          <button
+            type="button"
+            onClick={() => alCambiarCategoria(categoriaInferida)}
+            className="mt-1 text-xs text-gray-400 border border-dashed border-gray-300 rounded px-2 py-0.5 hover:text-gray-600 hover:border-gray-400 transition-colors"
+          >
+            Usar &ldquo;{categorias.find((c) => c.slug === categoriaInferida)?.nombre ?? categoriaInferida}&rdquo;
+          </button>
+        )}
       </div>
 
       {/* Titulo */}
@@ -416,6 +453,7 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
           placeholder="Ej: Estudiar calculo"
           maxLength={100}
           required
+          onChange={(e) => setTituloActual(e.target.value)}
         />
       </div>
 

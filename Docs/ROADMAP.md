@@ -82,11 +82,11 @@ Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mim
 - [x] Recordatorio de cumpleanos con cuenta regresiva ("Faltan 3 dias para el cumpleanos de Juan")
 
 ### IA y contenido
-- [ ] Deteccion automatica de duplicados al crear con IA - avisar si ya existe un recordatorio similar
-- [ ] Sugerencias de categoria inteligente al tipear en el formulario manual
+- [x] Deteccion automatica de duplicados al crear con IA - avisar si ya existe un recordatorio similar
+- [x] Sugerencias de categoria inteligente al tipear en el formulario manual
 
 ### Tecnico
 - [ ] Internacionalizacion (i18n) - soporte para ingles ademas de espanol
-- [ ] Cache de cliente con SWR o React Query para reducir recargas al navegar entre paginas
-- [ ] Full-text search con `tsvector` en PostgreSQL para busqueda mas precisa con soporte de acentos y sinonimos
+- [x] Cache de cliente con SWR o React Query para reducir recargas al navegar entre paginas
+- [x] Full-text search con `tsvector` en PostgreSQL para busqueda mas precisa con soporte de acentos y sinonimos
 - [ ] Tests E2E con Playwright para el flujo critico (crear recordatorio -> recibir notificacion)

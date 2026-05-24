@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import useSWR from 'swr'
 import { Search, X, Mic, Square, Loader2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -26,13 +27,17 @@ function construirHref(r: ResultadoBusqueda): string {
   return `/${slug}?destacado=${r.id}`
 }
 
+async function buscadorFetch(url: string): Promise<ResultadoBusqueda[]> {
+  const res = await fetch(url)
+  if (!res.ok) return []
+  return res.json()
+}
+
 export function BusquedaGlobal() {
   const [abierto, setAbierto] = useState(false)
   const [query, setQuery] = useState('')
-  const [resultados, setResultados] = useState<ResultadoBusqueda[]>([])
-  const [cargando, setCargando] = useState(false)
+  const [queryDemorada, setQueryDemorada] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -51,39 +56,31 @@ export function BusquedaGlobal() {
       setTimeout(() => inputRef.current?.focus(), 50)
     } else {
       setQuery('')
-      setResultados([])
+      setQueryDemorada('')
     }
   }, [abierto])
 
-  const buscar = useCallback((texto: string) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    if (texto.trim().length < 2) {
-      setResultados([])
-      return
-    }
-    setCargando(true)
-    timeoutRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(texto)}`)
-        if (res.ok) {
-          const data = await res.json()
-          setResultados(data)
-        }
-      } finally {
-        setCargando(false)
-      }
-    }, 300)
-  }, [])
+  useEffect(() => {
+    const t = setTimeout(() => setQueryDemorada(query), 300)
+    return () => clearTimeout(t)
+  }, [query])
 
-  const onTranscripcion = useCallback(
-    (texto: string) => {
-      const limpio = texto.trim()
-      if (!limpio) return
-      setQuery(limpio)
-      buscar(limpio)
-    },
-    [buscar],
+  const claveSwr =
+    queryDemorada.trim().length >= 2
+      ? `/api/search?q=${encodeURIComponent(queryDemorada.trim())}`
+      : null
+
+  const { data: resultados = [], isLoading: cargando } = useSWR(
+    claveSwr,
+    buscadorFetch,
+    { revalidateOnFocus: false, dedupingInterval: 10000 },
   )
+
+  const onTranscripcion = useCallback((texto: string) => {
+    const limpio = texto.trim()
+    if (!limpio) return
+    setQuery(limpio)
+  }, [])
 
   const {
     estadoGrabacion,
@@ -97,7 +94,6 @@ export function BusquedaGlobal() {
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     setQuery(e.target.value)
-    buscar(e.target.value)
   }
 
   if (!abierto) {
@@ -200,13 +196,13 @@ export function BusquedaGlobal() {
             </ul>
           )}
 
-          {!cargando && query.length >= 2 && resultados.length === 0 && (
+          {!cargando && queryDemorada.length >= 2 && resultados.length === 0 && (
             <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-              No se encontraron resultados para &quot;{query}&quot;
+              No se encontraron resultados para &quot;{queryDemorada}&quot;
             </p>
           )}
 
-          {!cargando && query.length < 2 && (
+          {!cargando && queryDemorada.length < 2 && (
             <p className="px-4 py-6 text-center text-sm text-muted-foreground">
               Escribe al menos 2 caracteres para buscar
             </p>

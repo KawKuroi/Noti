@@ -9,7 +9,7 @@ import { validarRecordatorio } from '@/lib/validations/reminder.schemas'
 import { calcularProximaOcurrencia, combinarFechaHora } from '@/lib/utils/date.utils'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { HORA_NOTIFICACION_LANZAMIENTO, TIPO_LANZAMIENTO_A_SLUG } from '@/lib/utils/constants'
-import { getRecordatoriosPorCategoriaPaginados } from '@/lib/queries/reminder.queries'
+import { getRecordatoriosPorCategoriaPaginados, buscarRecordatoriosSimilares } from '@/lib/queries/reminder.queries'
 import type { EstadoAccionRecordatorio, OrdenamientoRecordatorio, Recordatorio } from '@/types/reminder.types'
 import type { FuenteLanzamiento, TipoLanzamiento } from '@/types/release.types'
 
@@ -452,5 +452,19 @@ export async function duplicarNota(
   } catch (e) {
     console.error('Error al duplicar nota:', e)
     return { ok: false, error: 'Error al duplicar la nota' }
+  }
+}
+
+export async function verificarDuplicado(
+  titulo: string,
+  categoriaSlug: string,
+): Promise<{ encontrado: boolean; titulos: string[] }> {
+  const usuarioId = await obtenerUsuarioId()
+  if (!usuarioId) return { encontrado: false, titulos: [] }
+
+  const similares = await buscarRecordatoriosSimilares(usuarioId, titulo, categoriaSlug)
+  return {
+    encontrado: similares.length > 0,
+    titulos: similares.map((r) => r.titulo),
   }
 }

@@ -224,6 +224,7 @@ export async function buscarRecordatorios(
         eq(recordatorios.usuarioId, usuarioId),
         eq(recordatorios.estaCompletado, false),
         or(
+          sql`to_tsvector('spanish', coalesce(${recordatorios.titulo}, '') || ' ' || coalesce(${recordatorios.descripcion}, '')) @@ websearch_to_tsquery('spanish', ${texto})`,
           ilike(recordatorios.titulo, termino),
           ilike(recordatorios.descripcion, termino),
           sql`${recordatorios.metadatos}::text ILIKE ${termino}`,
@@ -234,6 +235,33 @@ export async function buscarRecordatorios(
     .limit(limite)
 
   return filas.map(mapearRecordatorio)
+}
+
+export async function buscarRecordatoriosSimilares(
+  usuarioId: string,
+  titulo: string,
+  categoriaSlug: string,
+): Promise<{ id: string; titulo: string }[]> {
+  const [categoria] = await db
+    .select({ id: categorias.id })
+    .from(categorias)
+    .where(eq(categorias.slug, categoriaSlug))
+    .limit(1)
+
+  if (!categoria) return []
+
+  return db
+    .select({ id: recordatorios.id, titulo: recordatorios.titulo })
+    .from(recordatorios)
+    .where(
+      and(
+        eq(recordatorios.usuarioId, usuarioId),
+        eq(recordatorios.categoriaId, categoria.id),
+        eq(recordatorios.estaCompletado, false),
+        ilike(recordatorios.titulo, `%${titulo}%`),
+      ),
+    )
+    .limit(3)
 }
 
 export interface RecordatorioConAnticipacion extends Recordatorio {

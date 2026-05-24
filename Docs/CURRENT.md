@@ -8,6 +8,13 @@
 **Activo:** Fase 23 (mejoras futuras no priorizadas — ver ROADMAP).
 **Estado general:** Fases 0–22 completadas. Fase 23 en progreso (dark mode, optimistic updates, infinite scroll, ordenamiento y countdown de cumpleanos completados).
 
+## Fase 23 — IA y contenido + Tecnico (sesion 2026-05-24)
+
+- **Full-text search** — `buscarRecordatorios` agrega FTS con `to_tsvector('spanish', ...)` + `websearch_to_tsquery` como primera condicion del `or()`, manteniendo `ilike` como fallback para busquedas simples.
+- **Deteccion de duplicados** — `buscarRecordatoriosSimilares` en reminder.queries; `verificarDuplicado` server action; aviso `toast.warning` no bloqueante en `asistente-provider.tsx` antes de crear via IA.
+- **Sugerencias de categoria** — `MAPA_PALABRAS_CLAVE` y `inferirCategoria` en formulario-recordatorio; chip con borde punteado que aparece cuando el titulo inferido difiere del seleccionado y al pulsarlo cambia la categoria.
+- **Cache SWR en busqueda global** — `swr` instalado; `busqueda-global.tsx` reemplaza fetch+debounce manual con `useSWR` (clave `/api/search?q=...`, `dedupingInterval: 10000`, `revalidateOnFocus: false`) y `queryDemorada` con delay de 300 ms.
+
 ## Fase 23 — Notificaciones y segundo plano (sesion 2026-05-24)
 
 - **Countdown de cumpleanos** — `getCumpleanosEnDias(n)` en reminder.queries filtra recordatorios de categoria birthdays cuya fechaVencimiento cae en N dias UTC; `procesarCountdownCumpleanos()` en push.service itera `[3, 1]` dias y envia push "Faltan N dias para el cumpleanos / Manana es el cumpleanos" con el titulo del recordatorio; cron `check-reminders` lo ejecuta en paralelo con `procesarRecordatoriosPendientes()`.

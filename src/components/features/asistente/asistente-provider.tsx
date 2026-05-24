@@ -7,6 +7,7 @@ import type { ResultadoLanzamiento, FuenteLanzamiento, TipoLanzamiento } from '@
 import {
   crearRecordatorioDesdeIA,
   crearRecordatorioLanzamiento,
+  verificarDuplicado,
 } from '@/lib/actions/reminder.actions'
 import { SLUGS_LANZAMIENTO, TIPO_LANZAMIENTO_A_SLUG } from '@/lib/utils/constants'
 import { parsearFechaNatural } from '@/lib/utils/parsear-fecha-natural'
@@ -425,6 +426,11 @@ export function AsistenteProvider({ children }: Props) {
         const horaParaCombinar = datos.horaVencimiento ?? '09:00'
         const d = new Date(`${datos.fechaVencimiento}T${horaParaCombinar}:00`)
         if (!isNaN(d.getTime())) fechaHoraUtc = d.toISOString()
+      }
+
+      const chequeo = await verificarDuplicado(datos.titulo, datos.categoriaSlug)
+      if (chequeo.encontrado) {
+        toast.warning(`Ya tienes algo similar: "${chequeo.titulos[0]}"`)
       }
 
       const resultado = await crearRecordatorioDesdeIA({
