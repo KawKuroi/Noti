@@ -13,6 +13,8 @@ function obtenerOrden(ordenamiento: OrdenamientoRecordatorio): SQL[] {
       return [desc(recordatorios.creadoEn)]
     case 'estado':
       return [asc(recordatorios.estaCompletado), asc(recordatorios.fechaVencimiento)]
+    default:
+      return [asc(recordatorios.fechaVencimiento)]
   }
 }
 
@@ -56,21 +58,6 @@ export async function getRecordatoriosProximos(
   return filas.map(mapearRecordatorio)
 }
 
-export async function getNotas(usuarioId: string): Promise<Recordatorio[]> {
-  const filas = await db
-    .select()
-    .from(recordatorios)
-    .innerJoin(categorias, eq(recordatorios.categoriaId, categorias.id))
-    .where(
-      and(
-        eq(recordatorios.usuarioId, usuarioId),
-        eq(categorias.slug, 'notes'),
-      ),
-    )
-    .orderBy(desc(recordatorios.creadoEn))
-
-  return filas.map((f) => mapearRecordatorio(f.reminders))
-}
 
 export async function getRecordatoriosPorCategoria(
   usuarioId: string,

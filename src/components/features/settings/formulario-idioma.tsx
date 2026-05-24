@@ -1,19 +1,21 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
 import { useTranslations } from 'next-intl'
+import { cambiarIdiomaAction } from '@/app/(dashboard)/settings/actions'
 
 interface Props {
   localeActual: string
 }
 
 export function FormularioIdioma({ localeActual }: Props) {
-  const router = useRouter()
+  const [pending, startTransition] = useTransition()
   const t = useTranslations('Settings')
 
   function cambiarIdioma(locale: string) {
-    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; SameSite=Lax`
-    router.refresh()
+    startTransition(() => {
+      void cambiarIdiomaAction(locale)
+    })
   }
 
   const opciones = [
@@ -28,7 +30,8 @@ export function FormularioIdioma({ localeActual }: Props) {
           key={op.valor}
           type="button"
           onClick={() => cambiarIdioma(op.valor)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+          disabled={pending}
+          className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
             localeActual === op.valor
               ? 'bg-foreground text-background border-foreground'
               : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'

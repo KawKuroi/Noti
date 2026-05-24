@@ -29,7 +29,7 @@ function construirHref(r: ResultadoBusqueda): string {
 
 async function buscadorFetch(url: string): Promise<ResultadoBusqueda[]> {
   const res = await fetch(url)
-  if (!res.ok) return []
+  if (!res.ok) throw new Error(`Error ${res.status}`)
   return res.json()
 }
 
@@ -70,7 +70,7 @@ export function BusquedaGlobal() {
       ? `/api/search?q=${encodeURIComponent(queryDemorada.trim())}`
       : null
 
-  const { data: resultados = [], isLoading: cargando } = useSWR(
+  const { data: resultados = [], isLoading: cargando, error: errorBusqueda } = useSWR(
     claveSwr,
     buscadorFetch,
     { revalidateOnFocus: false, dedupingInterval: 10000 },
@@ -196,13 +196,19 @@ export function BusquedaGlobal() {
             </ul>
           )}
 
-          {!cargando && queryDemorada.length >= 2 && resultados.length === 0 && (
+          {!cargando && errorBusqueda && (
+            <p className="px-4 py-6 text-center text-sm text-destructive">
+              Error al buscar. Verifica tu conexion.
+            </p>
+          )}
+
+          {!cargando && !errorBusqueda && queryDemorada.length >= 2 && resultados.length === 0 && (
             <p className="px-4 py-6 text-center text-sm text-muted-foreground">
               No se encontraron resultados para &quot;{queryDemorada}&quot;
             </p>
           )}
 
-          {!cargando && queryDemorada.length < 2 && (
+          {!cargando && !errorBusqueda && queryDemorada.length < 2 && (
             <p className="px-4 py-6 text-center text-sm text-muted-foreground">
               Escribe al menos 2 caracteres para buscar
             </p>

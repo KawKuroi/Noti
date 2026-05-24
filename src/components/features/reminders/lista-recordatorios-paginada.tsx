@@ -52,14 +52,17 @@ export function ListaRecordatoriosPaginada({
   async function ejecutarCargaMas() {
     if (cargandoRef.current || !hasMasRef.current) return
     setCargando(true)
-    const resultado = await cargarMasRecordatorios(
-      categoriaId,
-      registrosRef.current.length,
-      ordenamientoRef.current,
-    )
-    setRegistros((prev) => [...prev, ...resultado.recordatorios])
-    setHasMas(resultado.hasMas)
-    setCargando(false)
+    try {
+      const resultado = await cargarMasRecordatorios(
+        categoriaId,
+        registrosRef.current.length,
+        ordenamientoRef.current,
+      )
+      setRegistros((prev) => [...prev, ...resultado.recordatorios])
+      setHasMas(resultado.hasMas)
+    } finally {
+      setCargando(false)
+    }
   }
 
   useEffect(() => {
@@ -78,11 +81,14 @@ export function ListaRecordatoriosPaginada({
 
   async function cambiarOrdenamiento(nuevoOrdenamiento: OrdenamientoRecordatorio) {
     setCargando(true)
-    const resultado = await cargarMasRecordatorios(categoriaId, 0, nuevoOrdenamiento)
-    setRegistros(resultado.recordatorios)
-    setHasMas(resultado.hasMas)
-    setOrdenamiento(nuevoOrdenamiento)
-    setCargando(false)
+    try {
+      const resultado = await cargarMasRecordatorios(categoriaId, 0, nuevoOrdenamiento)
+      setRegistros(resultado.recordatorios)
+      setHasMas(resultado.hasMas)
+      setOrdenamiento(nuevoOrdenamiento)
+    } finally {
+      setCargando(false)
+    }
   }
 
   return (
