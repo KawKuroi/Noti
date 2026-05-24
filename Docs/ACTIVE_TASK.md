@@ -1,59 +1,28 @@
-# Tarea activa
+### 1. Contexto y Archivos Afectados
 
-## Solicitud original (usuario, 2026-05-24)
+**Tarea:** Countdown de cumpleanos — notificacion push "Faltan N dias para el cumpleanos de [nombre]" enviada 3 dias y 1 dia antes del cumpleanos. Feature del Roadmap Fase 23, seccion "Notificaciones y segundo plano".
 
-> Terminar la seccion UX/Productividad de Fase 23:
-> - Infinite scroll en la lista de recordatorios para usuarios con muchos items
-> - Anadir una opcion para ordenar los recordatorios segun la fecha, prioridad, estado o categoria
+| Archivo | Rol |
+|---|---|
+| `src/lib/queries/reminder.queries.ts` | Agregar `getCumpleanosEnDias(diasAnticipacion)` que consulta cumpleanos cuya `fechaVencimiento` cae exactamente en N dias UTC, uniendo con la tabla `categorias` para filtrar por `slug='birthdays'` |
+| `src/lib/services/push.service.ts` | Agregar `procesarCountdownCumpleanos()` que itera dias=[3,1], llama a la query e invoca `enviarPushAUsuario` con texto de countdown adecuado para cada caso |
+| `src/app/api/cron/check-reminders/route.ts` | Agregar import de `procesarCountdownCumpleanos` y ejecutarla en paralelo con `procesarRecordatoriosPendientes()` via `Promise.all` |
 
-## 1. Contexto y Archivos Afectados
+### 2. Plan de Accion Detallado
 
-La lista de recordatorios se renderiza en `ListaRecordatorios` (componente servidor-puro) que recibe todos
-los registros de una vez. Las paginas de categoria (`/[slug]`) usan `getRecordatoriosPorCategoria` que
-carga todos los registros sin limite ni paginacion.
+- [x] **Paso 1: [src/lib/queries/reminder.queries.ts]** Agregar al final del archivo la funcion exportada `getCumpleanosEnDias(diasAnticipacion: number): Promise<{ id: string; usuarioId: string; titulo: string }[]>`. Logica: calcular fecha objetivo = hoy UTC + N dias (inicio de dia 00:00:00 y fin de dia 23:59:59 en UTC). Hacer SELECT con join a `categorias` filtrando `eq(categorias.slug, 'birthdays')`, `eq(recordatorios.estaCompletado, false)`, `isNotNull(recordatorios.fechaVencimiento)`, `gte(recordatorios.fechaVencimiento, inicioObjetivo)`, `lte(recordatorios.fechaVencimiento, finObjetivo)`.
 
-Para implementar infinite scroll y ordenamiento, se necesita:
-- Un tipo compartido `OrdenamientoRecordatorio` para parametrizar el orden.
-- Una query paginada que soporte offset + limite + orden.
-- Una Server Action que el cliente pueda llamar para cargar mas registros.
-- Un componente cliente que maneje el estado de paginacion, el IntersectionObserver y el selector de orden.
-- La pagina `/[slug]` actualizada para usar el nuevo componente.
+- [x] **Paso 2: [src/lib/services/push.service.ts]** Agregar `getCumpleanosEnDias` al import de `@/lib/queries/reminder.queries`. Agregar al final del archivo la funcion exportada `procesarCountdownCumpleanos(): Promise<{ enviados: number }>`. Itera sobre `[3, 1]`. Para cada valor de dias: llama a `getCumpleanosEnDias(dias)`, y por cada resultado construye un `PayloadPush` con `title = dias === 1 ? 'Manana es el cumpleanos' : 'Faltan ${dias} dias para el cumpleanos'` y `body = c.titulo`, luego llama a `enviarPushAUsuario`. Retorna el total de enviados.
 
-Archivos directamente involucrados (5):
-- `src/types/reminder.types.ts` — agrega tipo `OrdenamientoRecordatorio`
-- `src/lib/queries/reminder.queries.ts` — agrega `getRecordatoriosPorCategoriaPaginados`
-- `src/lib/actions/reminder.actions.ts` — agrega `cargarMasRecordatorios` server action
-- `src/components/features/reminders/lista-recordatorios-paginada.tsx` — nuevo componente cliente con
-  IntersectionObserver y selector de ordenamiento
-- `src/app/(dashboard)/[slug]/page.tsx` — usa el nuevo componente paginado
+- [x] **Paso 3: [src/app/api/cron/check-reminders/route.ts]** Agregar `procesarCountdownCumpleanos` al import desde push.service. Reemplazar el try body para usar `const [{ procesados }, { enviados: cumpleanosEnviados }] = await Promise.all([procesarRecordatoriosPendientes(), procesarCountdownCumpleanos()])`. Actualizar el JSON de respuesta para incluir `cumpleanosEnviados`.
 
-## 2. Plan de Accion Detallado
-
-### Bloque 1 - Tipo y query paginada
-
-- [x] **Paso 1: `src/types/reminder.types.ts`** Agregar `export type OrdenamientoRecordatorio = 'fecha-asc' | 'fecha-desc' | 'reciente' | 'estado'`. `fecha-asc` es la mas proxima primero (default actual); `fecha-desc` es la mas lejana primero; `reciente` ordena por `creadoEn` DESC; `estado` pone pendientes antes que completados y luego por fecha.
-
-- [x] **Paso 2: `src/lib/queries/reminder.queries.ts`** Agregar import de `OrdenamientoRecordatorio` desde types. Agregar funcion privada `obtenerOrden(ordenamiento: OrdenamientoRecordatorio)` que devuelve el array de columnas Drizzle para `orderBy`. Agregar `getRecordatoriosPorCategoriaPaginados(usuarioId, categoriaId, limite, desplazamiento, ordenamiento)` que hace SELECT con `limit(limite + 1).offset(desplazamiento)`, luego devuelve `{ recordatorios: filas.slice(0, limite).map(mapearRecordatorio), hasMas: filas.length > limite }`.
-
-### Bloque 2 - Server Action para carga incremental
-
-- [x] **Paso 3: `src/lib/actions/reminder.actions.ts`** Agregar import de `OrdenamientoRecordatorio` y de `getRecordatoriosPorCategoriaPaginados`. Agregar `export async function cargarMasRecordatorios(categoriaId: number, desplazamiento: number, ordenamiento: OrdenamientoRecordatorio)` que obtiene el `usuarioId` del usuario autenticado, llama a `getRecordatoriosPorCategoriaPaginados` con LIMITE=20 y devuelve `{ recordatorios, hasMas }`. Si no hay usuario, devuelve `{ recordatorios: [], hasMas: false }`.
-
-### Bloque 3 - Componente cliente con infinite scroll y selector
-
-- [x] **Paso 4: `src/components/features/reminders/lista-recordatorios-paginada.tsx`** Crear componente `ListaRecordatoriosPaginada` con `'use client'`. Props: `recordatoriosIniciales`, `hasMasInicial`, `categoriaId`, `categorias`, `mensajeVacio`, `diasAutoEliminar`, `destacadoId`. Estado: `registros`, `hasMas`, `ordenamiento` ('fecha-asc' default), `cargando`. Usar refs (`registrosRef`, `hasMasRef`, `cargandoRef`, `ordenamientoRef`) actualizadas en cada render para evitar closures viejas en el observer. IntersectionObserver con `rootMargin: '300px'` sobre un `div` centinela al pie de la lista; dispara `ejecutarCargaMas` que llama a `cargarMasRecordatorios(categoriaId, registrosRef.current.length, ordenamientoRef.current)` y agrega al array. Selector `<Select>` de shadcn/ui con las 4 opciones al inicio; al cambiar llama a `cambiarOrdenamiento` que llama a `cargarMasRecordatorios(categoriaId, 0, nuevoOrdenamiento)` y reemplaza el array. Indicador `<Loader2>` visible cuando `cargando`.
-
-### Bloque 4 - Pagina de categoria actualizada
-
-- [x] **Paso 5: `src/app/(dashboard)/[slug]/page.tsx`** Cambiar `getRecordatoriosPorCategoria` por `getRecordatoriosPorCategoriaPaginados(user.id, categoria.id, 20, 0, 'fecha-asc')`. Reemplazar `<ListaRecordatorios>` por `<ListaRecordatoriosPaginada>` pasando `recordatoriosIniciales`, `hasMasInicial`, `categoriaId={categoria.id}`, `categorias`, `mensajeVacio`, `diasAutoEliminar` y `destacadoId`. Eliminado el contador de recordatorios del header (era inexacto con paginacion).
-
-## 3. Reporte de Pruebas
+### 3. Reporte de Pruebas
 
 **Estado:** [APROBADO]
 
-- **Cumplimiento funcional:** query `getRecordatoriosPorCategoriaPaginados` con offset/limit/orden; server action `cargarMasRecordatorios` protegida por auth; componente `ListaRecordatoriosPaginada` con IntersectionObserver (`rootMargin: '300px'`) y selector de 4 opciones de orden; `/[slug]` usa el componente paginado con carga inicial de 20 registros.
-- **Espanol absoluto:** todos los identificadores en espanol (registros, hasMas, ordenamiento, cargando, centinela, ejecutarCargaMas, cambiarOrdenamiento, desplazamiento, obtenerOrden). Metodos del ORM (`.offset()`, `.orderBy()`) son API externa.
-- **Seguridad:** sin secretos; sin `any`; RLS respetado via `eq(recordatorios.usuarioId, usuarioId)`.
-- **TSC:** EXIT 0, cero errores.
-- **Linter:** EXIT 0, cero warnings.
-- **Nota UI:** componente `.tsx` modificado en reminders/ — requiere validacion visual en navegador.
+- **Cumplimiento funcional:** `getCumpleanosEnDias` consulta cumpleanos cuya `fechaVencimiento` cae en el rango UTC de N dias. `procesarCountdownCumpleanos` itera `[3, 1]` y envia push con titulo contextual. El cron ejecuta ambas funciones en paralelo con `Promise.all`.
+- **Espanol absoluto:** `diasAnticipacion`, `inicioObjetivo`, `finObjetivo`, `cumpleanos`, `enviados`, `cumpleanosEnviados` — todos en espanol. Sin ingles en logica nueva.
+- **Seguridad:** sin secretos hardcodeados, sin `any`, RLS respetado via filtro de `usuarioId` en `enviarPushAUsuario`.
+- **TSC:** exit 0, cero errores.
+- **Linter:** exit 0, cero warnings.
+- **Sin cambios de UI:** no se modificaron archivos `.tsx` ni `.css`. Validacion visual no requerida.

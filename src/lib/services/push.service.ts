@@ -3,7 +3,7 @@ import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
 import { suscripcionesPush, logNotificaciones, recordatorios } from '@/db/schema'
 import { getSuscripcionesPorUsuario } from '@/lib/queries/push.queries'
-import { getRecordatoriosANotificar, getRecordatoriosEnRango } from '@/lib/queries/reminder.queries'
+import { getRecordatoriosANotificar, getRecordatoriosEnRango, getCumpleanosEnDias } from '@/lib/queries/reminder.queries'
 import { calcularProximaOcurrencia } from '@/lib/utils/date.utils'
 
 let vapidConfigurado = false
@@ -170,4 +170,28 @@ export async function procesarRecordatoriosPendientes(): Promise<{ procesados: n
   }
 
   return { procesados }
+}
+
+export async function procesarCountdownCumpleanos(): Promise<{ enviados: number }> {
+  let enviados = 0
+
+  for (const dias of [3, 1]) {
+    const cumpleanos = await getCumpleanosEnDias(dias)
+
+    for (const c of cumpleanos) {
+      const payload: PayloadPush = {
+        title: dias === 1 ? 'Manana es el cumpleanos' : `Faltan ${dias} dias para el cumpleanos`,
+        body: c.titulo,
+        data: {
+          url: '/inicio',
+          reminderId: c.id,
+        },
+      }
+
+      await enviarPushAUsuario(c.usuarioId, c.id, payload)
+      enviados++
+    }
+  }
+
+  return { enviados }
 }

@@ -6,7 +6,11 @@
 ## Fase activa
 
 **Activo:** Fase 23 (mejoras futuras no priorizadas — ver ROADMAP).
-**Estado general:** Fases 0–22 completadas. Fase 23 en progreso (dark mode, optimistic updates, infinite scroll y ordenamiento completados).
+**Estado general:** Fases 0–22 completadas. Fase 23 en progreso (dark mode, optimistic updates, infinite scroll, ordenamiento y countdown de cumpleanos completados).
+
+## Fase 23 — Notificaciones y segundo plano (sesion 2026-05-24)
+
+- **Countdown de cumpleanos** — `getCumpleanosEnDias(n)` en reminder.queries filtra recordatorios de categoria birthdays cuya fechaVencimiento cae en N dias UTC; `procesarCountdownCumpleanos()` en push.service itera `[3, 1]` dias y envia push "Faltan N dias para el cumpleanos / Manana es el cumpleanos" con el titulo del recordatorio; cron `check-reminders` lo ejecuta en paralelo con `procesarRecordatoriosPendientes()`.
 
 ## Fase 23 — UX/Productividad (sesion 2026-05-24)
 

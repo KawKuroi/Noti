@@ -79,7 +79,7 @@ Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mim
 
 ### Notificaciones y segundo plano
 - [ ] PWA Widget API (Windows 11 + Android) - widget nativo en la pantalla de inicio con los proximos recordatorios del dia (experimental, requiere Edge/Chrome reciente)
-- [ ] Recordatorio de cumpleanos con cuenta regresiva ("Faltan 3 dias para el cumpleanos de Juan")
+- [x] Recordatorio de cumpleanos con cuenta regresiva ("Faltan 3 dias para el cumpleanos de Juan")
 
 ### IA y contenido
 - [ ] Deteccion automatica de duplicados al crear con IA - avisar si ya existe un recordatorio similar

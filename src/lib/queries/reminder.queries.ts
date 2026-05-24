@@ -242,6 +242,36 @@ export interface RecordatorioConAnticipacion extends Recordatorio {
 
 // Devuelve recordatorios cuyo notify_at cayo en la ventana [ahora - ventanaMin, ahora]
 // Se usa en el cron para saber que notificaciones enviar cada minuto
+export async function getCumpleanosEnDias(
+  diasAnticipacion: number,
+): Promise<{ id: string; usuarioId: string; titulo: string }[]> {
+  const hoy = new Date()
+  const inicioObjetivo = new Date(
+    Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), hoy.getUTCDate() + diasAnticipacion, 0, 0, 0, 0),
+  )
+  const finObjetivo = new Date(
+    Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), hoy.getUTCDate() + diasAnticipacion, 23, 59, 59, 999),
+  )
+
+  return db
+    .select({
+      id: recordatorios.id,
+      usuarioId: recordatorios.usuarioId,
+      titulo: recordatorios.titulo,
+    })
+    .from(recordatorios)
+    .innerJoin(categorias, eq(recordatorios.categoriaId, categorias.id))
+    .where(
+      and(
+        eq(categorias.slug, 'birthdays'),
+        eq(recordatorios.estaCompletado, false),
+        isNotNull(recordatorios.fechaVencimiento),
+        gte(recordatorios.fechaVencimiento, inicioObjetivo),
+        lte(recordatorios.fechaVencimiento, finObjetivo),
+      ),
+    )
+}
+
 export async function getRecordatoriosANotificar(
   ahora: Date,
   ventanaMin = 1,
