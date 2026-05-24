@@ -74,8 +74,8 @@ Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mim
 ### UX / Productividad
 - [x] Dark mode - Tailwind lo soporta nativamente, impacto visual alto
 - [x] Optimistic updates en completar/eliminar - el item desaparece visualmente de inmediato sin esperar al servidor
-- [ ] Infinite scroll en la lista de recordatorios para usuarios con muchos items
-- [ ] Añadir una opción para ordenar los recordatorios segun la fecha, prioridad, estado o categoria
+- [x] Infinite scroll en la lista de recordatorios para usuarios con muchos items
+- [x] Añadir una opción para ordenar los recordatorios segun la fecha, prioridad, estado o categoria
 
 ### Notificaciones y segundo plano
 - [ ] PWA Widget API (Windows 11 + Android) - widget nativo en la pantalla de inicio con los proximos recordatorios del dia (experimental, requiere Edge/Chrome reciente)

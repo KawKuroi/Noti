@@ -9,7 +9,8 @@ import { validarRecordatorio } from '@/lib/validations/reminder.schemas'
 import { calcularProximaOcurrencia, combinarFechaHora } from '@/lib/utils/date.utils'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { HORA_NOTIFICACION_LANZAMIENTO, TIPO_LANZAMIENTO_A_SLUG } from '@/lib/utils/constants'
-import type { EstadoAccionRecordatorio, Recordatorio } from '@/types/reminder.types'
+import { getRecordatoriosPorCategoriaPaginados } from '@/lib/queries/reminder.queries'
+import type { EstadoAccionRecordatorio, OrdenamientoRecordatorio, Recordatorio } from '@/types/reminder.types'
 import type { FuenteLanzamiento, TipoLanzamiento } from '@/types/release.types'
 
 async function obtenerUsuarioId(): Promise<string | null> {
@@ -394,6 +395,25 @@ export async function crearRecordatorioLanzamiento(
     console.error('Error al crear recordatorio de lanzamiento:', e)
     return { ok: false, error: 'Error al guardar el lanzamiento' }
   }
+}
+
+const LIMITE_PAGINACION = 20
+
+export async function cargarMasRecordatorios(
+  categoriaId: number,
+  desplazamiento: number,
+  ordenamiento: OrdenamientoRecordatorio,
+): Promise<{ recordatorios: Recordatorio[]; hasMas: boolean }> {
+  const usuarioId = await obtenerUsuarioId()
+  if (!usuarioId) return { recordatorios: [], hasMas: false }
+
+  return getRecordatoriosPorCategoriaPaginados(
+    usuarioId,
+    categoriaId,
+    LIMITE_PAGINACION,
+    desplazamiento,
+    ordenamiento,
+  )
 }
 
 export async function duplicarNota(

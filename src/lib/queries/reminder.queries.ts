@@ -1,7 +1,20 @@
-import { eq, and, desc, asc, count, lte, gte, or, ilike, isNotNull, sql } from 'drizzle-orm'
+import { eq, and, desc, asc, count, lte, gte, or, ilike, isNotNull, sql, type SQL } from 'drizzle-orm'
 import { db } from '@/db'
 import { recordatorios, categorias, perfiles } from '@/db/schema'
-import type { Recordatorio } from '@/types/reminder.types'
+import type { Recordatorio, OrdenamientoRecordatorio } from '@/types/reminder.types'
+
+function obtenerOrden(ordenamiento: OrdenamientoRecordatorio): SQL[] {
+  switch (ordenamiento) {
+    case 'fecha-asc':
+      return [asc(recordatorios.fechaVencimiento)]
+    case 'fecha-desc':
+      return [desc(recordatorios.fechaVencimiento)]
+    case 'reciente':
+      return [desc(recordatorios.creadoEn)]
+    case 'estado':
+      return [asc(recordatorios.estaCompletado), asc(recordatorios.fechaVencimiento)]
+  }
+}
 
 function mapearRecordatorio(fila: typeof recordatorios.$inferSelect): Recordatorio {
   return {
@@ -75,6 +88,32 @@ export async function getRecordatoriosPorCategoria(
     .orderBy(asc(recordatorios.fechaVencimiento))
 
   return filas.map(mapearRecordatorio)
+}
+
+export async function getRecordatoriosPorCategoriaPaginados(
+  usuarioId: string,
+  categoriaId: number,
+  limite: number,
+  desplazamiento: number,
+  ordenamiento: OrdenamientoRecordatorio,
+): Promise<{ recordatorios: Recordatorio[]; hasMas: boolean }> {
+  const filas = await db
+    .select()
+    .from(recordatorios)
+    .where(
+      and(
+        eq(recordatorios.usuarioId, usuarioId),
+        eq(recordatorios.categoriaId, categoriaId),
+      ),
+    )
+    .orderBy(...obtenerOrden(ordenamiento))
+    .limit(limite + 1)
+    .offset(desplazamiento)
+
+  return {
+    recordatorios: filas.slice(0, limite).map(mapearRecordatorio),
+    hasMas: filas.length > limite,
+  }
 }
 
 export async function getRecordatorioPorId(

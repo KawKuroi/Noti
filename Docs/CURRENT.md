@@ -6,7 +6,11 @@
 ## Fase activa
 
 **Activo:** Fase 23 (mejoras futuras no priorizadas — ver ROADMAP).
-**Estado general:** Fases 0–22 completadas. Fase 23 en progreso (dark mode completado).
+**Estado general:** Fases 0–22 completadas. Fase 23 en progreso (dark mode, optimistic updates, infinite scroll y ordenamiento completados).
+
+## Fase 23 — UX/Productividad (sesion 2026-05-24)
+
+- **Infinite scroll y ordenamiento en lista de recordatorios (23.4)** — query paginada `getRecordatoriosPorCategoriaPaginados` con offset/limit/ordenamiento; server action `cargarMasRecordatorios`; componente cliente `ListaRecordatoriosPaginada` con IntersectionObserver (`rootMargin: 300px`) y selector de orden (mas proximo, mas lejano, creacion reciente, pendientes primero); paginas de categoria usan carga inicial de 20 registros con carga incremental al hacer scroll.
 
 ## Fase 23 — Dark mode (sesion 2026-05-21)
 

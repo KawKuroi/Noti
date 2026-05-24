@@ -1,5 +1,7 @@
 export type Prioridad = 'baja' | 'media' | 'alta'
 
+export type OrdenamientoRecordatorio = 'fecha-asc' | 'fecha-desc' | 'reciente' | 'estado'
+
 export interface MetadatosTareas {
   prioridad: Prioridad
 }

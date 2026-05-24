@@ -8,10 +8,10 @@ import {
 } from 'lucide-react'
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
-import { getRecordatoriosPorCategoria } from '@/lib/queries/reminder.queries'
+import { getRecordatoriosPorCategoriaPaginados } from '@/lib/queries/reminder.queries'
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
-import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
+import { ListaRecordatoriosPaginada } from '@/components/features/reminders/lista-recordatorios-paginada'
 import { BarraAsistente } from '@/components/features/asistente'
 import { SLUGS_VALIDOS } from '@/lib/utils/constants'
 
@@ -43,8 +43,8 @@ export default async function PaginaCategoria({ params, searchParams }: Props) {
 
   if (!categoria) notFound()
 
-  const [recordatorios, perfil] = await Promise.all([
-    getRecordatoriosPorCategoria(user.id, categoria.id),
+  const [{ recordatorios, hasMas }, perfil] = await Promise.all([
+    getRecordatoriosPorCategoriaPaginados(user.id, categoria.id, 20, 0, 'fecha-asc'),
     slug === 'tasks' ? getPerfilDelUsuarioActual() : Promise.resolve(null),
   ])
 
@@ -66,9 +66,6 @@ export default async function PaginaCategoria({ params, searchParams }: Props) {
           )}
           <div>
             <h1 className="text-2xl font-bold text-foreground">{categoria.nombre}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {recordatorios.length} recordatorio{recordatorios.length !== 1 ? 's' : ''}
-            </p>
           </div>
         </div>
         <BotonNuevoRecordatorio categorias={categorias} slugInicial={slug} />
@@ -78,8 +75,10 @@ export default async function PaginaCategoria({ params, searchParams }: Props) {
         <BarraAsistente />
       </div>
 
-      <ListaRecordatorios
-        recordatorios={recordatorios}
+      <ListaRecordatoriosPaginada
+        recordatoriosIniciales={recordatorios}
+        hasMasInicial={hasMas}
+        categoriaId={categoria.id}
         categorias={categorias}
         mensajeVacio={`Sin recordatorios en ${categoria.nombre}`}
         diasAutoEliminar={perfil?.autoEliminarTareasCompletadasDias ?? null}
