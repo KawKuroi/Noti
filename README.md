@@ -1,9 +1,8 @@
 <div align="center">
-  <!-- TODO: añadir screenshot del proyecto en funcionamiento -->
 
   <h1>Noti</h1>
 
-  <p>PWA minimalista para centralizar todos tus recordatorios con notificaciones push reales, asistente IA por lenguaje natural y búsqueda global.</p>
+  <p>PWA minimalista para centralizar todos tus recordatorios con notificaciones push reales, asistente IA por lenguaje natural y busqueda global.</p>
 
   <p>
     <img src="https://img.shields.io/badge/Next.js_15-000000?style=flat&logo=nextdotjs&logoColor=white" alt="Next.js" />
@@ -13,7 +12,7 @@
     <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white" alt="Supabase" />
     <img src="https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=flat&logo=drizzle&logoColor=black" alt="Drizzle ORM" />
     <img src="https://img.shields.io/badge/Vercel_AI_SDK_v6-000000?style=flat&logo=vercel&logoColor=white" alt="Vercel AI SDK" />
-    <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=flat&logo=googlegemini&logoColor=white" alt="Google Gemini" />
+    <img src="https://img.shields.io/badge/Groq-F55036?style=flat&logo=groq&logoColor=white" alt="Groq" />
     <img src="https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white" alt="Vercel" />
   </p>
 </div>
@@ -22,53 +21,73 @@
 
 ## Capturas de pantalla
 
-<!-- TODO: añadir screenshots del dashboard, asistente IA, búsqueda global y settings -->
+<div align="center">
+  <img src="public/screenshots/inicio.png" width="49%" alt="Dashboard" />
+  <img src="public/screenshots/calendario.png" width="49%" alt="Calendario" />
+  <img src="public/screenshots/chat-lanzamientos.png" width="49%" alt="Chat IA de lanzamientos" />
+  <img src="public/screenshots/dark-mode.png" width="49%" alt="Dark mode" />
+</div>
 
-## Características
+## Caracteristicas
 
 ### Recordatorios
-- 6 categorías visuales: Lanzamientos, Estudio, Clases, Cumpleaños, Tareas y Eventos
+- 10 categorias: Peliculas, Series, Videojuegos, Musica, Libros, Estudio, Cumpleanos, Pendientes, Eventos y Notas
 - Crear, editar, eliminar y completar recordatorios
-- Recurrencia automática — clases semanales y cumpleaños anuales
-- Vista de calendario mensual y semanal con badges por día
+- Recurrencia automatica — cumpleanos anuales y sesiones semanales de Estudio
+- Infinite scroll con ordenamiento por fecha proxima, lejana, creacion o pendientes
+- Optimistic updates con `useOptimistic` para respuesta inmediata en la UI
+- Vista de calendario mensual y semanal (timeline tipo Google Calendar, scroll a 07:00)
 
 ### Asistente IA
-- Crear cualquier recordatorio por lenguaje natural: *"recuérdame llamar al médico el juernes a las 3pm"*
-- Chat dedicado para agendar lanzamientos consultando TMDB, RAWG y MusicBrainz
-- Anti-alucinación: solo reporta fechas devueltas por fuentes verificadas, nunca las inventa
+- Crear cualquier recordatorio por lenguaje natural: *"recuerdame llamar al medico el jueves a las 3pm"*
+- Deteccion automatica de duplicados antes de crear un recordatorio
+- Sugerencias automaticas de categoria segun palabras clave
+- Entrada por audio via Whisper Large v3 Turbo (Groq)
+- Chat dedicado para agendar lanzamientos consultando TMDB, RAWG, MusicBrainz y Google Books
+- Anti-alucinacion: solo reporta fechas devueltas por fuentes verificadas, nunca las inventa
+
+### Notas
+- Cuadernos tipo chat con historial de entradas de texto
+- Adjuntos multimedia: imagenes, audios, documentos (PDF/DOCX/TXT) y videos
+- Almacenamiento en Vercel Blob
 
 ### Notificaciones push
 - Notificaciones push reales en Android y Windows via Web Push API + VAPID
-- Acciones desde la notificación: "Ver", "Posponer 15min", "Completar"
-- Resumen diario configurable: push matutino con los recordatorios del día
-- Múltiples dispositivos por usuario con gestión desde Settings
-- Reprogramación automática de recordatorios recurrentes al enviar la notificación
+- Acciones desde la notificacion: "Ver", "Posponer 15min", "Completar"
+- Resumen diario configurable: push matutino con los recordatorios del dia
+- Multiples dispositivos por usuario con gestion desde Settings
+- Countdown de cumpleanos: notificacion a 3 dias y 1 dia antes
+- Reprogramacion automatica de recordatorios recurrentes al enviar la notificacion
 
-### Búsqueda y navegación
-- Búsqueda global con Ctrl+K — filtra por título y descripción con debounce
-- Atajos de acceso rápido desde el icono PWA instalado (Nuevo, Pomodoro, Calendario)
+### Busqueda y navegacion
+- Busqueda global con Ctrl+K — full-text search con `to_tsvector` / `websearch_to_tsquery` en PostgreSQL
+- Cache SWR en los resultados de busqueda para respuesta instantanea
+- Atajos de acceso rapido desde el icono PWA instalado (Nuevo recordatorio, Calendario)
 
 ### PWA y segundo plano
 - Instalable directamente desde Chrome — sin tienda de apps
-- Service Worker con Background Sync: las mutaciones fallidas se reintentan al volver la conexión
-- `window-controls-overlay` para mejor integración en Windows
+- Service Worker con Background Sync: las mutaciones fallidas se reintentan al volver la conexion
+- `window-controls-overlay` para mejor integracion en Windows
+- PWA Widget API con Adaptive Cards v1.5 para mostrar proximos recordatorios
 
-### Técnico
-- Autenticación con Google OAuth y email/contraseña vía Supabase Auth
-- Timer Pomodoro 25/5/15 min con notificación push al terminar cada sesión
+### Tecnico
+- Autenticacion con Google OAuth y email/contrasena via Supabase Auth
+- Dark mode con next-themes y tokens CSS semanticos
+- Internacionalizacion ES/EN con next-intl (cookie-based, namespaces Sidebar/Comun/Settings)
 - Rate limiting en todas las API routes
 - Row Level Security (RLS) en todas las tablas de Supabase
-- 100% en tier gratuito: Supabase + Vercel + Google AI Studio
+- Tests E2E con Playwright (flujo sin autenticacion + test opcional con credenciales)
+- 100% en tier gratuito: Supabase + Vercel + Groq
 
-## Prerrequisitos
+## Prerequisitos
 
 - [Node.js >= 18.17](https://nodejs.org/)
 - Cuenta en [Supabase](https://supabase.com) (plan gratuito)
-- API key de [TMDB](https://www.themoviedb.org/settings/api) para películas y series
+- API key de [TMDB](https://www.themoviedb.org/settings/api) para peliculas y series
 - API key de [RAWG](https://rawg.io/apidocs) para videojuegos
-- API key de [Groq](https://console.groq.com) para Llama 3.3 70B / 3.1 8B (free tier sin tarjeta)
+- API key de [Groq](https://console.groq.com) para Llama 3.3 70B / Whisper Large v3 Turbo (free tier sin tarjeta)
 
-## Instalación
+## Instalacion
 
 ```bash
 git clone https://github.com/KawKuroi/Noti.git
@@ -76,28 +95,29 @@ cd Noti
 npm install
 ```
 
-## Configuración
+## Configuracion
 
 ```bash
 cp .env.example .env.local
 ```
 
-| Variable | Descripción | Requerida |
+| Variable | Descripcion | Requerida |
 |---|---|---|
-| `DATABASE_URL` | Conexión a Postgres de Supabase (Transaction Pooler para Vercel) | Sí |
-| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase | Sí |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anónima de Supabase | Sí |
-| `SUPABASE_SERVICE_ROLE_KEY` | Clave de rol de servicio (privada) | Sí |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Clave pública VAPID para Web Push | Sí |
-| `VAPID_PRIVATE_KEY` | Clave privada VAPID (privada) | Sí |
-| `VAPID_EMAIL` | Email de contacto VAPID (formato `mailto:`) | Sí |
-| `TMDB_API_KEY` | API key de TMDB | Sí |
-| `RAWG_API_KEY` | API key de RAWG | Sí |
-| `GROQ_API_KEY` | API key de Groq (console.groq.com, free tier) | Sí |
-| `CRON_SECRET` | Token para proteger los endpoints de cron | Sí |
-| `NEXT_PUBLIC_APP_URL` | URL pública de la app (sin barra final) | Sí |
+| `DATABASE_URL` | Conexion a Postgres de Supabase (Transaction Pooler para Vercel) | Si |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase | Si |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anonima de Supabase | Si |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave de rol de servicio (privada) | Si |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Clave publica VAPID para Web Push | Si |
+| `VAPID_PRIVATE_KEY` | Clave privada VAPID (privada) | Si |
+| `VAPID_EMAIL` | Email de contacto VAPID (formato `mailto:`) | Si |
+| `TMDB_API_KEY` | API key de TMDB | Si |
+| `RAWG_API_KEY` | API key de RAWG | Si |
+| `GROQ_API_KEY` | API key de Groq (console.groq.com, free tier) | Si |
+| `CRON_SECRET` | Token para proteger los endpoints de cron | Si |
+| `NEXT_PUBLIC_APP_URL` | URL publica de la app (sin barra final) | Si |
+| `BLOB_READ_WRITE_TOKEN` | Token de Vercel Blob para adjuntos en Notas | Si (Fase 22+) |
 
-> MusicBrainz no requiere API key.
+> MusicBrainz y Google Books no requieren API key.
 
 Aplica el esquema de base de datos:
 
@@ -106,21 +126,13 @@ npm run db:push
 npm run db:seed
 ```
 
-Si es la primera vez o estás migrando, aplica también en el SQL Editor de Supabase:
-
-```sql
--- Migración 0002: resumen diario
-ALTER TABLE "profiles" ADD COLUMN IF NOT EXISTS "daily_summary" boolean DEFAULT false NOT NULL;
-ALTER TABLE "profiles" ADD COLUMN IF NOT EXISTS "summary_hour" text DEFAULT '07:00' NOT NULL;
-```
-
-## Cómo ejecutar
+## Como ejecutar
 
 ```bash
 # Desarrollo
 npm run dev
 
-# Producción
+# Produccion
 npm run build
 npm start
 ```

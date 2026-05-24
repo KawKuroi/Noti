@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { crearClienteNavegador } from '@/lib/supabase/client'
+import { upsertPerfil } from '@/lib/actions/user.actions'
 
 export default function PaginaRegistro() {
   const [nombre, setNombre] = useState('')
@@ -13,13 +15,14 @@ export default function PaginaRegistro() {
   const [exito, setExito] = useState(false)
 
   const supabase = crearClienteNavegador()
+  const router = useRouter()
 
   async function manejarRegistro(e: React.FormEvent) {
     e.preventDefault()
     setCargando(true)
     setError(null)
 
-    const { error } = await supabase.auth.signUp({
+    const { error, data } = await supabase.auth.signUp({
       email,
       password: contrasena,
       options: {
@@ -31,6 +34,15 @@ export default function PaginaRegistro() {
     if (error) {
       setError(error.message)
       setCargando(false)
+      return
+    }
+
+    // Si Supabase tiene confirmacion de email desactivada, la sesion
+    // esta disponible de inmediato y el callback nunca se ejecuta.
+    // En ese caso creamos el perfil aqui y redirigimos al dashboard.
+    if (data.session) {
+      await upsertPerfil(data.session.user.id, nombre || null)
+      router.push('/inicio')
       return
     }
 

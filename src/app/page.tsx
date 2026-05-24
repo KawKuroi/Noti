@@ -1,9 +1,15 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   Bell,
   Film,
+  Tv,
+  Gamepad2,
+  Music,
+  BookMarked,
   BookOpen,
+  StickyNote,
   Cake,
   CheckSquare,
   MapPin,
@@ -12,6 +18,9 @@ import {
   ShieldCheck,
   Calendar,
   Github,
+  Moon,
+  Mic,
+  Paperclip,
 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -19,12 +28,20 @@ export const metadata: Metadata = {
   description: 'Recordatorios inteligentes para todo lo que importa. Notificaciones push reales, chat IA para lanzamientos y calendario en una sola PWA.',
 }
 
-const CATEGORIAS = [
-  { icono: Film, nombre: 'Peliculas y series', descripcion: 'El chat IA busca fechas exactas de estrenos en TMDB y te notifica el dia del lanzamiento.', color: '#7C3AED' },
-  { icono: BookOpen, nombre: 'Estudio', descripcion: 'Recordatorios para sesiones de estudio, clases y trabajo. Configura recurrencias semanales.', color: '#0284C7' },
-  { icono: Cake, nombre: 'Cumpleanos', descripcion: 'Recordatorios anuales automaticos para que nunca olvides felicitar a alguien.', color: '#DB2777' },
-  { icono: CheckSquare, nombre: 'Pendientes', descripcion: 'Lista de pendientes con prioridad baja, media o alta y fecha limite.', color: '#D97706' },
+const LANZAMIENTOS = [
+  { icono: Film, nombre: 'Peliculas', descripcion: 'El chat IA busca fechas exactas de estrenos en TMDB y te notifica el dia del lanzamiento.', color: '#0A0A0A' },
+  { icono: Tv, nombre: 'Series', descripcion: 'Sigue temporadas y episodios. Recibe push el dia que sale el episodio en tu plataforma.', color: '#2563EB' },
+  { icono: Gamepad2, nombre: 'Videojuegos', descripcion: 'Busqueda de fechas de lanzamiento via RAWG.io para todas las plataformas.', color: '#16A34A' },
+  { icono: Music, nombre: 'Musica', descripcion: 'Albums y singles via MusicBrainz sin necesidad de API key.', color: '#DC2626' },
+  { icono: BookMarked, nombre: 'Libros', descripcion: 'Fechas de publicacion consultadas en Google Books automaticamente.', color: '#7C3AED' },
+]
+
+const PERSONALES = [
+  { icono: BookOpen, nombre: 'Estudio', descripcion: 'Sesiones de estudio y clases con recurrencia semanal configurable.', color: '#0284C7' },
+  { icono: Cake, nombre: 'Cumpleanos', descripcion: 'Recordatorios anuales automaticos con push a 3 dias y 1 dia de anticipacion.', color: '#DB2777' },
+  { icono: CheckSquare, nombre: 'Pendientes', descripcion: 'Lista de tareas con prioridad baja, media o alta y auto-eliminacion al completar.', color: '#D97706' },
   { icono: MapPin, nombre: 'Eventos', descripcion: 'Eventos con ubicacion. Llega a tiempo a donde necesitas estar.', color: '#DC2626' },
+  { icono: StickyNote, nombre: 'Notas', descripcion: 'Cuadernos tipo chat con adjuntos: imagenes, audios, documentos y videos.', color: '#6366F1' },
 ]
 
 const BENEFICIOS = [
@@ -36,7 +53,7 @@ const BENEFICIOS = [
   {
     icono: Sparkles,
     titulo: 'Chat IA contra alucinaciones',
-    descripcion: 'El asistente solo reporta fechas de fuentes verificadas (TMDB, RAWG, MusicBrainz). Si no la encuentra, te pide la fecha manualmente.',
+    descripcion: 'El asistente solo reporta fechas de fuentes verificadas (TMDB, RAWG, MusicBrainz, Google Books). Si no la encuentra, te pide la fecha manualmente.',
   },
   {
     icono: Calendar,
@@ -52,6 +69,21 @@ const BENEFICIOS = [
     icono: Bell,
     titulo: 'Acciones desde la notificacion',
     descripcion: 'Ver, posponer 15 min o completar directamente desde la notificacion sin abrir la app.',
+  },
+  {
+    icono: Moon,
+    titulo: 'Dark mode',
+    descripcion: 'Tema oscuro completo con tokens CSS semanticos. Tu preferencia se guarda automaticamente.',
+  },
+  {
+    icono: Mic,
+    titulo: 'Entrada por voz',
+    descripcion: 'Dicta tus recordatorios. Whisper Large v3 Turbo (Groq) transcribe el audio al instante.',
+  },
+  {
+    icono: Paperclip,
+    titulo: 'Notas con adjuntos',
+    descripcion: 'Adjunta imagenes, audios, PDFs y videos directamente en tus cuadernos de notas.',
   },
 ]
 
@@ -71,6 +103,10 @@ const FAQS = [
   {
     pregunta: 'Que pasa si el chat IA no encuentra la fecha de un lanzamiento?',
     respuesta: 'El asistente te pide la fecha manualmente en lugar de inventarla. Asi garantizas que el recordatorio tiene la fecha correcta.',
+  },
+  {
+    pregunta: 'Puedo usar Noti en modo oscuro?',
+    respuesta: 'Si. Noti incluye dark mode completo y guarda tu preferencia automaticamente. Puedes cambiarlo desde Configuracion.',
   },
 ]
 
@@ -109,7 +145,7 @@ export default function PaginaLanding() {
             <span className="text-gray-400">En cualquier dispositivo.</span>
           </h1>
           <p className="mt-6 text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Noti unifica tus recordatorios con notificaciones push reales y un chat IA que busca fechas exactas de peliculas, series, videojuegos y albumes.
+            Noti unifica tus recordatorios con notificaciones push reales y un chat IA que busca fechas exactas de peliculas, series, videojuegos, albumes y libros.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
@@ -136,17 +172,30 @@ export default function PaginaLanding() {
           </div>
         </section>
 
-        {/* Capturas placeholder */}
+        {/* Capturas */}
         <section className="max-w-5xl mx-auto px-6 pb-20">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {['Dashboard', 'Calendario', 'Chat de lanzamientos'].map((label) => (
-              <div
-                key={label}
-                className="aspect-video bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center"
-              >
-                <span className="text-xs text-gray-400 text-center px-2">{label}</span>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Image
+              src="/screenshots/inicio.png"
+              alt="Dashboard de recordatorios"
+              width={800}
+              height={500}
+              className="rounded-xl border border-gray-200 w-full"
+            />
+            <Image
+              src="/screenshots/calendario.png"
+              alt="Vista de calendario"
+              width={800}
+              height={500}
+              className="rounded-xl border border-gray-200 w-full"
+            />
+            <Image
+              src="/screenshots/chat-lanzamientos.png"
+              alt="Chat IA de lanzamientos"
+              width={800}
+              height={500}
+              className="rounded-xl border border-gray-200 w-full"
+            />
           </div>
         </section>
 
@@ -154,18 +203,44 @@ export default function PaginaLanding() {
         <section className="border-t border-gray-100 bg-gray-50 py-16">
           <div className="max-w-5xl mx-auto px-6">
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">
-              6 categorias, una sola app
+              10 categorias, una sola app
             </h2>
             <p className="text-gray-500 text-center mb-10">
               Cada categoria tiene campos y comportamiento adaptado a su tipo.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {CATEGORIAS.map((cat) => {
+
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Lanzamientos</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+              {LANZAMIENTOS.map((cat) => {
                 const Icono = cat.icono
                 return (
                   <div
                     key={cat.nombre}
-                    className="bg-white border border-gray-200 rounded-xl p-5 space-y-3"
+                    className="bg-white border border-gray-200 rounded-xl p-4 space-y-3"
+                  >
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: `${cat.color}18` }}
+                    >
+                      <Icono size={18} style={{ color: cat.color }} />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">{cat.nombre}</p>
+                      <p className="text-xs text-gray-500 mt-1 leading-relaxed">{cat.descripcion}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Personales</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {PERSONALES.map((cat) => {
+                const Icono = cat.icono
+                return (
+                  <div
+                    key={cat.nombre}
+                    className="bg-white border border-gray-200 rounded-xl p-4 space-y-3"
                   >
                     <div
                       className="w-9 h-9 rounded-lg flex items-center justify-center"
@@ -197,13 +272,14 @@ export default function PaginaLanding() {
                   Chat IA para agendar lanzamientos
                 </h2>
                 <p className="text-gray-500 mb-4 leading-relaxed">
-                  Pregunta en lenguaje natural: &ldquo;cuando sale GTA 6&rdquo;, &ldquo;nuevo album de Bad Bunny&rdquo; o &ldquo;Avatar 3&rdquo;. El asistente busca la fecha exacta en TMDB, RAWG y MusicBrainz y te pide confirmar antes de agendar.
+                  Pregunta en lenguaje natural: &ldquo;cuando sale GTA 6&rdquo;, &ldquo;nuevo album de Bad Bunny&rdquo; o &ldquo;Avatar 3&rdquo;. El asistente busca la fecha exacta y te pide confirmar antes de agendar.
                 </p>
                 <ul className="space-y-2">
                   {[
                     'Peliculas y series via TMDB con preferencia regional',
                     'Videojuegos via RAWG.io',
                     'Albums via MusicBrainz (sin API key)',
+                    'Libros via Google Books (sin API key)',
                     'Anti-alucinacion: si no encuentra la fecha, te la pide manualmente',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-gray-600">
@@ -213,8 +289,14 @@ export default function PaginaLanding() {
                   ))}
                 </ul>
               </div>
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 aspect-video flex items-center justify-center">
-                <span className="text-sm text-gray-400">Captura del chat de lanzamientos</span>
+              <div className="rounded-xl border border-gray-200 overflow-hidden">
+                <Image
+                  src="/screenshots/chat-lanzamientos.png"
+                  alt="Chat de lanzamientos"
+                  width={600}
+                  height={400}
+                  className="w-full"
+                />
               </div>
             </div>
           </div>
@@ -226,7 +308,7 @@ export default function PaginaLanding() {
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-10">
               Todo lo que incluye
             </h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {BENEFICIOS.map((b) => {
                 const Icono = b.icono
                 return (
@@ -306,7 +388,7 @@ export default function PaginaLanding() {
           </p>
           <div className="flex items-center gap-4">
             <span>
-              Datos de peliculas y series:{' '}
+              Peliculas y series:{' '}
               <a
                 href="https://www.themoviedb.org"
                 target="_blank"
