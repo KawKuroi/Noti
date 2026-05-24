@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getLocale } from 'next-intl/server'
 import { requerirUsuario } from '@/lib/auth'
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { getSuscripcionesDelUsuarioActual } from '@/lib/queries/push.queries'
@@ -8,6 +9,7 @@ import { FormularioPerfil } from '@/components/features/settings/formulario-perf
 import { FormularioResumenDiario } from '@/components/features/settings/formulario-resumen-diario'
 import { FormularioAutoDeleteTareas } from '@/components/features/settings/formulario-auto-delete-tareas'
 import { FormularioApariencia } from '@/components/features/settings/formulario-apariencia'
+import { FormularioIdioma } from '@/components/features/settings/formulario-idioma'
 import { BotonCerrarSesion } from '@/components/features/settings/boton-cerrar-sesion'
 
 export const metadata: Metadata = { title: 'Configuracion | Noti' }
@@ -15,9 +17,10 @@ export const metadata: Metadata = { title: 'Configuracion | Noti' }
 export default async function PaginaSettings() {
   await requerirUsuario()
 
-  const [perfil, suscripciones] = await Promise.all([
+  const [perfil, suscripciones, localeActual] = await Promise.all([
     getPerfilDelUsuarioActual(),
     getSuscripcionesDelUsuarioActual(),
+    getLocale(),
   ])
 
   return (
@@ -79,6 +82,14 @@ export default async function PaginaSettings() {
           Cuanto tiempo se conservan las tareas marcadas como completadas antes de eliminarse automaticamente.
         </p>
         <FormularioAutoDeleteTareas valorActual={perfil?.autoEliminarTareasCompletadasDias ?? null} />
+      </section>
+
+      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
+        <h2 className="text-base font-semibold text-foreground">Idioma</h2>
+        <p className="text-sm text-muted-foreground">
+          Elige el idioma de la interfaz.
+        </p>
+        <FormularioIdioma localeActual={localeActual} />
       </section>
 
       <section className="bg-card border border-border rounded-lg p-6 space-y-4">

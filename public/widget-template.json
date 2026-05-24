@@ -1,0 +1,28 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Proximos recordatorios",
+      "weight": "Bolder",
+      "size": "Medium",
+      "color": "Default"
+    },
+    {
+      "type": "TextBlock",
+      "text": "${proximosTexto}",
+      "wrap": true,
+      "color": "Default",
+      "spacing": "Small"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "Ver todos",
+      "url": "/inicio"
+    }
+  ]
+}

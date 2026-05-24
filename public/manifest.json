@@ -37,5 +37,22 @@
       "url": "/calendar",
       "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }]
     }
+  ],
+  "widgets": [
+    {
+      "name": "Proximos recordatorios",
+      "description": "Muestra los recordatorios mas cercanos del dia",
+      "tag": "noti-proximos",
+      "ms_ac_template": "/widget-template.json",
+      "data": "/api/widget",
+      "update": 3600,
+      "icons": [
+        { "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }
+      ],
+      "screenshots": [],
+      "actions": [
+        { "action": "abrir", "title": "Abrir Noti" }
+      ]
+    }
   ]
 }

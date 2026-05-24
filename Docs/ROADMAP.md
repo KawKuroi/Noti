@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-La ola priorizada original (Fases 0-19) esta completa. Las fases 20-23 son aditivas y quedan en cola para iteraciones posteriores. Estan ordenadas por importancia descendente: las primeras son las que mas cambian la logica y el desarrollo de la aplicacion, y las ultimas son features aditivas o de limpieza. Cada fase es ejecutable de forma independiente salvo Fase 22 (notas multimedia), que depende de la Fase 9.
+El roadmap completo (Fases 0-23) esta terminado. No hay fases activas pendientes.
 
 ---
 
@@ -32,6 +32,7 @@ La ola priorizada original (Fases 0-19) esta completa. Las fases 20-23 son aditi
 - **Fase 20 — Auto-eliminacion de tareas completadas** — migracion `0006_auto_delete_tasks.sql` con columnas `auto_delete_completed_tasks_days` en `profiles` y `completed_at` en `reminders`; `alternarCompletado` graba la fecha de completado; cron `limpiar-tareas` diario a las 03:00 UTC; selector en settings (Nunca / 7 / 30 / 90 dias); countdown ambar en tarjetas cuando quedan 3 dias o menos.
 - **Fase 21 — Entrada por audio en el asistente IA** — endpoint `src/app/api/ai/transcribir/route.ts` con `whisper-large-v3-turbo` y rate-limit 10 req/min; hook `src/hooks/use-audio-recorder.ts` con seleccion de mimeType por compatibilidad, timer, auto-stop a 60 s y manejo de permisos denegados; boton Mic integrado en `CommandPalette` con estados grabando (rojo + timer), procesando (loader purpura) y error inline bajo el header.
 - **Fase 22 — Notas multimedia (22.0–22.D):** 22.0: cuadernos tipo chat WhatsApp con tabla `note_entries` (migracion `0008`). 22.A–22.D: adjuntos multimedia — tabla `note_attachments` (migracion `0009`), `@vercel/blob`, API route `/api/notas/adjunto` con token de subida, actions `registrarAdjunto` y `eliminarAdjunto`, componentes `VisorImagen`, `ReproductorAudio`, `VisorDocumento`, `ReproductorVideo`, `BurbujaAdjunto`, hook `useGrabadorAudioAdjunto`, `SubirAdjunto` con clip+mic. Timeline mezclada ordenada por `creadoEn` en `VistaChatNotas`.
+- **Fase 23 — Mejoras aditivas completas:** Dark mode, optimistic updates, infinite scroll + ordenamiento, countdown cumpleanos, deteccion duplicados IA, sugerencias de categoria, cache SWR en busqueda global, full-text search con tsvector, Tests E2E con Playwright (flujo critico sin auth + test salteable con credenciales), PWA Widget API (manifest + sw.js + Adaptive Card template + endpoint /api/widget), i18n con next-intl cookie-based (sidebar y settings traducidos ES/EN, toggle en configuracion).
 
 ---
 
@@ -67,26 +68,4 @@ Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mim
 
 ---
 
-## Fase 23 (futuras mejoras)
-
-**No priorizado - oportunidades de mejora identificadas:**
-
-### UX / Productividad
-- [x] Dark mode - Tailwind lo soporta nativamente, impacto visual alto
-- [x] Optimistic updates en completar/eliminar - el item desaparece visualmente de inmediato sin esperar al servidor
-- [x] Infinite scroll en la lista de recordatorios para usuarios con muchos items
-- [x] Añadir una opción para ordenar los recordatorios segun la fecha, prioridad, estado o categoria
-
-### Notificaciones y segundo plano
-- [ ] PWA Widget API (Windows 11 + Android) - widget nativo en la pantalla de inicio con los proximos recordatorios del dia (experimental, requiere Edge/Chrome reciente)
-- [x] Recordatorio de cumpleanos con cuenta regresiva ("Faltan 3 dias para el cumpleanos de Juan")
-
-### IA y contenido
-- [x] Deteccion automatica de duplicados al crear con IA - avisar si ya existe un recordatorio similar
-- [x] Sugerencias de categoria inteligente al tipear en el formulario manual
-
-### Tecnico
-- [ ] Internacionalizacion (i18n) - soporte para ingles ademas de espanol
-- [x] Cache de cliente con SWR o React Query para reducir recargas al navegar entre paginas
-- [x] Full-text search con `tsvector` en PostgreSQL para busqueda mas precisa con soporte de acentos y sinonimos
-- [ ] Tests E2E con Playwright para el flujo critico (crear recordatorio -> recibir notificacion)
+El roadmap esta completo. No hay fases ni items pendientes.

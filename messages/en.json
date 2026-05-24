@@ -1,0 +1,33 @@
+{
+  "Sidebar": {
+    "inicio": "Home",
+    "lanzamientos": "Releases",
+    "calendario": "Calendar",
+    "herramientas": "Tools",
+    "buscar": "Search",
+    "configuracion": "Settings",
+    "cerrarHerramientas": "Close tools",
+    "abrirHerramientas": "Open tools",
+    "categorias": "categories",
+    "notas": "Notes"
+  },
+  "Comun": {
+    "guardar": "Save",
+    "cancelar": "Cancel",
+    "crear": "Create",
+    "editar": "Edit",
+    "eliminar": "Delete",
+    "buscar": "Search",
+    "cargando": "Loading...",
+    "nuevo": "New",
+    "confirmar": "Confirm"
+  },
+  "Settings": {
+    "titulo": "Settings",
+    "subtitulo": "Manage your notification preferences",
+    "idioma": "Language",
+    "idiomaDescripcion": "Choose the interface language.",
+    "espanol": "Spanish",
+    "ingles": "English"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "Sidebar": {
+    "inicio": "Inicio",
+    "lanzamientos": "Lanzamientos",
+    "calendario": "Calendario",
+    "herramientas": "Herramientas",
+    "buscar": "Buscar",
+    "configuracion": "Configuracion",
+    "cerrarHerramientas": "Cerrar herramientas",
+    "abrirHerramientas": "Abrir herramientas",
+    "categorias": "categorias",
+    "notas": "Notas"
+  },
+  "Comun": {
+    "guardar": "Guardar",
+    "cancelar": "Cancelar",
+    "crear": "Crear",
+    "editar": "Editar",
+    "eliminar": "Eliminar",
+    "buscar": "Buscar",
+    "cargando": "Cargando...",
+    "nuevo": "Nuevo",
+    "confirmar": "Confirmar"
+  },
+  "Settings": {
+    "titulo": "Configuracion",
+    "subtitulo": "Gestiona tus preferencias de notificacion",
+    "idioma": "Idioma",
+    "idiomaDescripcion": "Elige el idioma de la interfaz.",
+    "espanol": "Espanol",
+    "ingles": "Ingles"
+  }
+}

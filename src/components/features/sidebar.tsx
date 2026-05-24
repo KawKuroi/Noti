@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   BookOpen,
   CalendarDays,
@@ -42,6 +43,7 @@ interface Props {
 
 export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
   const ruta = usePathname()
+  const t = useTranslations('Sidebar')
   const [herramientasAbiertas, setHerramientasAbiertas] = useState(true)
   const categoriasGenerales = categorias.filter(
     (c) =>
@@ -78,7 +80,7 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
           )}
         >
           <LayoutDashboard size={16} />
-          Inicio
+          {t('inicio')}
         </Link>
 
         <button
@@ -86,12 +88,12 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         >
           <Search size={16} />
-          Buscar
+          {t('buscar')}
         </button>
 
         <div className="pt-3 pb-1 px-3">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Categorias
+            {t('categorias')}
           </span>
         </div>
 
@@ -105,7 +107,7 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
           )}
         >
           <Clapperboard size={16} />
-          Lanzamientos
+          {t('lanzamientos')}
         </Link>
 
         {categoriasGenerales.map((cat) => {
@@ -138,9 +140,10 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
           <button
             onClick={() => setHerramientasAbiertas((prev) => !prev)}
             className="flex items-center justify-between w-full group"
+            aria-label={herramientasAbiertas ? t('cerrarHerramientas') : t('abrirHerramientas')}
           >
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Herramientas
+              {t('herramientas')}
             </span>
             {herramientasAbiertas ? (
               <ChevronDown size={12} className="text-muted-foreground group-hover:text-foreground" />
@@ -162,7 +165,7 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
               )}
             >
               <Calendar size={16} />
-              Calendario
+              {t('calendario')}
             </Link>
 
             <Link
@@ -175,7 +178,7 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
               )}
             >
               <StickyNote size={16} />
-              Notas
+              {t('notas')}
             </Link>
           </>
         )}
@@ -191,7 +194,7 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
               ? 'bg-accent text-foreground'
               : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
           )}
-          aria-label="Configuracion"
+          aria-label={t('configuracion')}
         >
           <Settings size={16} />
         </Link>

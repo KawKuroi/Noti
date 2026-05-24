@@ -5,8 +5,14 @@
 
 ## Fase activa
 
-**Activo:** Fase 23 (mejoras futuras no priorizadas — ver ROADMAP).
-**Estado general:** Fases 0–22 completadas. Fase 23 en progreso (dark mode, optimistic updates, infinite scroll, ordenamiento y countdown de cumpleanos completados).
+**Activo:** Ninguna. El roadmap completo (Fases 0–23) esta terminado.
+**Estado general:** Todas las fases completadas. El producto esta en estado de mantenimiento.
+
+## Fase 23 — Sprint final (sesion 2026-05-24)
+
+- **Tests E2E con Playwright** — `playwright.config.ts` con webServer y chromium; `tests/e2e/flujo-recordatorio.spec.ts` con 3 tests sin auth (landing, login, redireccion protegida) y 1 test salteable que requiere `E2E_EMAIL`/`E2E_PASSWORD` para el flujo completo de creacion.
+- **PWA Widget API** — propiedad `"widgets"` en `public/manifest.json` con plantilla Adaptive Cards v1.5 (`/widget-template.json`); handlers `widgetinstall`, `widgetuninstall`, `widgetresume`, `widgetclick` en `public/sw.js`; endpoint autenticado `GET /api/widget` que devuelve los proximos 5 recordatorios como JSON.
+- **i18n con next-intl** — `next-intl` instalado, `src/i18n/request.ts` con `getRequestConfig` cookie-based (`NEXT_LOCALE`); `next.config.ts` envuelto con `createNextIntlPlugin`; `messages/es.json` y `messages/en.json` con namespaces Sidebar, Comun y Settings; `layout.tsx` convertido a async con `NextIntlClientProvider`; `sidebar.tsx` con `useTranslations`; `FormularioIdioma` en settings con toggle ES/EN que escribe cookie y llama `router.refresh()`.
 
 ## Fase 23 — IA y contenido + Tecnico (sesion 2026-05-24)
 

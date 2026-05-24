@@ -206,6 +206,46 @@ self.addEventListener('notificationclick', (evento) => {
   )
 })
 
+// --- PWA Widget API (experimental, Edge/Chrome en Windows 11) ---
+
+async function actualizarWidget() {
+  if (!self.widgets) return
+  try {
+    const respuesta = await fetch('/api/widget')
+    if (!respuesta.ok) return
+    const datos = await respuesta.json()
+    const payload = {
+      template: 'noti-proximos',
+      data: JSON.stringify(datos),
+    }
+    await self.widgets.updateByTag('noti-proximos', payload)
+  } catch {
+    // El widget no es critico; ignorar errores de red
+  }
+}
+
+self.addEventListener('widgetinstall', (evento) => {
+  evento.waitUntil(actualizarWidget())
+})
+
+self.addEventListener('widgetresume', (evento) => {
+  evento.waitUntil(actualizarWidget())
+})
+
+self.addEventListener('widgetuninstall', (evento) => {
+  evento.waitUntil(
+    Promise.resolve(),
+  )
+})
+
+self.addEventListener('widgetclick', (evento) => {
+  if (evento.action === 'abrir') {
+    evento.waitUntil(
+      clients.openWindow('/inicio'),
+    )
+  }
+})
+
 // Cuando el navegador rota la suscripcion push, re-registrar automaticamente
 self.addEventListener('pushsubscriptionchange', (evento) => {
   evento.waitUntil(

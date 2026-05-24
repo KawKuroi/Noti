@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Toaster } from 'sonner'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
 import { RegistrarSW } from '@/components/features/registrar-sw'
 import { ProvedorTema } from '@/components/providers/proveedor-tema'
@@ -48,18 +50,23 @@ interface Props {
   children: React.ReactNode
 }
 
-export default function LayoutRaiz({ children }: Props) {
+export default async function LayoutRaiz({ children }: Props) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
       </head>
       <body className={inter.className}>
-        <ProvedorTema>
-          <RegistrarSW />
-          {children}
-          <Toaster richColors position="top-right" />
-        </ProvedorTema>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ProvedorTema>
+            <RegistrarSW />
+            {children}
+            <Toaster richColors position="top-right" />
+          </ProvedorTema>
+        </NextIntlClientProvider>
       </body>
     </html>
   )
