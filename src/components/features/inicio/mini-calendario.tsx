@@ -35,14 +35,14 @@ export function MiniCalendario({ diasConRecordatorios }: Props) {
 
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <p className="text-xs font-semibold text-gray-700 mb-3">
+    <div className="bg-card rounded-xl border border-border p-5">
+      <p className="text-xs font-semibold text-foreground mb-3">
         {MESES[mesActual]} {anioActual}
       </p>
 
       <div className="grid grid-cols-7 gap-1 mb-1">
         {DIAS_SEMANA.map((d) => (
-          <span key={d} className="text-center text-[10px] font-medium text-gray-400">
+          <span key={d} className="text-center text-[10px] font-medium text-muted-foreground">
             {d}
           </span>
         ))}
@@ -61,7 +61,7 @@ export function MiniCalendario({ diasConRecordatorios }: Props) {
               <span
                 className={cn(
                   'w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium',
-                  esHoy ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100',
+                  esHoy ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent',
                 )}
               >
                 {dia}

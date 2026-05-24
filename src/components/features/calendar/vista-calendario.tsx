@@ -81,7 +81,7 @@ export function VistaCalendario({
           <Button variante="fantasma" tamano="icono" onClick={() => navegar(-1)} title="Anterior">
             <ChevronLeft size={16} />
           </Button>
-          <h2 className="text-base font-semibold text-gray-900 capitalize min-w-[180px] text-center">
+          <h2 className="text-base font-semibold text-foreground capitalize min-w-[180px] text-center">
             {titulo}
           </h2>
           <Button variante="fantasma" tamano="icono" onClick={() => navegar(1)} title="Siguiente">
@@ -93,13 +93,13 @@ export function VistaCalendario({
         </div>
 
         {/* Toggle vista */}
-        <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+        <div className="flex rounded-lg border border-border overflow-hidden">
           <button
             onClick={() => cambiarVista('mes')}
             className={`px-3 py-1.5 text-sm font-medium transition-colors ${
               vista === 'mes'
-                ? 'bg-gray-900 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-background text-muted-foreground hover:bg-accent/50'
             }`}
           >
             Mes
@@ -108,8 +108,8 @@ export function VistaCalendario({
             onClick={() => cambiarVista('semana')}
             className={`px-3 py-1.5 text-sm font-medium transition-colors ${
               vista === 'semana'
-                ? 'bg-gray-900 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-background text-muted-foreground hover:bg-accent/50'
             }`}
           >
             Semana
@@ -144,7 +144,7 @@ export function VistaCalendario({
 
         {recordatoriosFiltrados.length === 0 && (
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-            <div className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs text-gray-500 shadow-sm ring-1 ring-gray-200 backdrop-blur">
+            <div className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-card/95 px-3 py-1 text-xs text-muted-foreground shadow-sm ring-1 ring-border backdrop-blur">
               <Info size={12} />
               Sin recordatorios en este filtro
             </div>

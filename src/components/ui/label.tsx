@@ -6,7 +6,7 @@ interface Props extends React.ComponentPropsWithoutRef<typeof LabelPrimitive.Roo
 export function Label({ className, ...props }: Props) {
   return (
     <LabelPrimitive.Root
-      className={cn('text-sm font-medium text-gray-700 leading-none', className)}
+      className={cn('text-sm font-medium text-foreground leading-none', className)}
       {...props}
     />
   )

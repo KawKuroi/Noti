@@ -110,15 +110,15 @@ export function BusquedaGlobal() {
         className="absolute inset-0 bg-black/30"
         onClick={() => setAbierto(false)}
       />
-      <div className="relative w-full max-w-xl bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
-          <Search size={16} className="text-gray-400 shrink-0" />
+      <div className="relative w-full max-w-xl bg-card rounded-xl shadow-xl border border-border overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+          <Search size={16} className="text-muted-foreground shrink-0" />
           <input
             ref={inputRef}
             value={query}
             onChange={onChange}
             placeholder="Buscar recordatorios..."
-            className="flex-1 text-sm outline-none text-gray-900 placeholder:text-gray-400"
+            className="flex-1 text-sm outline-none bg-transparent text-foreground placeholder:text-muted-foreground"
           />
 
           {estadoGrabacion === 'grabando' ? (
@@ -138,7 +138,7 @@ export function BusquedaGlobal() {
               type="button"
               onClick={iniciarGrabacion}
               disabled={micDeshabilitado}
-              className="p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+              className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
               title="Dictado por voz"
               aria-label="Dictado por voz"
             >
@@ -148,7 +148,7 @@ export function BusquedaGlobal() {
 
           <button
             onClick={() => setAbierto(false)}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <X size={16} />
           </button>
@@ -164,7 +164,7 @@ export function BusquedaGlobal() {
           {cargando && (
             <div className="p-4 space-y-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />
+                <div key={i} className="h-10 bg-muted rounded animate-pulse" />
               ))}
             </div>
           )}
@@ -176,7 +176,7 @@ export function BusquedaGlobal() {
                   <a
                     href={construirHref(r)}
                     onClick={() => setAbierto(false)}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors"
                   >
                     {r.categoria && (
                       <span
@@ -185,8 +185,8 @@ export function BusquedaGlobal() {
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{r.titulo}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-sm font-medium text-foreground truncate">{r.titulo}</p>
+                      <p className="text-xs text-muted-foreground">
                         {r.categoria?.nombre} &middot;{' '}
                         {formatDistanceToNow(new Date(r.fechaVencimiento), {
                           addSuffix: true,
@@ -201,13 +201,13 @@ export function BusquedaGlobal() {
           )}
 
           {!cargando && query.length >= 2 && resultados.length === 0 && (
-            <p className="px-4 py-6 text-center text-sm text-gray-400">
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">
               No se encontraron resultados para &quot;{query}&quot;
             </p>
           )}
 
           {!cargando && query.length < 2 && (
-            <p className="px-4 py-6 text-center text-sm text-gray-400">
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">
               Escribe al menos 2 caracteres para buscar
             </p>
           )}

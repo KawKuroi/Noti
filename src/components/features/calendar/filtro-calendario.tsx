@@ -21,8 +21,8 @@ export function FiltroCalendario({ categorias, seleccionadas, onChange }: Props)
         onClick={() => onChange([])}
         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border flex items-center gap-2 ${
           seleccionadas.length === 0
-            ? 'bg-gray-900 text-white border-gray-900'
-            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+            ? 'bg-primary text-primary-foreground border-primary'
+            : 'bg-background text-muted-foreground border-border hover:bg-accent/50'
         }`}
       >
         Todas
@@ -36,8 +36,8 @@ export function FiltroCalendario({ categorias, seleccionadas, onChange }: Props)
             onClick={() => toggle(cat.id)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border flex items-center gap-2 ${
               activa
-                ? 'bg-gray-900 text-white border-gray-900'
-                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-background text-muted-foreground border-border hover:bg-accent/50'
             }`}
           >
             {activa && (

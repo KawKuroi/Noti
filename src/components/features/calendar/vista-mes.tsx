@@ -67,7 +67,7 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
         {DIAS_CABECERA.map((dia) => (
           <div
             key={dia}
-            className="py-2 text-center text-xs font-medium text-gray-400 uppercase tracking-wide"
+            className="py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wide"
           >
             {dia}
           </div>
@@ -76,7 +76,7 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
 
       {/* Grid de dias */}
       <div
-        className="grid grid-cols-7 gap-px bg-gray-100 border border-gray-100 rounded-xl overflow-hidden flex-1 min-h-0"
+        className="grid grid-cols-7 gap-px bg-border border border-border rounded-xl overflow-hidden flex-1 min-h-0"
         style={{ gridTemplateRows: `repeat(${filas}, minmax(0, 1fr))` }}
       >
         {dias.map((dia) => {
@@ -90,8 +90,8 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
               key={dia.toISOString()}
               onClick={() => total > 0 || esDelMes ? onDiaClick(dia) : undefined}
               className={cn(
-                'bg-white p-2 flex flex-col items-start gap-1 hover:bg-gray-50 transition-colors text-left overflow-hidden',
-                !esDelMes && 'bg-gray-50/70',
+                'bg-card p-2 flex flex-col items-start gap-1 hover:bg-accent/50 transition-colors text-left overflow-hidden',
+                !esDelMes && 'bg-muted/40',
                 total > 0 && 'cursor-pointer',
                 total === 0 && !esDelMes && 'cursor-default',
               )}
@@ -99,9 +99,9 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
               <span
                 className={cn(
                   'text-sm font-medium leading-none w-6 h-6 flex items-center justify-center rounded-full',
-                  esDiaHoy && 'bg-gray-900 text-white',
-                  !esDiaHoy && esDelMes && 'text-gray-900',
-                  !esDiaHoy && !esDelMes && 'text-gray-300',
+                  esDiaHoy && 'bg-primary text-primary-foreground',
+                  !esDiaHoy && esDelMes && 'text-foreground',
+                  !esDiaHoy && !esDelMes && 'text-muted-foreground/40',
                 )}
               >
                 {format(dia, 'd')}
@@ -117,7 +117,7 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
                     />
                   ))}
                   {extras > 0 && (
-                    <span className="text-xs text-gray-400 ml-0.5">+{extras}</span>
+                    <span className="text-xs text-muted-foreground ml-0.5">+{extras}</span>
                   )}
                 </div>
               )}

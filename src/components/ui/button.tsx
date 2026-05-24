@@ -3,15 +3,15 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils/cn'
 
 const variantes = cva(
-  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 disabled:pointer-events-none disabled:opacity-40',
+  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40',
   {
     variants: {
       variante: {
-        primario: 'bg-gray-900 text-white hover:bg-gray-700',
-        secundario: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
+        primario: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        secundario: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         destructivo: 'bg-red-500 text-white hover:bg-red-600',
-        contorno: 'border border-gray-200 bg-white text-gray-900 hover:bg-gray-50',
-        fantasma: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+        contorno: 'border border-border bg-background text-foreground hover:bg-accent/50',
+        fantasma: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
       },
       tamano: {
         sm: 'h-8 px-3 text-xs',

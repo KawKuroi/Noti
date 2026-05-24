@@ -46,14 +46,14 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 border-b border-gray-100 w-full">
+        <div className="flex gap-1 border-b border-border w-full">
           <button
             onClick={() => setTabActiva('todos')}
             className={cn(
               'px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap',
               tabActiva === 'todos'
-                ? 'border-gray-900 text-gray-900'
-                : 'border-transparent text-gray-500 hover:text-gray-700',
+                ? 'border-primary text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
             Todos
@@ -65,8 +65,8 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
               className={cn(
                 'px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap',
                 tabActiva === cat.slug
-                  ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-500 hover:text-gray-700',
+                  ? 'border-primary text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground',
               )}
             >
               {cat.nombre}

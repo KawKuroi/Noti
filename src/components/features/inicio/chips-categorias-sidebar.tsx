@@ -28,16 +28,16 @@ export function ChipsCategoriasSidebar({ categorias, contadores }: Props) {
   const total = Object.values(contadores).reduce((a, b) => a + b, 0)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <p className="text-xs font-semibold text-gray-700 mb-3">Categorías</p>
+    <div className="bg-card rounded-xl border border-border p-4">
+      <p className="text-xs font-semibold text-foreground mb-3">Categorías</p>
       <div className="flex flex-col gap-1">
         <button
           onClick={() => seleccionar(null)}
           className={cn(
             'flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors text-left',
             !categoriaActual
-              ? 'bg-gray-900 text-white'
-              : 'text-gray-600 hover:bg-gray-100',
+              ? 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:bg-accent',
           )}
         >
           <span>Todos</span>
@@ -45,7 +45,7 @@ export function ChipsCategoriasSidebar({ categorias, contadores }: Props) {
             <span
               className={cn(
                 'text-xs px-1.5 rounded-full',
-                !categoriaActual ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500',
+                !categoriaActual ? 'bg-white/20 text-primary-foreground' : 'bg-muted text-muted-foreground',
               )}
             >
               {total}
@@ -63,7 +63,7 @@ export function ChipsCategoriasSidebar({ categorias, contadores }: Props) {
               onClick={() => seleccionar(cat.id)}
               className={cn(
                 'flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors text-left',
-                activa ? 'text-white' : 'text-gray-600 hover:bg-gray-100',
+                activa ? 'text-white' : 'text-muted-foreground hover:bg-accent',
               )}
               style={activa ? { backgroundColor: cat.color } : undefined}
             >
@@ -72,7 +72,7 @@ export function ChipsCategoriasSidebar({ categorias, contadores }: Props) {
                 <span
                   className={cn(
                     'text-xs px-1.5 rounded-full',
-                    activa ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500',
+                    activa ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground',
                   )}
                 >
                   {count}
