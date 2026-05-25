@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { FormularioSugerencias } from '@/components/features/formulario-sugerencias'
 import {
   Bell,
   Film,
@@ -349,6 +350,19 @@ export default function PaginaLanding() {
                 </details>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Sugerencias */}
+        <section className="border-t border-gray-100 py-16">
+          <div className="max-w-2xl mx-auto px-6">
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">
+              Tienes una sugerencia?
+            </h2>
+            <p className="text-gray-500 text-center mb-8">
+              Noti es un proyecto en desarrollo. Tu feedback ayuda a decidir que construir.
+            </p>
+            <FormularioSugerencias />
           </div>
         </section>
 

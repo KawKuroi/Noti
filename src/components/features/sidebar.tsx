@@ -65,9 +65,9 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
 
   return (
     <aside className="w-60 h-screen bg-background border-r border-border flex flex-col sticky top-0">
-      <div className="px-6 py-5 border-b border-border">
+      <Link href="/" className="px-6 py-5 border-b border-border flex items-center hover:opacity-80 transition-opacity">
         <span className="text-lg font-bold text-foreground">Noti</span>
-      </div>
+      </Link>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         <Link

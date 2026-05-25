@@ -116,6 +116,7 @@ cp .env.example .env.local
 | `CRON_SECRET` | Token para proteger los endpoints de cron | Si |
 | `NEXT_PUBLIC_APP_URL` | URL publica de la app (sin barra final) | Si |
 | `BLOB_READ_WRITE_TOKEN` | Token de Vercel Blob para adjuntos en Notas | Si (Fase 22+) |
+| `RESEND_API_KEY` | API key de Resend para el formulario de sugerencias (resend.com, free tier) | Si |
 
 > MusicBrainz y Google Books no requieren API key.
 
