@@ -15,7 +15,7 @@ export default async function PaginaNotas() {
   const subtitulo = `${cuadernos.length} cuaderno${cuadernos.length !== 1 ? 's' : ''}`
 
   return (
-    <div>
+    <div className="max-w-3xl mx-auto space-y-6">
       <PageHeader
         icon={<NotebookPen size={22} />}
         iconColor="var(--cat-notas)"

@@ -58,12 +58,12 @@ export default function LayoutAuth({ children }: Props) {
         {children}
       </div>
 
-      {/* Columna derecha — visual marketing */}
+      {/* Columna derecha — visual marketing. Fondo oscuro fijo (no se invierte en dark mode). */}
       <div
         className="auth-visual-col"
         style={{
-          background: 'var(--ink)',
-          color: 'var(--bg)',
+          background: 'var(--panel-dark-bg)',
+          color: 'var(--panel-dark-ink)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -126,8 +126,8 @@ export default function LayoutAuth({ children }: Props) {
           }}
         >
           {[
-            { emoji: '🎬', titulo: 'GTA VI', sub: 'Estreno en 2 dias' },
-            { emoji: '🎂', titulo: 'Cumpleanos de Laura', sub: 'Manana · 12:00' },
+            { emoji: '🎬', titulo: 'GTA VI', sub: 'Estreno en 2 días' },
+            { emoji: '🎂', titulo: 'Cumpleaños de Laura', sub: 'Mañana · 12:00' },
             { emoji: '📚', titulo: 'Entregar informe', sub: 'Hoy · 18:00' },
           ].map(({ emoji, titulo, sub }) => (
             <div

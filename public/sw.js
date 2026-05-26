@@ -1,4 +1,4 @@
-const CACHE_NOMBRE = 'noti-v4'
+const CACHE_NOMBRE = 'noti-v5'
 const URLS_CACHE = ['/']
 const DB_NOMBRE = 'noti-sync'
 const STORE_PENDIENTES = 'operaciones-pendientes'
@@ -99,13 +99,15 @@ self.addEventListener('fetch', (evento) => {
     return
   }
 
-  // Para mutaciones en rutas de la app: guardar si falla la red
-  if (
+  // Para mutaciones en rutas de la app: encolar para reintentar si falla la red.
+  // IMPORTANTE: el encolado sólo aplica a mutaciones idempotentes de datos del usuario;
+  // las rutas de IA/transcripción no tiene sentido replayearlas (el contexto ya pasó).
+  const RUTAS_ENCOLABLES = ['/api/reminders', '/api/notas']
+  const esRutaEncolable =
     evento.request.method === 'POST' &&
-    url.pathname.startsWith('/api/') &&
-    !url.pathname.includes('/api/push/') &&
-    !url.pathname.includes('/api/contacto')
-  ) {
+    RUTAS_ENCOLABLES.some((p) => url.pathname.startsWith(p))
+
+  if (esRutaEncolable) {
     evento.respondWith(
       fetch(evento.request.clone()).catch(async () => {
         try {
@@ -115,8 +117,11 @@ self.addEventListener('fetch', (evento) => {
         } catch {
           // ignorar errores de almacenamiento
         }
+        // 503 (no 202): así response.ok === false en el cliente y el caller
+        // puede mostrar el toast de "guardado offline, se sincronizará" sin
+        // que su rama de éxito ejecute lógica que asume datos reales.
         return new Response(JSON.stringify({ ok: false, pendiente: true }), {
-          status: 202,
+          status: 503,
           headers: { 'Content-Type': 'application/json' },
         })
       }),

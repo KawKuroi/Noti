@@ -22,6 +22,37 @@ interface Props {
   tipoInicial?: TipoLanzamiento
 }
 
+const estiloLabel: React.CSSProperties = {
+  fontSize: '11px',
+  fontWeight: 500,
+  textTransform: 'uppercase',
+  letterSpacing: '0.08em',
+  color: 'var(--ink-3)',
+  display: 'block',
+  marginBottom: '6px',
+}
+
+const estiloBotonSecundario: React.CSSProperties = {
+  padding: '8px 14px',
+  borderRadius: '10px',
+  fontSize: '13px',
+  fontWeight: 500,
+  background: 'var(--bg)',
+  color: 'var(--ink)',
+  border: '1px solid var(--line-2)',
+  cursor: 'pointer',
+}
+
+const estiloBotonPrimario: React.CSSProperties = {
+  padding: '8px 14px',
+  borderRadius: '10px',
+  fontSize: '13px',
+  fontWeight: 500,
+  background: 'var(--ink)',
+  color: 'var(--bg)',
+  border: '1px solid var(--ink)',
+}
+
 export function FormularioManualLanzamiento({ tipoInicial }: Props) {
   const [abierto, setAbierto] = useState(false)
   const [tipo, setTipo] = useState<TipoLanzamiento>(tipoInicial ?? 'movie')
@@ -125,7 +156,7 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
                 <label
                   htmlFor="tipo-lanzamiento"
                   className="mono"
-                  style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  style={estiloLabel}
                 >
                   Tipo
                 </label>
@@ -147,9 +178,9 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
                 <label
                   htmlFor="titulo-lanzamiento"
                   className="mono"
-                  style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  style={estiloLabel}
                 >
-                  Titulo
+                  Título
                 </label>
                 <Input
                   id="titulo-lanzamiento"
@@ -275,15 +306,15 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
                 <label
                   htmlFor="descripcion-lanzamiento"
                   className="mono"
-                  style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  style={estiloLabel}
                 >
-                  Descripcion (opcional)
+                  Descripción (opcional)
                 </label>
                 <Textarea
                   id="descripcion-lanzamiento"
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
-                  placeholder="Breve descripcion..."
+                  placeholder="Breve descripción..."
                   rows={2}
                   className="resize-none"
                 />
@@ -293,7 +324,7 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
                 <label
                   htmlFor="fecha-lanzamiento"
                   className="mono"
-                  style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  style={estiloLabel}
                 >
                   Fecha de lanzamiento
                 </label>
@@ -322,16 +353,7 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
               <button
                 type="button"
                 onClick={() => setAbierto(false)}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: '10px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  background: 'var(--bg)',
-                  color: 'var(--ink)',
-                  border: '1px solid var(--line-2)',
-                  cursor: 'pointer',
-                }}
+                style={estiloBotonSecundario}
               >
                 Cancelar
               </button>
@@ -339,13 +361,7 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
                 type="submit"
                 disabled={pending || !titulo.trim() || !fecha}
                 style={{
-                  padding: '8px 14px',
-                  borderRadius: '10px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  background: 'var(--ink)',
-                  color: 'var(--bg)',
-                  border: '1px solid var(--ink)',
+                  ...estiloBotonPrimario,
                   cursor: pending || !titulo.trim() || !fecha ? 'not-allowed' : 'pointer',
                   opacity: pending || !titulo.trim() || !fecha ? 0.5 : 1,
                 }}

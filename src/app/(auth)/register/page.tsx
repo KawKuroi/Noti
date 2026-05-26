@@ -100,7 +100,7 @@ export default function PaginaRegistro() {
           Revisa tu email
         </h3>
         <p style={{ fontSize: '14px', color: 'var(--ink-3)', marginBottom: '20px', lineHeight: 1.5 }}>
-          Te enviamos un enlace de confirmacion a <strong style={{ color: 'var(--ink)' }}>{email}</strong>. Abrelo para activar tu cuenta.
+          Te enviamos un enlace de confirmación a <strong style={{ color: 'var(--ink)' }}>{email}</strong>. Ábrelo para activar tu cuenta.
         </p>
         <Link
           href="/login"
@@ -113,7 +113,7 @@ export default function PaginaRegistro() {
             textUnderlineOffset: '3px',
           }}
         >
-          Volver al inicio de sesion
+          Volver al inicio de sesión
         </Link>
       </div>
     )
@@ -145,9 +145,9 @@ export default function PaginaRegistro() {
           <p
             style={{
               fontSize: '13px',
-              color: 'var(--cat-peliculas)',
-              background: 'color-mix(in oklab, var(--cat-peliculas) 8%, transparent)',
-              border: '1px solid color-mix(in oklab, var(--cat-peliculas) 20%, transparent)',
+              color: 'var(--danger)',
+              background: 'color-mix(in oklab, var(--danger) 8%, transparent)',
+              border: '1px solid color-mix(in oklab, var(--danger) 20%, transparent)',
               borderRadius: '8px',
               padding: '8px 12px',
             }}
@@ -187,7 +187,7 @@ export default function PaginaRegistro() {
         </div>
 
         <div>
-          <label htmlFor="contrasena" className="mono" style={labelEstilo}>Contrasena</label>
+          <label htmlFor="contrasena" className="mono" style={labelEstilo}>Contraseña</label>
           <input
             id="contrasena"
             type="password"
@@ -195,7 +195,7 @@ export default function PaginaRegistro() {
             onChange={(e) => setContrasena(e.target.value)}
             required
             minLength={6}
-            placeholder="Minimo 6 caracteres"
+            placeholder="Mínimo 6 caracteres"
             style={inputEstilo}
             onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--ink)')}
             onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--line-2)')}
@@ -249,7 +249,7 @@ export default function PaginaRegistro() {
           href="/login"
           style={{ color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: '3px' }}
         >
-          Inicia sesion
+          Inicia sesión
         </Link>
       </p>
     </div>

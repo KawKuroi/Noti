@@ -103,7 +103,7 @@ export function FormularioSugerencias({ onEnviado }: Props = {}) {
       </div>
 
       {error && (
-        <p className="text-sm text-[var(--cat-peliculas)]">{error}</p>
+        <p className="text-sm text-[var(--danger)]">{error}</p>
       )}
 
       <button

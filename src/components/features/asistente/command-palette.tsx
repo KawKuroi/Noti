@@ -208,7 +208,7 @@ export function PanelSugerencias() {
   // Cuando esta cerrado el query y no hay resultados ni carga, muestra solo ejemplos.
   // Aunque el query sea breve, seguimos mostrando ejemplos para guiar al usuario.
   return (
-    <div className="flex flex-col max-h-[60vh] bg-[var(--bg-elev)] rounded-xl shadow-2xl border border-[var(--line)] overflow-hidden">
+    <div className="flex flex-col max-h-[85vh] bg-[var(--bg-elev)] rounded-xl shadow-2xl border border-[var(--line)] overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {!hayResultado && !cargando && (
           <div className="py-2">

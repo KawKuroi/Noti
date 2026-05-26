@@ -89,7 +89,7 @@ function CamposCumpleanos({ edadInicial }: { edadInicial?: number }) {
         />
       </div>
       <p style={{ fontSize: '12px', color: 'var(--ink-3)' }}>
-        Este recordatorio se repetira cada ano automaticamente.
+        Este recordatorio se repetirá cada año automáticamente.
       </p>
     </>
   )
@@ -98,7 +98,7 @@ function CamposCumpleanos({ edadInicial }: { edadInicial?: number }) {
 function CamposEventos({ ubicacionInicial }: { ubicacionInicial?: string }) {
   return (
     <div className="space-y-1">
-      <Label htmlFor="meta_ubicacion">Ubicacion (opcional)</Label>
+      <Label htmlFor="meta_ubicacion">Ubicación (opcional)</Label>
       <Input
         id="meta_ubicacion"
         name="meta_ubicacion"
@@ -113,7 +113,7 @@ function CamposEventos({ ubicacionInicial }: { ubicacionInicial?: string }) {
 function CamposEstudio({ duracionInicial }: { duracionInicial?: number }) {
   return (
     <div className="space-y-1">
-      <Label htmlFor="meta_duracionMin">Duracion estimada (minutos)</Label>
+      <Label htmlFor="meta_duracionMin">Duración estimada (minutos)</Label>
       <Input
         id="meta_duracionMin"
         name="meta_duracionMin"
@@ -481,7 +481,7 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
             className="mono"
             style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '8px' }}
           >
-            Categoria
+            Categoría
           </label>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {categorias.map((cat) => {
@@ -543,13 +543,13 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
             className="mono"
             style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
           >
-            Titulo
+            Título
           </label>
           <Input
             id="titulo"
             name="titulo"
             defaultValue={recordatorio?.titulo}
-            placeholder="Ej: Estudiar calculo"
+            placeholder="Ej: Estudiar cálculo"
             maxLength={100}
             required
             onChange={(e) => setTituloActual(e.target.value)}
@@ -563,13 +563,13 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
             className="mono"
             style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
           >
-            {slugActual === 'notes' ? 'Contenido' : 'Descripcion (opcional)'}
+            {slugActual === 'notes' ? 'Contenido' : 'Descripción (opcional)'}
           </label>
           <Textarea
             id="descripcion"
             name="descripcion"
             defaultValue={recordatorio?.descripcion ?? ''}
-            placeholder={slugActual === 'notes' ? 'Escribe tu nota aqui...' : 'Agrega detalles adicionales...'}
+            placeholder={slugActual === 'notes' ? 'Escribe tu nota aquí...' : 'Agrega detalles adicionales...'}
             maxLength={slugActual === 'notes' ? 10000 : 500}
             rows={slugActual === 'notes' ? 6 : 3}
           />
@@ -652,7 +652,7 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
 
         {/* Errores */}
         {tieneError && (
-          <p style={{ fontSize: '13px', color: 'var(--cat-peliculas)' }}>{estado.error as string}</p>
+          <p style={{ fontSize: '13px', color: 'var(--danger)' }}>{estado.error as string}</p>
         )}
       </div>
 

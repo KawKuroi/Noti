@@ -82,7 +82,7 @@ export function ListaDispositivos({ suscripciones }: Props) {
               disabled={pending}
               className="transition-colors"
               style={{ padding: '6px', color: 'var(--ink-4)', borderRadius: '6px' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--cat-peliculas)')}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--danger)')}
               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-4)')}
               aria-label="Eliminar dispositivo"
             >

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
 import { FormularioManualLanzamiento } from './formulario-manual-lanzamiento'
 import {
@@ -61,7 +61,7 @@ const COLOR_CATEGORIA_VAR: Record<string, string> = {
   games: 'var(--cat-juegos)',
   music: 'var(--cat-musica)',
   books: 'var(--cat-libros)',
-  study: 'var(--var-estudio)',
+  study: 'var(--cat-estudio)',
   birthdays: 'var(--cat-cumple)',
   tasks: 'var(--cat-pendientes)',
   events: 'var(--cat-eventos)',
@@ -79,6 +79,15 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
 
   const categoriaActiva = datosOrdenados.find((d) => d.cat.slug === tabActiva)
   const tipoActivo = SLUG_A_TIPO[tabActiva as SlugLanzamiento]
+
+  const todosOrdenados = useMemo(
+    () => ordenarRecordatorios(todos, ordenamiento),
+    [todos, ordenamiento],
+  )
+  const categoriaActivaOrdenada = useMemo(
+    () => (categoriaActiva ? ordenarRecordatorios(categoriaActiva.recordatorios, ordenamiento) : []),
+    [categoriaActiva, ordenamiento],
+  )
 
   const activeTabClass =
     'flex items-center px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium text-[var(--ink)] bg-[var(--bg)] shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-[var(--line-2)] focus:outline-none transition-all'
@@ -101,9 +110,9 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="fecha-asc">Mas proximo primero</SelectItem>
-              <SelectItem value="fecha-desc">Mas lejano primero</SelectItem>
-              <SelectItem value="reciente">Creacion reciente</SelectItem>
+              <SelectItem value="fecha-asc">Más próximo primero</SelectItem>
+              <SelectItem value="fecha-desc">Más lejano primero</SelectItem>
+              <SelectItem value="reciente">Creación reciente</SelectItem>
             </SelectContent>
           </Select>
           <FormularioManualLanzamiento tipoInicial={tipoActivo} />
@@ -141,7 +150,7 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
       <div className="pt-2">
         {tabActiva === 'todos' ? (
           <ListaRecordatorios
-            recordatorios={ordenarRecordatorios(todos, ordenamiento)}
+            recordatorios={todosOrdenados}
             categorias={categorias}
             mostrarCategoria
             mensajeVacio="Sin lanzamientos. Usa el chat o agrega uno manualmente."
@@ -149,7 +158,7 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
         ) : (
           categoriaActiva && (
             <ListaRecordatorios
-              recordatorios={ordenarRecordatorios(categoriaActiva.recordatorios, ordenamiento)}
+              recordatorios={categoriaActivaOrdenada}
               categorias={categorias}
               mensajeVacio={`Sin lanzamientos en ${categoriaActiva.cat.nombre}. Usa el chat o agrega uno manualmente.`}
             />

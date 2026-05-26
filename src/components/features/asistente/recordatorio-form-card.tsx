@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Check, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -214,10 +213,10 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
         borderRadius: '12px',
         border: '1px solid var(--line-2)',
         background: 'var(--bg-elev)',
-        padding: '16px',
+        padding: '14px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
+        gap: '10px',
       }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -245,18 +244,18 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       </div>
 
       <div>
-        <label style={estiloLabel}>Titulo</label>
+        <label style={estiloLabel}>Título</label>
         <Input
           autoFocus
           value={titulo}
           onChange={(e) => setTitulo(e.target.value)}
-          placeholder="Titulo del recordatorio"
+          placeholder="Título del recordatorio"
           disabled={creando}
         />
       </div>
 
       <div>
-        <label style={estiloLabel}>Categoria</label>
+        <label style={estiloLabel}>Categoría</label>
         <Select value={categoriaSlug} onValueChange={setCategoriaSlug} disabled={creando}>
           <SelectTrigger>
             <SelectValue />
@@ -422,7 +421,7 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       {categoriaSlug === 'events' && (
         <div>
           <label style={estiloLabel}>
-            Ubicacion <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
+            Ubicación <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
           </label>
           <Input
             value={ubicacion}
@@ -437,7 +436,7 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       {categoriaSlug === 'study' && (
         <div>
           <label style={estiloLabel}>
-            Duracion estimada (minutos) <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
+            Duración estimada (minutos) <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
           </label>
           <Input
             type="number"
@@ -505,8 +504,8 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="yearly">Cada ano (mismo dia y mes)</SelectItem>
-                <SelectItem value="weekly">Cada semana (dias especificos)</SelectItem>
+                <SelectItem value="yearly">Cada año (mismo día y mes)</SelectItem>
+                <SelectItem value="weekly">Cada semana (días específicos)</SelectItem>
               </SelectContent>
             </Select>
 
@@ -543,7 +542,7 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
       <div>
         <label style={estiloLabel}>
-          Descripcion <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
+          Descripción <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
         </label>
         <Textarea
           value={descripcion}
@@ -553,22 +552,60 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
         />
       </div>
 
-      {error && <p style={{ fontSize: '12px', color: 'var(--cat-peliculas)' }}>{error}</p>}
+      {error && <p style={{ fontSize: '12px', color: 'var(--danger)' }}>{error}</p>}
 
-      <div className="flex gap-2 pt-1">
-        <Button
-          variante="primario"
-          tamano="sm"
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          paddingTop: '10px',
+          marginTop: '2px',
+          borderTop: '1px solid var(--line)',
+          alignItems: 'center',
+        }}
+      >
+        <button
+          type="button"
+          onClick={onCancelar}
+          disabled={creando}
+          style={{
+            padding: '9px 14px',
+            borderRadius: '10px',
+            fontSize: '13px',
+            fontWeight: 500,
+            background: 'var(--bg)',
+            color: 'var(--ink)',
+            border: '1px solid var(--line-2)',
+            cursor: creando ? 'not-allowed' : 'pointer',
+            opacity: creando ? 0.6 : 1,
+          }}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
           onClick={handleGuardar}
           disabled={creando}
-          className="flex-1"
+          style={{
+            flex: 1,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '9px 14px',
+            borderRadius: '10px',
+            fontSize: '13px',
+            fontWeight: 500,
+            background: 'var(--ink)',
+            color: 'var(--bg)',
+            border: '1px solid var(--ink)',
+            cursor: creando ? 'not-allowed' : 'pointer',
+            opacity: creando ? 0.6 : 1,
+          }}
         >
           <Check size={14} />
           {creando ? 'Creando...' : 'Crear recordatorio'}
-        </Button>
-        <Button variante="contorno" tamano="sm" onClick={onCancelar} disabled={creando}>
-          Cancelar
-        </Button>
+        </button>
       </div>
     </div>
   )

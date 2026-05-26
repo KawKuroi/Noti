@@ -19,15 +19,6 @@
 
 ---
 
-## Capturas de pantalla
-
-<div align="center">
-  <img src="public/screenshots/inicio.png" width="49%" alt="Dashboard" />
-  <img src="public/screenshots/calendario.png" width="49%" alt="Calendario" />
-  <img src="public/screenshots/chat-lanzamientos.png" width="49%" alt="Chat IA de lanzamientos" />
-  <img src="public/screenshots/dark-mode.png" width="49%" alt="Dark mode" />
-</div>
-
 ## Caracteristicas
 
 ### Recordatorios
@@ -63,6 +54,11 @@
 - Busqueda global con Ctrl+K — full-text search con `to_tsvector` / `websearch_to_tsquery` en PostgreSQL
 - Cache SWR en los resultados de busqueda para respuesta instantanea
 - Atajos de acceso rapido desde el icono PWA instalado (Nuevo recordatorio, Calendario)
+
+### Landing page publica
+- Hero, seccion de caracteristicas, mockups del producto, listado de categorias, demo del asistente y FAQ
+- Formulario de sugerencias integrado que envia correo via Resend
+- Diseno con design tokens CSS y dark mode sincronizado con la app
 
 ### PWA y segundo plano
 - Instalable directamente desde Chrome — sin tienda de apps
@@ -117,6 +113,7 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_APP_URL` | URL publica de la app (sin barra final) | Si |
 | `BLOB_READ_WRITE_TOKEN` | Token de Vercel Blob para adjuntos en Notas | Si (Fase 22+) |
 | `RESEND_API_KEY` | API key de Resend para el formulario de sugerencias (resend.com, free tier) | Si |
+| `CONTACT_DESTINATION_EMAIL` | Email destinatario del formulario de sugerencias de la landing | Si |
 
 > MusicBrainz y Google Books no requieren API key.
 
@@ -145,6 +142,7 @@ npm run lint            # ESLint
 npm run db:generate     # Generar migraciones Drizzle
 npm run db:push         # Aplicar migraciones
 npm run db:studio       # Abrir Drizzle Studio (UI visual de la BD)
+npm run test:e2e        # Tests E2E con Playwright
 ```
 
 ## Demo en vivo

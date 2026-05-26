@@ -34,7 +34,7 @@ export default function PaginaLogin() {
     const { error } = await supabase.auth.signInWithPassword({ email, password: contrasena })
 
     if (error) {
-      setError('Credenciales incorrectas. Verifica tu email y contrasena.')
+      setError('Credenciales incorrectas. Verifica tu email y contraseña.')
       setCargando(false)
       return
     }
@@ -119,9 +119,9 @@ export default function PaginaLogin() {
           <p
             style={{
               fontSize: '13px',
-              color: 'var(--cat-peliculas)',
-              background: 'color-mix(in oklab, var(--cat-peliculas) 8%, transparent)',
-              border: '1px solid color-mix(in oklab, var(--cat-peliculas) 20%, transparent)',
+              color: 'var(--danger)',
+              background: 'color-mix(in oklab, var(--danger) 8%, transparent)',
+              border: '1px solid color-mix(in oklab, var(--danger) 20%, transparent)',
               borderRadius: '8px',
               padding: '8px 12px',
             }}
@@ -182,7 +182,7 @@ export default function PaginaLogin() {
               marginBottom: '6px',
             }}
           >
-            Contrasena
+            Contraseña
           </label>
           <input
             id="contrasena"
@@ -220,7 +220,7 @@ export default function PaginaLogin() {
             href="/forgot-password"
             style={{ fontSize: '13px', color: 'var(--ink-3)', textDecoration: 'underline', textUnderlineOffset: '3px' }}
           >
-            ¿Olvidaste tu contrasena?
+            ¿Olvidaste tu contraseña?
           </Link>
         </div>
 
@@ -252,7 +252,7 @@ export default function PaginaLogin() {
             e.currentTarget.style.boxShadow = ''
           }}
         >
-          {cargando ? 'Iniciando...' : 'Iniciar sesion'}
+          {cargando ? 'Iniciando...' : 'Iniciar sesión'}
         </button>
       </form>
 
@@ -266,7 +266,7 @@ export default function PaginaLogin() {
           marginTop: '24px',
         }}
       >
-        ¿Aun no tienes cuenta?{' '}
+        ¿Aún no tienes cuenta?{' '}
         <Link
           href="/register"
           style={{ color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: '3px' }}

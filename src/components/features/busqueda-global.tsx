@@ -212,11 +212,11 @@ export function BusquedaGlobal() {
                 fontSize: '11.5px',
                 padding: '4px 8px',
                 borderRadius: '6px',
-                background: 'color-mix(in oklab, var(--cat-peliculas) 12%, transparent)',
-                color: 'var(--cat-peliculas)',
+                background: 'color-mix(in oklab, var(--danger) 12%, transparent)',
+                color: 'var(--danger)',
                 flexShrink: 0,
               }}
-              title="Detener grabacion"
+              title="Detener grabación"
             >
               <Square size={11} />
               <span className="mono font-medium">{segundosGrabando}s</span>
@@ -316,12 +316,12 @@ export function BusquedaGlobal() {
           <div
             className="px-4 py-2"
             style={{
-              background: 'color-mix(in oklab, var(--cat-peliculas) 8%, transparent)',
+              background: 'color-mix(in oklab, var(--danger) 8%, transparent)',
               borderBottom: '1px solid var(--line)',
               flexShrink: 0,
             }}
           >
-            <p className="text-xs" style={{ color: 'var(--cat-peliculas)' }}>{errorGrabacion}</p>
+            <p className="text-xs" style={{ color: 'var(--danger)' }}>{errorGrabacion}</p>
           </div>
         )}
 
@@ -390,8 +390,8 @@ export function BusquedaGlobal() {
           )}
 
           {!cargando && errorBusqueda && (
-            <p className="px-4 py-6 text-center text-sm" style={{ color: 'var(--cat-peliculas)' }}>
-              Error al buscar. Verifica tu conexion.
+            <p className="px-4 py-6 text-center text-sm" style={{ color: 'var(--danger)' }}>
+              Error al buscar. Verifica tu conexión.
             </p>
           )}
 
