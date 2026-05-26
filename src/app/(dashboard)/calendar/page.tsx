@@ -4,15 +4,16 @@ import {
   endOfMonth,
   startOfWeek,
   endOfWeek,
-  addDays,
 } from 'date-fns'
-
-export const metadata: Metadata = { title: 'Calendario | Noti' }
+import { CalendarDays } from 'lucide-react'
 import { requerirUsuario } from '@/lib/auth'
 import { getRecordatoriosEnRango } from '@/lib/queries/reminder.queries'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { expandirOcurrenciasEnRango } from '@/lib/utils/date.utils'
 import { VistaCalendario } from '@/components/features/calendar/vista-calendario'
+import { PageHeader } from '@/components/ui/page-header'
+
+export const metadata: Metadata = { title: 'Calendario | Noti' }
 
 interface Props {
   searchParams: Promise<{ mes?: string; vista?: string; fecha?: string }>
@@ -58,11 +59,13 @@ export default async function PaginaCalendario({ searchParams }: Props) {
   const recordatorios = expandirOcurrenciasEnRango(recordatoriosRaw, rangoInicio, rangoFin)
 
   return (
-    <div className="flex flex-col gap-6 h-full">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Calendario</h1>
-        <p className="text-sm text-muted-foreground mt-1">Vista mensual y semanal de todos tus recordatorios.</p>
-      </div>
+    <div className="flex flex-col gap-4 h-full">
+      <PageHeader
+        title="Calendario"
+        subtitle="Vista mensual y semanal de todos tus recordatorios."
+        icon={<CalendarDays size={20} />}
+        iconColor="var(--cat-estudio)"
+      />
 
       <div className="flex-1 min-h-0">
         <VistaCalendario

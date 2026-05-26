@@ -78,7 +78,7 @@ export default async function PaginaInicio({ searchParams }: Props) {
     <div className="max-w-5xl mx-auto">
       <NotificationPrompt />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
         {/* Columna principal */}
         <div className="space-y-5">
           <div className="flex items-start justify-between gap-4">

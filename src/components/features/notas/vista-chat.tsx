@@ -233,24 +233,41 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
         onDrop={manejarDrop}
       >
         {arrastrando && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-indigo-400 bg-indigo-50/90 pointer-events-none">
-            <Upload size={32} className="text-indigo-500" />
-            <p className="text-sm font-medium text-indigo-600">Suelta el archivo para adjuntarlo</p>
+          <div
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-lg pointer-events-none"
+            style={{
+              border: '2px dashed var(--cat-notas)',
+              background: 'color-mix(in oklab, var(--cat-notas) 8%, transparent)',
+            }}
+          >
+            <Upload size={32} style={{ color: 'var(--cat-notas)' }} />
+            <p className="text-sm font-medium" style={{ color: 'var(--cat-notas)' }}>
+              Suelta el archivo para adjuntarlo
+            </p>
           </div>
         )}
         {/* Cabecera */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background flex-shrink-0">
+        <div
+          className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
+          style={{ borderBottom: '1px solid var(--line)', background: 'var(--bg)' }}
+        >
           <Button
             variante="fantasma"
             tamano="sm"
             onClick={() => router.push('/notes')}
-            className="gap-1.5 text-muted-foreground flex-shrink-0"
+            className="gap-1.5 flex-shrink-0"
+            style={{ color: 'var(--ink-3)' }}
           >
             <ArrowLeft size={15} />
-            Notas
+            <span className="mono" style={{ fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 500 }}>Notas</span>
           </Button>
 
-          <h1 className="font-semibold text-foreground flex-1 truncate">{tituloCuaderno}</h1>
+          <h1
+            className="font-medium flex-1 truncate"
+            style={{ color: 'var(--ink)', fontSize: '15px' }}
+          >
+            {tituloCuaderno}
+          </h1>
 
           <div className="flex items-center gap-1 flex-shrink-0">
             <Button
@@ -277,9 +294,9 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
         </div>
 
         {/* Zona de mensajes */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3" style={{ background: 'var(--bg-soft)' }}>
           {elementosTimeline.length === 0 && (
-            <p className="text-center text-sm text-muted-foreground mt-10">
+            <p className="text-center text-sm mt-10" style={{ color: 'var(--ink-3)' }}>
               Aun no hay mensajes. Escribe el primero.
             </p>
           )}
@@ -304,8 +321,14 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
 
         {/* Chip-preview del archivo pendiente (estilo LLM) */}
         {archivoPendiente && (
-          <div className="border-t border-border bg-background px-4 pt-3 pb-1 flex-shrink-0">
-            <div className="inline-flex items-center gap-2 bg-muted border border-border rounded-xl pl-2 pr-1 py-1.5 max-w-full">
+          <div
+            className="px-4 pt-3 pb-1 flex-shrink-0"
+            style={{ borderTop: '1px solid var(--line)', background: 'var(--bg)' }}
+          >
+            <div
+              className="inline-flex items-center gap-2 rounded-xl pl-2 pr-1 py-1.5 max-w-full"
+              style={{ background: 'var(--bg-soft)', border: '1px solid var(--line)' }}
+            >
               {previewImagen ? (
                 <img
                   src={previewImagen}
@@ -313,22 +336,26 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
                   className="w-10 h-10 rounded-md object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-md bg-card border border-border flex items-center justify-center flex-shrink-0 text-muted-foreground">
+                <div
+                  className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'var(--bg-elev)', border: '1px solid var(--line)', color: 'var(--ink-3)' }}
+                >
                   <IconoArchivo mime={archivoPendiente.type} />
                 </div>
               )}
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-medium text-foreground truncate max-w-[240px]">
+                <span className="text-sm font-medium truncate max-w-[240px]" style={{ color: 'var(--ink)' }}>
                   {archivoPendiente.name}
                 </span>
-                <span className="text-[11px] text-muted-foreground">
+                <span className="mono" style={{ fontSize: '11px', color: 'var(--ink-3)', fontWeight: 500 }}>
                   {formatearTamano(archivoPendiente.size)}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={quitarArchivoPendiente}
-                className="ml-1 flex-shrink-0 w-6 h-6 rounded-full bg-foreground/80 hover:bg-foreground text-background flex items-center justify-center transition-colors"
+                className="ml-1 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                style={{ background: 'var(--ink-4)', color: 'var(--bg)' }}
                 title="Quitar archivo"
                 aria-label="Quitar archivo"
               >
@@ -339,7 +366,10 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
         )}
 
         {/* Zona de entrada */}
-        <div className="border-t border-border bg-background px-4 py-3 flex items-center gap-2 flex-shrink-0">
+        <div
+          className="px-4 py-3 flex items-center gap-2 flex-shrink-0"
+          style={{ borderTop: '1px solid var(--line)', background: 'var(--bg)' }}
+        >
           <SubirAdjunto
             onArchivoSeleccionado={manejarSeleccionArchivo}
             subiendo={subiendo}

@@ -2,7 +2,25 @@
 
 import { useState, useRef, useEffect, useOptimistic, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Check, Pencil, Trash2, RotateCcw, Clock, Timer } from 'lucide-react'
+import { cn } from '@/lib/utils/cn'
+import {
+  Check,
+  Pencil,
+  Trash2,
+  RotateCcw,
+  Timer,
+  Clapperboard,
+  BookOpen,
+  Cake,
+  CheckSquare,
+  MapPin,
+  Music,
+  Gamepad2,
+  Tv,
+  HelpCircle,
+  CalendarDays,
+  StickyNote,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,10 +32,35 @@ import {
 import { FormularioRecordatorio } from './formulario-recordatorio'
 import { eliminarRecordatorio, alternarCompletado } from '@/lib/actions/reminder.actions'
 import { formatearFechaCorta, formatearFechaSinHora } from '@/lib/utils/date.utils'
-import { PALETA_LANZAMIENTOS } from '@/lib/utils/constants'
 import type { Recordatorio } from '@/types/reminder.types'
 import type { Categoria } from '@/types/category.types'
 import type { TipoLanzamiento } from '@/types/release.types'
+
+const COLOR_CATEGORIA_VAR: Record<string, string> = {
+  movies: 'var(--cat-series)',
+  tv: 'var(--cat-series)',
+  games: 'var(--cat-juegos)',
+  music: 'var(--cat-musica)',
+  books: 'var(--cat-libros)',
+  study: 'var(--cat-estudio)',
+  birthdays: 'var(--cat-cumple)',
+  tasks: 'var(--cat-pendientes)',
+  events: 'var(--cat-eventos)',
+  notes: 'var(--cat-notas)',
+}
+
+const ICONOS_CATEGORIA: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  movies: Clapperboard,
+  tv: Tv,
+  games: Gamepad2,
+  music: Music,
+  books: BookOpen,
+  study: BookOpen,
+  birthdays: Cake,
+  tasks: CheckSquare,
+  events: MapPin,
+  notes: StickyNote,
+}
 
 interface Props {
   recordatorio: Recordatorio
@@ -50,6 +93,32 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
     return () => clearTimeout(t)
   }, [destacado])
 
+  const manejarCompletar = () => {
+    const siguiente = !estaCompletado
+    startTransition(async () => {
+      actualizarCompletado(siguiente)
+      const r = await alternarCompletado(recordatorio.id)
+      if (!r.ok) {
+        actualizarCompletado(!siguiente)
+        toast.error(r.error ?? 'No se pudo actualizar')
+      }
+    })
+  }
+
+  const confirmarEliminar = () => {
+    startTransition(async () => {
+      marcarEliminado(true)
+      const r = await eliminarRecordatorio(recordatorio.id)
+      if (!r.ok) {
+        marcarEliminado(false)
+        toast.error(r.error ?? 'No se pudo eliminar')
+      } else {
+        toast.success('Recordatorio eliminado')
+        setEliminarAbierto(false)
+      }
+    })
+  }
+
   if (eliminado) return null
 
   const categoria = categorias.find((c) => c.id === recordatorio.categoriaId)
@@ -68,97 +137,101 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
   const plataforma = metadatos?.plataforma as string | undefined
   const temporada = metadatos?.temporada as number | undefined
 
-  const colorAcento = tipoLanzamiento ? PALETA_LANZAMIENTOS[tipoLanzamiento] : undefined
+  const colorCat = categoria ? (COLOR_CATEGORIA_VAR[categoria.slug] || categoria.color) : 'var(--ink)'
+  const IconoCat = categoria ? (ICONOS_CATEGORIA[categoria.slug] || HelpCircle) : HelpCircle
 
   const etiquetaAutoDelete = (() => {
-    if (!estaCompletado || !recordatorio.completadoEn || !diasAutoEliminar) return null
-    const fechaEliminar = new Date(
-      new Date(recordatorio.completadoEn).getTime() + diasAutoEliminar * 86400000,
+    if (!estaCompletado || !diasAutoEliminar || !recordatorio.fechaVencimiento) return null
+    const transcurridos = Math.ceil(
+      (Date.now() - new Date(recordatorio.fechaVencimiento).getTime()) / 86400000,
     )
-    const diasRestantes = Math.ceil((fechaEliminar.getTime() - Date.now()) / 86400000)
-    if (diasRestantes <= 0) return null
-    return { dias: diasRestantes, urgente: diasRestantes <= 3 }
+    const dias = Math.max(0, diasAutoEliminar - transcurridos)
+    if (transcurridos < 0 || dias > diasAutoEliminar) return null
+    return { dias, urgente: dias <= 1 }
   })()
-
-  function manejarCompletar() {
-    startTransition(async () => {
-      const estabaCompletado = recordatorio.estaCompletado
-      actualizarCompletado(!estabaCompletado)
-      const resultado = await alternarCompletado(recordatorio.id)
-      if (resultado.ok) {
-        if (estabaCompletado) {
-          toast.success('Recordatorio reabierto')
-        } else if (recordatorio.esRecurrente) {
-          toast.success('Avanzado a la proxima ocurrencia')
-        } else {
-          toast.success('Recordatorio completado')
-        }
-      } else {
-        toast.error(resultado.error ?? 'No se pudo actualizar el recordatorio')
-      }
-    })
-  }
-
-  function confirmarEliminar() {
-    setEliminarAbierto(false)
-    startTransition(async () => {
-      marcarEliminado(true)
-      const resultado = await eliminarRecordatorio(recordatorio.id)
-      if (resultado.ok) {
-        toast.success('Recordatorio eliminado')
-      } else {
-        toast.error(resultado.error ?? 'No se pudo eliminar el recordatorio')
-      }
-    })
-  }
 
   return (
     <>
       <div
         ref={tarjetaRef}
-        className={`group flex items-start gap-3 p-4 bg-card rounded-xl border transition-colors ${
-          estaCompletado
-            ? 'border-border opacity-60'
-            : 'border-border hover:border-border/80'
-        } ${mostrarRing ? 'ring-2 ring-purple-400 ring-offset-2' : ''}`}
-        style={colorAcento ? { borderLeftColor: colorAcento, borderLeftWidth: '3px' } : undefined}
+        className={cn(
+          'group flex items-start gap-4 p-[10px_14px] bg-transparent hover:bg-[var(--bg-soft)] rounded-[14px] border border-transparent hover:border-[var(--line)] transition-all duration-150 relative min-w-0 w-full',
+          estaCompletado ? 'opacity-60' : '',
+          mostrarRing ? 'ring-2 ring-purple-400 ring-offset-2' : ''
+        )}
       >
         {/* Boton completar — solo para recordatorios no recurrentes */}
-        {!recordatorio.esRecurrente && (
+        {!recordatorio.esRecurrente ? (
           <button
             onClick={manejarCompletar}
             disabled={pending}
             title="Marcar como completado"
-            className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-              estaCompletado
-                ? 'border-green-500 bg-green-500'
-                : 'border-border hover:border-foreground/50'
-            }`}
+            className={cn(
+              'w-[20px] h-[20px] rounded-[6px] border-[1.5px] flex items-center justify-center shrink-0 mt-[3px] cursor-pointer transition-all duration-150 focus:outline-none',
+              estaCompletado ? 'border-transparent text-white' : 'border-[var(--line-2)] hover:border-[var(--ink-4)] bg-transparent'
+            )}
+            style={estaCompletado ? { backgroundColor: colorCat } : undefined}
           >
-            {estaCompletado && <Check size={10} className="text-white" />}
+            {estaCompletado && <Check size={11} className="stroke-[3px]" />}
           </button>
+        ) : (
+          <div className="w-[20px] shrink-0" />
         )}
 
-        {/* Contenido */}
+        {/* Icon Block */}
+        <div
+          className="w-[32px] h-[32px] rounded-[9px] flex items-center justify-center shrink-0 mt-[2px]"
+          style={{
+            backgroundColor: `color-mix(in oklab, ${colorCat} 14%, transparent)`,
+            color: colorCat,
+          }}
+        >
+          <IconoCat size={15} />
+        </div>
+
+        {/* Contenido (Title + Description + Meta) */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <p
-              className={`text-sm font-medium text-foreground ${
-                estaCompletado ? 'line-through text-muted-foreground' : ''
-              }`}
-            >
-              {recordatorio.titulo}
-            </p>
+            <div className="min-w-0 flex-1">
+              <p
+                className={cn(
+                  'text-[14.5px] font-normal text-[var(--ink)] leading-tight select-none',
+                  estaCompletado ? 'line-through text-[var(--ink-3)] opacity-55 font-normal' : 'font-medium'
+                )}
+              >
+                {recordatorio.titulo}
+              </p>
+
+              {recordatorio.descripcion && (
+                <p className="text-[12.5px] text-[var(--ink-2)] mt-0.5 leading-normal truncate select-none">
+                  {recordatorio.descripcion}
+                </p>
+              )}
+
+              {(director || artista || plataforma || temporada) && (
+                <p className="text-[12.5px] text-[var(--ink-3)] mt-0.5 leading-normal truncate select-none font-mono text-[10px] tracking-wide uppercase">
+                  {[
+                    director ? `Dir. ${director}` : null,
+                    artista,
+                    plataforma,
+                    temporada ? `Temp. ${temporada}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              )}
+            </div>
 
             {/* Acciones — visibles al hover */}
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shrink-0 ml-2 self-start mt-[-2px]">
               <Button
                 variante="fantasma"
                 tamano="icono"
                 onClick={() => setEditarAbierto(true)}
                 title="Editar"
+                className="h-7 w-7 rounded-md text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--bg-soft)]"
               >
-                <Pencil size={13} />
+                <Pencil size={12} />
               </Button>
               <Button
                 variante="fantasma"
@@ -166,48 +239,36 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
                 onClick={() => setEliminarAbierto(true)}
                 disabled={pending}
                 title="Eliminar"
-                className="hover:text-red-500"
+                className="h-7 w-7 rounded-md text-[var(--ink-2)] hover:text-red-500 hover:bg-red-500/10"
               >
-                <Trash2 size={13} />
+                <Trash2 size={12} />
               </Button>
             </div>
           </div>
 
-          {recordatorio.descripcion && (
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">{recordatorio.descripcion}</p>
-          )}
-
-          {(director || artista || plataforma || temporada) && (
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">
-              {[
-                director ? `Dir. ${director}` : null,
-                artista,
-                plataforma,
-                temporada ? `Temp. ${temporada}` : null,
-              ].filter(Boolean).join(' · ')}
-            </p>
-          )}
-
-          <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex flex-wrap items-center gap-2.5 mt-1.5 font-mono text-[10.5px] font-medium text-[var(--ink-3)] uppercase tracking-[0.03em] select-none">
             {fechaFormateada && (
-              <span suppressHydrationWarning className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock size={10} />
+              <span suppressHydrationWarning className="flex items-center gap-1">
+                <CalendarDays size={10.5} className="text-[var(--ink-3)]" />
                 {fechaFormateada}
               </span>
             )}
 
             {mostrarCategoria && categoria && (
               <span
-                className="text-xs px-1.5 py-0.5 rounded-md font-medium"
-                style={{ backgroundColor: `${categoria.color}20`, color: categoria.color }}
+                className="px-2 py-0.5 rounded-[999px] font-semibold text-[10px] uppercase tracking-wider"
+                style={{
+                  backgroundColor: `color-mix(in oklab, ${colorCat} 12%, transparent)`,
+                  color: colorCat,
+                }}
               >
                 {categoria.nombre}
               </span>
             )}
 
             {recordatorio.esRecurrente && (
-              <span className="text-xs text-gray-400 flex items-center gap-1">
-                <RotateCcw size={10} />
+              <span className="flex items-center gap-1 font-semibold">
+                <RotateCcw size={10} className="animate-[spin_10s_linear_infinite]" />
                 Recurrente
               </span>
             )}
@@ -215,12 +276,15 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
             {etiquetaAutoDelete && (
               <span
                 suppressHydrationWarning
-                className={`text-xs flex items-center gap-1 ${etiquetaAutoDelete.urgente ? 'text-amber-500' : 'text-muted-foreground'}`}
+                className={cn(
+                  'flex items-center gap-1 font-semibold',
+                  etiquetaAutoDelete.urgente ? 'text-amber-600' : 'text-[var(--ink-3)]'
+                )}
               >
                 <Timer size={10} />
                 {etiquetaAutoDelete.dias === 1
-                  ? 'Se elimina manana'
-                  : `Se elimina en ${etiquetaAutoDelete.dias} dias`}
+                  ? 'Se elimina mañana'
+                  : `Se elimina en ${etiquetaAutoDelete.dias}d`}
               </span>
             )}
           </div>

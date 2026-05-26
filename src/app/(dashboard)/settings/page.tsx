@@ -12,8 +12,46 @@ import { FormularioApariencia } from '@/components/features/settings/formulario-
 import { FormularioIdioma } from '@/components/features/settings/formulario-idioma'
 import { BotonSugerencias } from '@/components/features/settings/boton-sugerencias'
 import { BotonCerrarSesion } from '@/components/features/settings/boton-cerrar-sesion'
+import { PageHeader } from '@/components/ui/page-header'
+import { Settings } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Configuracion | Noti' }
+
+function ConfigCard({
+  titulo,
+  descripcion,
+  children,
+}: {
+  titulo: string
+  descripcion?: string
+  children: React.ReactNode
+}) {
+  return (
+    <section
+      style={{
+        background: 'var(--bg)',
+        border: '1px solid var(--line)',
+        borderRadius: '14px',
+        padding: '22px 24px',
+      }}
+    >
+      <h2
+        className="font-medium"
+        style={{ fontSize: '15px', color: 'var(--ink)', marginBottom: descripcion ? '4px' : '16px' }}
+      >
+        {titulo}
+      </h2>
+      {descripcion && (
+        <p
+          style={{ fontSize: '13.5px', color: 'var(--ink-3)', marginBottom: '16px', lineHeight: 1.5 }}
+        >
+          {descripcion}
+        </p>
+      )}
+      {children}
+    </section>
+  )
+}
 
 export default async function PaginaSettings() {
   await requerirUsuario()
@@ -25,87 +63,54 @@ export default async function PaginaSettings() {
   ])
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Configuracion</h1>
-        <p className="text-sm text-muted-foreground mt-1">Gestiona tus preferencias de notificacion</p>
-      </div>
+    <div className="max-w-2xl mx-auto" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <PageHeader
+        icon={<Settings size={22} />}
+        title="Configuracion"
+        subtitle="Personaliza tu experiencia en Noti."
+      />
 
-      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Perfil</h2>
-        <p className="text-sm text-muted-foreground">
-          Tu nombre y zona horaria para las notificaciones.
-        </p>
+      <ConfigCard titulo="Perfil" descripcion="Tu nombre y zona horaria para las notificaciones.">
         <FormularioPerfil
           nombreActual={perfil?.nombreMostrado}
           zonaHorariaActual={perfil?.zonaHoraria ?? 'America/Bogota'}
         />
-      </section>
+      </ConfigCard>
 
-      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Apariencia</h2>
-        <p className="text-sm text-muted-foreground">
-          Elige entre el tema claro, oscuro o el del sistema operativo.
-        </p>
+      <ConfigCard titulo="Apariencia" descripcion="Elige entre el tema claro, oscuro o el del sistema operativo.">
         <FormularioApariencia />
-      </section>
+      </ConfigCard>
 
-      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Notificaciones</h2>
-        <p className="text-sm text-muted-foreground">
-          Con cuanta anticipacion quieres recibir el aviso antes de que venza un recordatorio.
-        </p>
+      <ConfigCard titulo="Notificaciones" descripcion="Con cuanta anticipacion quieres recibir el aviso antes de que venza un recordatorio.">
         <FormularioAnticipacion anticipacionActual={perfil?.anticipacionNotificacion ?? 15} />
-      </section>
+      </ConfigCard>
 
-      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Dispositivos registrados</h2>
-        <p className="text-sm text-muted-foreground">
-          Dispositivos que recibiran notificaciones push.
-        </p>
+      <ConfigCard titulo="Dispositivos registrados" descripcion="Dispositivos que recibiran notificaciones push.">
         <ListaDispositivos suscripciones={suscripciones} />
-      </section>
+      </ConfigCard>
 
-      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Resumen diario</h2>
-        <p className="text-sm text-muted-foreground">
-          Recibe una notificacion push cada manana con el resumen de tus recordatorios del dia.
-        </p>
+      <ConfigCard titulo="Resumen diario" descripcion="Recibe una notificacion push cada manana con el resumen de tus recordatorios del dia.">
         <FormularioResumenDiario
           activoActual={perfil?.resumenDiario ?? false}
           horaActual={perfil?.horaResumen ?? '07:00'}
         />
-      </section>
+      </ConfigCard>
 
-      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Tareas completadas</h2>
-        <p className="text-sm text-muted-foreground">
-          Cuanto tiempo se conservan las tareas marcadas como completadas antes de eliminarse automaticamente.
-        </p>
+      <ConfigCard titulo="Tareas completadas" descripcion="Cuanto tiempo se conservan las tareas marcadas como completadas antes de eliminarse automaticamente.">
         <FormularioAutoDeleteTareas valorActual={perfil?.autoEliminarTareasCompletadasDias ?? null} />
-      </section>
+      </ConfigCard>
 
-      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Idioma</h2>
-        <p className="text-sm text-muted-foreground">
-          Elige el idioma de la interfaz.
-        </p>
+      <ConfigCard titulo="Idioma" descripcion="Elige el idioma de la interfaz.">
         <FormularioIdioma localeActual={localeActual} />
-      </section>
+      </ConfigCard>
 
-      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Sugerencias</h2>
-        <p className="text-sm text-muted-foreground">
-          Tienes una idea o detectaste un bug? Envialo y lo recibo por correo.
-        </p>
+      <ConfigCard titulo="Sugerencias" descripcion="Tienes una idea o detectaste un bug? Envialo y lo recibo por correo.">
         <BotonSugerencias />
-      </section>
+      </ConfigCard>
 
-      <section className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Cuenta</h2>
-        <p className="text-sm text-muted-foreground">Gestiona tu sesion activa.</p>
+      <ConfigCard titulo="Cuenta" descripcion="Gestiona tu sesion activa.">
         <BotonCerrarSesion />
-      </section>
+      </ConfigCard>
     </div>
   )
 }

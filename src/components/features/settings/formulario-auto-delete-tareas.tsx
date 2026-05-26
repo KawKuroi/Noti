@@ -35,7 +35,7 @@ export function FormularioAutoDeleteTareas({ valorActual }: Props) {
           manejarCambio(val)
         }}
         disabled={pending}
-        className="px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+        className="px-3 py-2 text-sm border border-[var(--line-2)] rounded-[10px] bg-[var(--bg)] text-[var(--ink)] focus:outline-none focus:border-[var(--ink)] disabled:opacity-50"
       >
         {OPCIONES_AUTO_DELETE_TAREAS.map((op) => (
           <option key={op.valor === null ? 'null' : op.valor} value={op.valor === null ? '' : op.valor}>

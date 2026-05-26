@@ -31,10 +31,10 @@ export function FormularioIdioma({ localeActual }: Props) {
           type="button"
           onClick={() => cambiarIdioma(op.valor)}
           disabled={pending}
-          className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+          className={`px-4 py-2 rounded-[10px] text-sm font-medium border transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
             localeActual === op.valor
-              ? 'bg-foreground text-background border-foreground'
-              : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
+              ? 'bg-[var(--ink)] text-[var(--bg)] border-[var(--ink)]'
+              : 'border-[var(--line-2)] text-[var(--ink-3)] hover:border-[var(--ink)] hover:text-[var(--ink)]'
           }`}
         >
           {op.etiqueta}

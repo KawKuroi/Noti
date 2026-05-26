@@ -32,6 +32,19 @@ const SLUG_A_TIPO: Record<SlugLanzamiento, TipoLanzamiento> = {
   books: 'book',
 }
 
+const COLOR_CATEGORIA_VAR: Record<string, string> = {
+  movies: 'var(--cat-series)',
+  tv: 'var(--cat-series)',
+  games: 'var(--cat-juegos)',
+  music: 'var(--cat-musica)',
+  books: 'var(--cat-libros)',
+  study: 'var(--var-estudio)',
+  birthdays: 'var(--cat-cumple)',
+  tasks: 'var(--cat-pendientes)',
+  events: 'var(--cat-eventos)',
+  notes: 'var(--cat-notas)',
+}
+
 export function HubLanzamientos({ datos, todos, categorias }: Props) {
   const datosOrdenados = ORDEN_TABS.flatMap((slug) => {
     const encontrado = datos.find((d) => d.cat.slug === slug)
@@ -43,58 +56,67 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
   const categoriaActiva = datosOrdenados.find((d) => d.cat.slug === tabActiva)
   const tipoActivo = SLUG_A_TIPO[tabActiva as SlugLanzamiento]
 
+  const activeTabClass =
+    'flex items-center px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium text-[var(--ink)] bg-[var(--bg)] shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-[var(--line-2)] focus:outline-none transition-all'
+  const inactiveTabClass =
+    'flex items-center px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-normal text-[var(--ink-2)] hover:text-[var(--ink)] border border-transparent focus:outline-none transition-all'
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1 border-b border-border w-full">
-          <button
-            onClick={() => setTabActiva('todos')}
-            className={cn(
-              'px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap',
-              tabActiva === 'todos'
-                ? 'border-primary text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            Todos
-          </button>
-          {datosOrdenados.map(({ cat }) => (
+    <div className="space-y-5">
+      {/* Eyebrow + manual trigger */}
+      <div className="flex items-center justify-between gap-4 pt-2">
+        <span className="font-mono text-[10.5px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]">
+          Mis lanzamientos seguidos
+        </span>
+        <FormularioManualLanzamiento tipoInicial={tipoActivo} />
+      </div>
+
+      {/* Segmented Tab pills */}
+      <div className="flex flex-wrap items-center gap-1 p-[3px] bg-[var(--bg-soft)] border border-[var(--line)] rounded-[999px] max-w-max select-none">
+        <button
+          onClick={() => setTabActiva('todos')}
+          className={tabActiva === 'todos' ? activeTabClass : inactiveTabClass}
+        >
+          <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[var(--ink-3)] mr-1.5" />
+          <span>Todos</span>
+        </button>
+        {datosOrdenados.map(({ cat }) => {
+          const catColor = COLOR_CATEGORIA_VAR[cat.slug] || cat.color
+          const activa = tabActiva === cat.slug
+          return (
             <button
               key={cat.slug}
               onClick={() => setTabActiva(cat.slug)}
-              className={cn(
-                'px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap',
-                tabActiva === cat.slug
-                  ? 'border-primary text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground',
-              )}
+              className={activa ? activeTabClass : inactiveTabClass}
             >
-              {cat.nombre}
+              <span
+                className="w-1.5 h-1.5 rounded-full shrink-0 mr-1.5"
+                style={{ backgroundColor: catColor }}
+              />
+              <span>{cat.nombre}</span>
             </button>
-          ))}
-          <div className="flex-1" />
-          <div className="pb-2">
-            <FormularioManualLanzamiento tipoInicial={tipoActivo} />
-          </div>
-        </div>
+          )
+        })}
       </div>
 
-      {tabActiva === 'todos' ? (
-        <ListaRecordatorios
-          recordatorios={todos}
-          categorias={categorias}
-          mostrarCategoria
-          mensajeVacio="Sin lanzamientos. Usa el chat o agrega uno manualmente."
-        />
-      ) : (
-        categoriaActiva && (
+      <div className="pt-2">
+        {tabActiva === 'todos' ? (
           <ListaRecordatorios
-            recordatorios={categoriaActiva.recordatorios}
+            recordatorios={todos}
             categorias={categorias}
-            mensajeVacio={`Sin lanzamientos en ${categoriaActiva.cat.nombre}. Usa el chat o agrega uno manualmente.`}
+            mostrarCategoria
+            mensajeVacio="Sin lanzamientos. Usa el chat o agrega uno manualmente."
           />
-        )
-      )}
+        ) : (
+          categoriaActiva && (
+            <ListaRecordatorios
+              recordatorios={categoriaActiva.recordatorios}
+              categorias={categorias}
+              mensajeVacio={`Sin lanzamientos en ${categoriaActiva.cat.nombre}. Usa el chat o agrega uno manualmente.`}
+            />
+          )
+        )}
+      </div>
     </div>
   )
 }

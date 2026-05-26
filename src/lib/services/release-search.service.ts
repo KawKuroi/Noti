@@ -204,12 +204,14 @@ export async function obtenerCandidatos(extraccion: Extraccion): Promise<Resulta
     .slice(0, limiteFinal)
     .map((x) => x.c)
 
-  console.log('[release-search/obtenerCandidatos]', {
-    intencion: extraccion.intencion,
-    tipo,
-    devueltos: rankeados.length,
-    totalUnicos: unicos.length,
-  })
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[release-search/obtenerCandidatos]', {
+      intencion: extraccion.intencion,
+      tipo,
+      devueltos: rankeados.length,
+      totalUnicos: unicos.length,
+    })
+  }
 
   return rankeados
 }

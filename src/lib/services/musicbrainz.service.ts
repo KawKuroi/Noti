@@ -178,7 +178,7 @@ export async function candidatosAlbum(
 
   const resultados = await Promise.all(ordenados.map(grupoAResultado))
   const filtrados = resultados.filter((r): r is ResultadoLanzamiento => r !== null)
-  console.log('[MusicBrainz/candidatos]', { titulo, artista, candidatos: filtrados.length })
+  if (process.env.NODE_ENV !== 'production') console.log('[MusicBrainz/candidatos]', { titulo, artista, candidatos: filtrados.length })
   return filtrados
 }
 

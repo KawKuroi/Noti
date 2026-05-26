@@ -83,11 +83,13 @@
   }
 }
 
-/* Utilidad mono global (disponible en toda la app, no solo en landing) */
+/* Utilidad mono global — Geist con tratamiento tabular */
 .mono {
-  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono), ui-sans-serif, system-ui, sans-serif;
   font-weight: 500;
-  letter-spacing: 0.005em;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum', 'ss01';
 }
 
 /* Animaciones globales del sistema de diseño */
@@ -166,6 +168,8 @@
 
     --pad-section: 120px;
     --gap: 20px;
+
+    --font-mono: var(--font-sans);
   }
 
   .dark {
@@ -207,7 +211,9 @@
 }
 
 .landing-root .mono {
-  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum', 'ss01';
 }
 
 .landing-root a {
@@ -306,11 +312,14 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-mono), ui-sans-serif, system-ui, sans-serif;
   font-size: 11px;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum', 'ss01';
 }
 
 .landing-root .eyebrow::before {

@@ -167,7 +167,7 @@ export async function candidatosJuego(titulo: string, limite = 5): Promise<Resul
     ordenados.map((j) => juegoAResultado(j, !j.released || j.tba)),
   )
 
-  console.log('[RAWG/candidatos]', { titulo, candidatos: resultados.length })
+  if (process.env.NODE_ENV !== 'production') console.log('[RAWG/candidatos]', { titulo, candidatos: resultados.length })
   return resultados
 }
 

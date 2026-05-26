@@ -3,13 +3,7 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { FormularioRecordatorio } from './formulario-recordatorio'
 import type { Categoria } from '@/types/category.types'
 
@@ -28,21 +22,20 @@ export function BotonNuevoRecordatorio({ categorias, slugInicial }: Props) {
         Nuevo recordatorio
       </Button>
 
-      <Dialog open={abierto} onOpenChange={setAbierto}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Nuevo recordatorio</DialogTitle>
-            <DialogDescription>
-              Completa los detalles del recordatorio.
-            </DialogDescription>
-          </DialogHeader>
+      <Sheet open={abierto} onOpenChange={setAbierto}>
+        <SheetContent
+          title="Nuevo recordatorio"
+          description="O pideselo a la IA con Ctrl+I"
+          onClose={() => setAbierto(false)}
+        >
           <FormularioRecordatorio
             categorias={categorias}
             slugInicial={slugInicial}
             onExito={() => setAbierto(false)}
+            onCancelar={() => setAbierto(false)}
           />
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   )
 }

@@ -13,6 +13,7 @@ import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
 import { ListaRecordatoriosPaginada } from '@/components/features/reminders/lista-recordatorios-paginada'
 import { BarraAsistente } from '@/components/features/asistente'
+import { PageHeader } from '@/components/ui/page-header'
 import { SLUGS_VALIDOS } from '@/lib/utils/constants'
 
 const ICONOS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
@@ -51,25 +52,13 @@ export default async function PaginaCategoria({ params, searchParams }: Props) {
   const Icono = ICONOS[categoria.icono]
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          {Icono && (
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: `${categoria.color}20` }}
-            >
-              <span style={{ color: categoria.color }}>
-                <Icono size={20} />
-              </span>
-            </div>
-          )}
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{categoria.nombre}</h1>
-          </div>
-        </div>
-        <BotonNuevoRecordatorio categorias={categorias} slugInicial={slug} />
-      </div>
+    <div>
+      <PageHeader
+        icon={Icono ? <Icono size={22} /> : undefined}
+        iconColor={categoria.color}
+        title={categoria.nombre}
+        action={<BotonNuevoRecordatorio categorias={categorias} slugInicial={slug} />}
+      />
 
       <div className="mb-6">
         <BarraAsistente />

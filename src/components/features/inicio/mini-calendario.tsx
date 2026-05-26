@@ -35,14 +35,14 @@ export function MiniCalendario({ diasConRecordatorios }: Props) {
 
 
   return (
-    <div className="bg-card rounded-xl border border-border p-5">
-      <p className="text-xs font-semibold text-foreground mb-3">
+    <div className="bg-[var(--bg)] rounded-[14px] border border-[var(--line)] p-4 select-none">
+      <p className="font-mono text-[11px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em] mb-4">
         {MESES[mesActual]} {anioActual}
       </p>
 
-      <div className="grid grid-cols-7 gap-1 mb-1">
+      <div className="grid grid-cols-7 gap-1 mb-2">
         {DIAS_SEMANA.map((d) => (
-          <span key={d} className="text-center text-[10px] font-medium text-muted-foreground">
+          <span key={d} className="text-center font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase">
             {d}
           </span>
         ))}
@@ -50,28 +50,30 @@ export function MiniCalendario({ diasConRecordatorios }: Props) {
 
       <div className="grid grid-cols-7 gap-1">
         {diasDelMes.map((dia, i) => {
-          if (dia === null) return <span key={`vacio-${i}`} />
+          if (dia === null) return <span key={`vacio-${i}`} className="min-h-[38px]" />
 
           const esHoy = dia === diaHoy
           const colores = diasConRecordatorios[dia] ?? []
           const tieneRec = colores.length > 0
 
           return (
-            <div key={dia} className="flex flex-col items-center gap-0.5 py-0.5">
+            <div key={dia} className="flex flex-col items-center py-0.5 min-h-[38px] justify-start">
               <span
                 className={cn(
-                  'w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium',
-                  esHoy ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent',
+                  'w-7 h-7 flex items-center justify-center rounded-full text-[12.5px] transition-colors',
+                  esHoy
+                    ? 'bg-[var(--ink)] text-[var(--bg)] font-semibold shadow-sm'
+                    : 'text-[var(--ink-2)] hover:bg-[var(--bg-soft)] font-normal cursor-pointer',
                 )}
               >
                 {dia}
               </span>
-              {tieneRec && !esHoy && (
-                <div className="flex gap-0.5">
+              {tieneRec && (
+                <div className="flex gap-[3px] mt-[3px] h-1 justify-center">
                   {colores.slice(0, 3).map((c, idx) => (
                     <span
                       key={idx}
-                      className="w-1.5 h-1.5 rounded-full"
+                      className="w-[4px] h-[4px] rounded-full shrink-0"
                       style={{ backgroundColor: c }}
                     />
                   ))}

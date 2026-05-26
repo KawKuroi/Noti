@@ -33,10 +33,19 @@ function SeccionDia({
 
   return (
     <div>
-      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+      <h3
+        className="mono mb-2"
+        style={{
+          fontSize: '11px',
+          fontWeight: 500,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          color: 'var(--ink-3)',
+        }}
+      >
         {titulo}
       </h3>
-      <div className="space-y-2">
+      <div className="space-y-1">
         {items.map((rec) => (
           <TarjetaRecordatorio
             key={rec.id}
@@ -64,13 +73,18 @@ export function ListaRecordatorios({
   if (recordatorios.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center mb-3">
-          <Bell className="w-6 h-6 text-muted-foreground" />
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
+          style={{ background: 'var(--bg-soft)', border: '1px solid var(--line)' }}
+        >
+          <Bell className="w-6 h-6" style={{ color: 'var(--ink-4)' }} />
         </div>
-        <p className="text-sm font-medium text-foreground">
+        <p className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
           {mensajeVacio ?? 'Sin recordatorios pendientes'}
         </p>
-        <p className="text-xs text-muted-foreground mt-1">Los recordatorios creados apareceran aqui.</p>
+        <p className="text-xs mt-1" style={{ color: 'var(--ink-3)' }}>
+          Los recordatorios creados apareceran aqui.
+        </p>
       </div>
     )
   }
@@ -99,11 +113,14 @@ export function ListaRecordatorios({
   if (!hayContenido) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center mb-3">
-          <Bell className="w-6 h-6 text-muted-foreground" />
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
+          style={{ background: 'var(--bg-soft)', border: '1px solid var(--line)' }}
+        >
+          <Bell className="w-6 h-6 text-[var(--ink-3)]" />
         </div>
-        <p className="text-sm font-medium text-foreground">Sin recordatorios proximos</p>
-        <p className="text-xs text-muted-foreground mt-1">Todos tus recordatorios estan al dia.</p>
+        <p className="text-sm font-medium text-[var(--ink)]">Sin recordatorios proximos</p>
+        <p className="text-xs text-[var(--ink-3)] mt-1">Todos tus recordatorios estan al dia.</p>
       </div>
     )
   }

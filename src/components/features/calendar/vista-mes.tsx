@@ -62,62 +62,81 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
 
   return (
     <div className="flex flex-col h-full">
-      {/* Cabecera de dias */}
+      {/* Cabecera de días */}
       <div className="grid grid-cols-7 mb-1">
         {DIAS_CABECERA.map((dia) => (
           <div
             key={dia}
-            className="py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wide"
+            className="py-2 text-center font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]"
           >
             {dia}
           </div>
         ))}
       </div>
 
-      {/* Grid de dias */}
+      {/* Grid de días */}
       <div
-        className="grid grid-cols-7 gap-px bg-border border border-border rounded-xl overflow-hidden flex-1 min-h-0"
+        className="grid grid-cols-7 border border-[var(--line)] rounded-[14px] overflow-hidden flex-1 min-h-0"
         style={{ gridTemplateRows: `repeat(${filas}, minmax(0, 1fr))` }}
       >
-        {dias.map((dia) => {
+        {dias.map((dia, idx) => {
           const esDelMes = isSameMonth(dia, referencia)
           const esDiaHoy = isToday(dia)
           const { dots, total } = getDotInfo(dia)
           const extras = total - dots.length
+
+          // Border separators
+          const esUltFila = idx >= dias.length - 7
+          const esPrimerColumna = idx % 7 === 0
 
           return (
             <button
               key={dia.toISOString()}
               onClick={() => total > 0 || esDelMes ? onDiaClick(dia) : undefined}
               className={cn(
-                'bg-card p-2 flex flex-col items-start gap-1 hover:bg-accent/50 transition-colors text-left overflow-hidden',
-                !esDelMes && 'bg-muted/40',
+                'p-2 flex flex-col items-start gap-1 transition-colors text-left overflow-hidden focus:outline-none',
+                'border-b border-r border-[var(--line)]',
+                !esUltFila ? '' : 'border-b-0',
+                esPrimerColumna ? 'border-l-0' : '',
+                esDelMes
+                  ? 'bg-[var(--bg)] hover:bg-[var(--bg-soft)]'
+                  : 'bg-[var(--bg-soft)] opacity-60 hover:opacity-80',
                 total > 0 && 'cursor-pointer',
                 total === 0 && !esDelMes && 'cursor-default',
               )}
             >
               <span
                 className={cn(
-                  'text-sm font-medium leading-none w-6 h-6 flex items-center justify-center rounded-full',
-                  esDiaHoy && 'bg-primary text-primary-foreground',
-                  !esDiaHoy && esDelMes && 'text-foreground',
-                  !esDiaHoy && !esDelMes && 'text-muted-foreground/40',
+                  'font-mono text-[12px] font-medium leading-none w-6 h-6 flex items-center justify-center rounded-full',
+                  esDiaHoy && 'bg-[var(--ink)] text-[var(--bg)] font-semibold',
+                  !esDiaHoy && esDelMes && 'text-[var(--ink-2)]',
+                  !esDiaHoy && !esDelMes && 'text-[var(--ink-4)]',
                 )}
               >
                 {format(dia, 'd')}
               </span>
 
               {dots.length > 0 && (
-                <div className="flex items-center gap-0.5 flex-wrap">
+                <div className="flex flex-col gap-[2px] w-full">
                   {dots.map((dot) => (
                     <span
                       key={dot.id}
-                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: dot.color }}
-                    />
+                      className="flex items-center gap-1 text-[10px] font-medium leading-tight px-1 py-[2px] rounded-[5px] truncate"
+                      style={{
+                        backgroundColor: `color-mix(in oklab, ${dot.color} 8%, transparent)`,
+                        color: dot.color,
+                      }}
+                    >
+                      <span
+                        className="w-[5px] h-[5px] rounded-full shrink-0"
+                        style={{ backgroundColor: dot.color }}
+                      />
+                    </span>
                   ))}
                   {extras > 0 && (
-                    <span className="text-xs text-muted-foreground ml-0.5">+{extras}</span>
+                    <span className="font-mono text-[10px] text-[var(--ink-3)] mt-0.5 pl-1">
+                      +{extras} más
+                    </span>
                   )}
                 </div>
               )}

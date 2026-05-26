@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
@@ -11,12 +11,6 @@ const geist = Geist({
   subsets: ['latin'],
   variable: '--font-sans',
   weight: ['300', '400', '500', '600', '700'],
-})
-
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  weight: ['400', '500'],
 })
 
 export const metadata: Metadata = {
@@ -65,7 +59,7 @@ export default async function LayoutRaiz({ children }: Props) {
   const messages = await getMessages()
 
   return (
-    <html lang={locale} suppressHydrationWarning className={`${geist.variable} ${geistMono.variable}`}>
+    <html lang={locale} suppressHydrationWarning className={geist.variable}>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
       </head>

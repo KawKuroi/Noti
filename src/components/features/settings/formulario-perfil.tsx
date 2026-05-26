@@ -32,10 +32,15 @@ export function FormularioPerfil({ nombreActual, zonaHorariaActual }: Props) {
     })
   }
 
+  const labelClass =
+    'mono block text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink-3)] mb-1.5'
+  const fieldClass =
+    'w-full px-3 py-2 border border-[var(--line-2)] rounded-[10px] text-sm bg-[var(--bg)] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)]'
+
   return (
     <form onSubmit={manejarEnvio} className="space-y-4">
       <div className="space-y-1">
-        <label htmlFor="nombre" className="block text-sm font-medium text-foreground">
+        <label htmlFor="nombre" className={labelClass}>
           Nombre
         </label>
         <input
@@ -45,19 +50,19 @@ export function FormularioPerfil({ nombreActual, zonaHorariaActual }: Props) {
           onChange={(e) => setNombre(e.target.value)}
           maxLength={60}
           placeholder="Tu nombre"
-          className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+          className={fieldClass}
         />
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="zona" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="zona" className={labelClass}>
           Zona horaria
         </label>
         <select
           id="zona"
           value={zona}
           onChange={(e) => setZona(e.target.value)}
-          className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className={fieldClass}
         >
           {ZONAS_HORARIAS_LATAM.map((tz) => (
             <option key={tz} value={tz}>
@@ -70,7 +75,7 @@ export function FormularioPerfil({ nombreActual, zonaHorariaActual }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+        className="px-4 py-2 bg-[var(--ink)] text-[var(--bg)] text-sm font-medium rounded-[10px] hover:opacity-90 transition-opacity disabled:opacity-50"
       >
         {pending ? 'Guardando...' : 'Guardar cambios'}
       </button>

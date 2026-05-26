@@ -6,6 +6,7 @@ import { getRecordatoriosPorCategoria, getLanzamientosTodos } from '@/lib/querie
 import { HubLanzamientos } from '@/components/features/lanzamientos/hub-lanzamientos'
 import { AtribucionFuentes } from '@/components/features/lanzamientos/atribucion-fuentes'
 import { BarraAsistente } from '@/components/features/asistente'
+import { PageHeader } from '@/components/ui/page-header'
 import { SLUGS_LANZAMIENTO } from '@/lib/utils/constants'
 
 export const metadata: Metadata = { title: 'Lanzamientos | Noti' }
@@ -30,27 +31,17 @@ export default async function PaginaLanzamientos() {
   ])
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/10">
-          <span className="text-purple-600">
-            <Clapperboard size={20} />
-          </span>
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Lanzamientos</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Peliculas, series, videojuegos, musica y libros.
-          </p>
-        </div>
-      </div>
+    <div className="max-w-3xl mx-auto space-y-6">
+      <PageHeader
+        title="Lanzamientos"
+        subtitle="Películas, series, videojuegos, música y libros."
+        icon={<Clapperboard size={20} />}
+        iconColor="var(--cat-series)"
+      />
 
-      <BarraAsistente />
+      <BarraAsistente placeholder="Pídele a la IA un estreno: «GTA 6 nov 19»" />
 
-      <section>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-          Mis lanzamientos seguidos
-        </h2>
+      <section className="pt-2">
         <HubLanzamientos datos={datos} todos={todos} categorias={categorias} />
       </section>
 

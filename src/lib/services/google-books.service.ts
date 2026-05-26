@@ -87,7 +87,7 @@ export async function candidatosLibro(
     candidatos.push(aResultado(it, norm, tba))
   }
 
-  console.log('[GoogleBooks/candidatos]', { titulo, autor, candidatos: candidatos.length })
+  if (process.env.NODE_ENV !== 'production') console.log('[GoogleBooks/candidatos]', { titulo, autor, candidatos: candidatos.length })
   return candidatos
 }
 

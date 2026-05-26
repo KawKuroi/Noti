@@ -48,8 +48,8 @@ export function FormularioResumenDiario({ activoActual, horaActual }: Props) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-foreground">Resumen matutino</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-sm font-medium text-[var(--ink)]">Resumen matutino</p>
+          <p className="text-xs text-[var(--ink-3)] mt-0.5">
             Recibe una notificacion push con tus recordatorios del dia
           </p>
         </div>
@@ -57,13 +57,13 @@ export function FormularioResumenDiario({ activoActual, horaActual }: Props) {
           onClick={toggleActivo}
           disabled={isPending}
           className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors disabled:opacity-50 ${
-            activo ? 'bg-primary' : 'bg-input'
+            activo ? 'bg-[var(--ink)]' : 'bg-[var(--line-2)]'
           }`}
           role="switch"
           aria-checked={activo}
         >
           <span
-            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-background transition-transform ${
+            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-[var(--bg)] transition-transform ${
               activo ? 'translate-x-4' : 'translate-x-1'
             }`}
           />
@@ -72,12 +72,12 @@ export function FormularioResumenDiario({ activoActual, horaActual }: Props) {
 
       {activo && (
         <div className="flex items-center gap-2">
-          <label className="text-sm text-muted-foreground">Hora de envio:</label>
+          <label className="text-sm text-[var(--ink-3)]">Hora de envio:</label>
           <select
             value={hora}
             onChange={cambiarHora}
             disabled={isPending}
-            className="text-sm border border-border rounded-md px-2 py-1 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+            className="text-sm border border-[var(--line-2)] rounded-[8px] px-2 py-1 bg-[var(--bg)] text-[var(--ink)] focus:outline-none focus:border-[var(--ink)] disabled:opacity-50"
           >
             {OPCIONES_HORA.map((op) => (
               <option key={op.valor} value={op.valor}>

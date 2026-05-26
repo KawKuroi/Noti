@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
-import { StickyNote } from 'lucide-react'
+import { NotebookPen } from 'lucide-react'
 import { requerirUsuario } from '@/lib/auth'
 import { obtenerCuadernos } from '@/lib/queries/notas.queries'
 import { ListaCuadernos } from '@/components/features/notas/lista-cuadernos'
 import { BotonNuevoCuaderno } from '@/components/features/notas/boton-nuevo-cuaderno'
+import { PageHeader } from '@/components/ui/page-header'
 
 export const metadata: Metadata = { title: 'Notas | Noti' }
 
@@ -11,22 +12,17 @@ export default async function PaginaNotas() {
   const user = await requerirUsuario()
   const cuadernos = await obtenerCuadernos(user.id)
 
+  const subtitulo = `${cuadernos.length} cuaderno${cuadernos.length !== 1 ? 's' : ''}`
+
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-indigo-500/10">
-            <StickyNote size={20} className="text-indigo-500" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Notas</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {cuadernos.length} cuaderno{cuadernos.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-        </div>
-        <BotonNuevoCuaderno />
-      </div>
+    <div>
+      <PageHeader
+        icon={<NotebookPen size={22} />}
+        iconColor="var(--cat-notas)"
+        title="Notas"
+        subtitle={subtitulo}
+        action={<BotonNuevoCuaderno />}
+      />
       <ListaCuadernos cuadernos={cuadernos} />
     </div>
   )

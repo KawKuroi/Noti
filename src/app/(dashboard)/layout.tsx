@@ -24,9 +24,19 @@ export default async function LayoutDashboard({ children }: Props) {
 
   return (
     <AsistenteProvider>
-      <div className="flex h-screen overflow-hidden bg-background">
-        <Sidebar categorias={categorias} usuario={user} nombrePerfil={perfil?.nombreMostrado} />
-        <main className="flex-1 overflow-y-auto px-6 pt-10 pb-6">{children}</main>
+      <div
+        className="h-screen overflow-hidden"
+        style={{ background: 'var(--bg)' }}
+      >
+        <div className="flex h-full">
+          <Sidebar categorias={categorias} usuario={user} nombrePerfil={perfil?.nombreMostrado} />
+          <main
+            className="flex-1 overflow-y-auto"
+            style={{ padding: 'clamp(20px, 3vw, 40px) clamp(22px, 3.5vw, 44px)' }}
+          >
+            {children}
+          </main>
+        </div>
       </div>
       <BusquedaGlobal />
     </AsistenteProvider>

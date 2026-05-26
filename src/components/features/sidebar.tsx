@@ -1,39 +1,39 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
-  BookOpen,
-  CalendarDays,
-  Cake,
-  CheckSquare,
-  MapPin,
-  StickyNote,
   LayoutDashboard,
-  Settings,
-  Calendar,
-  Clapperboard,
   Search,
   ChevronDown,
   ChevronRight,
+  Calendar,
+  StickyNote,
+  Settings,
+  Menu,
+  X,
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { cn } from '@/lib/utils/cn'
 import { SLUGS_LANZAMIENTO } from '@/lib/utils/constants'
 import type { Categoria } from '@/types/category.types'
 
-const ICONOS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  BookOpen,
-  CalendarDays,
-  Cake,
-  CheckSquare,
-  MapPin,
-  StickyNote,
-}
-
 const SLUGS_HERRAMIENTAS = ['notes'] as const
+
+const COLOR_CATEGORIA_VAR: Record<string, string> = {
+  movies: 'var(--cat-series)',
+  tv: 'var(--cat-series)',
+  games: 'var(--cat-juegos)',
+  music: 'var(--cat-musica)',
+  books: 'var(--cat-libros)',
+  study: 'var(--cat-estudio)',
+  birthdays: 'var(--cat-cumple)',
+  tasks: 'var(--cat-pendientes)',
+  events: 'var(--cat-eventos)',
+  notes: 'var(--cat-notas)',
+}
 
 interface Props {
   categorias: Categoria[]
@@ -45,6 +45,13 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
   const ruta = usePathname()
   const t = useTranslations('Sidebar')
   const [herramientasAbiertas, setHerramientasAbiertas] = useState(true)
+  const [drawerAbierto, setDrawerAbierto] = useState(false)
+
+  // Cierra el drawer cuando cambia la ruta
+  useEffect(() => {
+    setDrawerAbierto(false)
+  }, [ruta])
+
   const categoriasGenerales = categorias.filter(
     (c) =>
       !(SLUGS_LANZAMIENTO as readonly string[]).includes(c.slug) &&
@@ -63,142 +70,211 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
     )
   }
 
+  const linkActivoClase =
+    'flex items-center gap-3 px-3 py-2 rounded-[10px] text-[13px] font-medium transition-all duration-150 border border-[var(--line)] bg-[var(--bg-soft)] text-[var(--ink)]'
+  const linkInactivoClase =
+    'flex items-center gap-3 px-3 py-2 rounded-[10px] text-[13px] font-normal transition-all duration-150 border border-transparent text-[var(--ink-2)] hover:bg-[var(--bg-soft)] hover:text-[var(--ink)]'
+
   return (
-    <aside className="w-60 h-screen bg-background border-r border-border flex flex-col sticky top-0">
-      <Link href="/" className="px-6 py-5 border-b border-border flex items-center hover:opacity-80 transition-opacity">
-        <span className="text-lg font-bold text-foreground">Noti</span>
-      </Link>
-
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <Link
-          href="/inicio"
-          className={cn(
-            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-            ruta === '/inicio'
-              ? 'bg-accent text-foreground'
-              : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
-          )}
-        >
-          <LayoutDashboard size={16} />
-          {t('inicio')}
-        </Link>
-
-        <button
-          onClick={abrirBusqueda}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-        >
-          <Search size={16} />
-          {t('buscar')}
-        </button>
-
-        <div className="pt-3 pb-1 px-3">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            {t('categorias')}
-          </span>
-        </div>
-
-        <Link
-          href="/lanzamientos"
-          className={cn(
-            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-            ruta === '/lanzamientos'
-              ? 'bg-accent text-foreground'
-              : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
-          )}
-        >
-          <Clapperboard size={16} />
-          {t('lanzamientos')}
-        </Link>
-
-        {categoriasGenerales.map((cat) => {
-          const Icono = ICONOS[cat.icono]
-          const estaActiva = ruta === `/${cat.slug}` || ruta.startsWith(`/${cat.slug}/`)
-
-          return (
-            <Link
-              key={cat.slug}
-              href={`/${cat.slug}`}
-              style={{ '--cat-color': cat.color } as React.CSSProperties}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                estaActiva
-                  ? 'bg-accent text-foreground'
-                  : 'text-muted-foreground hover:bg-[color:var(--cat-color)]/10 hover:text-[color:var(--cat-color)]',
-              )}
-            >
-              {Icono && (
-                <span style={{ color: estaActiva ? cat.color : undefined }}>
-                  <Icono size={16} />
-                </span>
-              )}
-              {cat.nombre}
-            </Link>
-          )
-        })}
-
-        <div className="pt-3 pb-1 px-3">
-          <button
-            onClick={() => setHerramientasAbiertas((prev) => !prev)}
-            className="flex items-center justify-between w-full group"
-            aria-label={herramientasAbiertas ? t('cerrarHerramientas') : t('abrirHerramientas')}
+    <>
+      {/* Header mobile — solo visible en <md */}
+      <div
+        className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4"
+        style={{ height: '52px', background: 'var(--bg)', borderBottom: '1px solid var(--line)' }}
+      >
+        <div className="flex items-center gap-2.5">
+          <div
+            style={{
+              width: '28px', height: '28px', borderRadius: '8px',
+              background: 'var(--ink)', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', color: 'var(--bg)', fontWeight: 700, fontSize: '14px',
+            }}
           >
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {t('herramientas')}
-            </span>
-            {herramientasAbiertas ? (
-              <ChevronDown size={12} className="text-muted-foreground group-hover:text-foreground" />
-            ) : (
-              <ChevronRight size={12} className="text-muted-foreground group-hover:text-foreground" />
+            N
+          </div>
+          <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--ink)' }}>Noti</span>
+        </div>
+        <button
+          onClick={() => setDrawerAbierto(true)}
+          style={{ padding: '6px', color: 'var(--ink-2)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+          aria-label="Abrir menu"
+        >
+          <Menu size={20} />
+        </button>
+      </div>
+
+      {/* Overlay backdrop mobile */}
+      {drawerAbierto && (
+        <div
+          className="md:hidden fixed inset-0 z-40"
+          style={{ background: 'rgba(10,10,10,0.32)' }}
+          onClick={() => setDrawerAbierto(false)}
+        />
+      )}
+
+      {/* Aside — fijo en mobile como drawer, estático en desktop */}
+      <aside
+        className={cn(
+          'h-screen bg-[var(--bg)] border-r border-[var(--line)] flex flex-col',
+          // Desktop: estático en el grid
+          'md:w-[230px] md:sticky md:top-0 md:translate-x-0 md:z-auto',
+          // Mobile: drawer fijo con transición
+          'fixed top-0 left-0 bottom-0 z-50 w-[230px] transition-transform duration-200 md:transition-none',
+          drawerAbierto ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
+        )}
+      >
+        {/* Botón cerrar en mobile */}
+        <button
+          className="md:hidden absolute top-3 right-3"
+          onClick={() => setDrawerAbierto(false)}
+          style={{ padding: '4px', color: 'var(--ink-3)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+          aria-label="Cerrar menu"
+        >
+          <X size={16} />
+        </button>
+      {/* 1. Logo Noti */}
+      <div className="px-6 py-5 border-b border-[var(--line)] flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-[var(--ink)] flex items-center justify-center text-[var(--bg)] font-bold text-base relative select-none">
+          N
+          <span className="w-2 h-2 rounded-full bg-[#16a34a] absolute -bottom-0.5 -right-0.5 border border-[var(--bg)]" />
+        </div>
+        <span className="text-base font-semibold tracking-tight text-[var(--ink)]">Noti</span>
+      </div>
+
+      {/* Navegación Principal */}
+      <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
+        {/* 2. Items top: Inicio, Buscar */}
+        <div className="space-y-0.5">
+          <Link
+            href="/inicio"
+            className={ruta === '/inicio' ? linkActivoClase : linkInactivoClase}
+          >
+            <LayoutDashboard size={16} className="text-[var(--ink-2)]" />
+            <span>{t('inicio')}</span>
+          </Link>
+
+          <button
+            onClick={abrirBusqueda}
+            className={cn(
+              linkInactivoClase,
+              'w-full text-left flex items-center justify-between'
             )}
+          >
+            <div className="flex items-center gap-3">
+              <Search size={16} className="text-[var(--ink-2)]" />
+              <span>{t('buscar')}</span>
+            </div>
+            <kbd className="px-1.5 py-0.5 rounded border border-[var(--line-2)] bg-[var(--bg-soft)] font-mono text-[10px] font-medium text-[var(--ink-3)]">
+              ⌘K
+            </kbd>
           </button>
         </div>
 
-        {herramientasAbiertas && (
-          <>
-            <Link
-              href="/calendar"
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                ruta === '/calendar'
-                  ? 'bg-accent text-foreground'
-                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
-              )}
-            >
-              <Calendar size={16} />
-              {t('calendario')}
-            </Link>
+        {/* 3. Sección Categorías */}
+        <div className="space-y-0.5">
+          <div className="pt-2 pb-1.5 px-3">
+            <span className="font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]">
+              {t('categorias')}
+            </span>
+          </div>
 
-            <Link
-              href="/notes"
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                ruta === '/notes' || ruta.startsWith('/notes/')
-                  ? 'bg-accent text-foreground'
-                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
-              )}
+          {/* Lanzamientos siempre va primero */}
+          <Link
+            href="/lanzamientos"
+            className={ruta === '/lanzamientos' ? linkActivoClase : linkInactivoClase}
+          >
+            <span className="w-2 h-2 rounded-full shrink-0 bg-[var(--cat-series)]" />
+            <span>{t('lanzamientos')}</span>
+          </Link>
+
+          {categoriasGenerales.map((cat) => {
+            const estaActiva = ruta === `/${cat.slug}` || ruta.startsWith(`/${cat.slug}/`)
+            const colorVar = COLOR_CATEGORIA_VAR[cat.slug] || cat.color
+
+            return (
+              <Link
+                key={cat.slug}
+                href={`/${cat.slug}`}
+                className={estaActiva ? linkActivoClase : linkInactivoClase}
+              >
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: colorVar }}
+                />
+                <span>{cat.nombre}</span>
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* 4. Sección Herramientas */}
+        <div className="space-y-0.5">
+          <div className="pt-2 pb-1.5 px-3">
+            <button
+              onClick={() => setHerramientasAbiertas((prev) => !prev)}
+              className="flex items-center justify-between w-full group focus:outline-none"
+              aria-label={herramientasAbiertas ? t('cerrarHerramientas') : t('abrirHerramientas')}
             >
-              <StickyNote size={16} />
-              {t('notas')}
-            </Link>
-          </>
-        )}
+              <span className="font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]">
+                {t('herramientas')}
+              </span>
+              {herramientasAbiertas ? (
+                <ChevronDown size={12} className="text-[var(--ink-3)] group-hover:text-[var(--ink)]" />
+              ) : (
+                <ChevronRight size={12} className="text-[var(--ink-3)] group-hover:text-[var(--ink)]" />
+              )}
+            </button>
+          </div>
+
+          {herramientasAbiertas && (
+            <div className="space-y-0.5">
+              <Link
+                href="/calendar"
+                className={ruta === '/calendar' ? linkActivoClase : linkInactivoClase}
+              >
+                <Calendar size={16} className="text-[var(--ink-2)]" />
+                <span>{t('calendario')}</span>
+              </Link>
+
+              <Link
+                href="/notes"
+                className={cn(
+                  ruta === '/notes' || ruta.startsWith('/notes/') ? linkActivoClase : linkInactivoClase
+                )}
+              >
+                <StickyNote size={16} className="text-[var(--ink-2)]" />
+                <span>{t('notas')}</span>
+              </Link>
+            </div>
+          )}
+        </div>
       </nav>
 
-      <div className="px-3 py-3 border-t border-border flex items-center gap-2">
-        <span className="flex-1 text-sm font-medium text-foreground px-3 truncate">{nombre}</span>
+      {/* 5. Footer user */}
+      <div className="p-3 border-t border-[var(--line)] flex items-center gap-3 shrink-0 bg-[var(--bg)]">
+        <div className="w-8 h-8 rounded-full bg-[var(--bg-soft)] border border-[var(--line-2)] flex items-center justify-center text-[12px] font-mono font-medium text-[var(--ink-2)] select-none shrink-0">
+          {nombre.charAt(0).toUpperCase()}
+        </div>
+        <span className="flex-1 text-[13px] font-medium text-[var(--ink)] truncate select-none">
+          {nombre}
+        </span>
         <Link
           href="/settings"
           className={cn(
             'p-2 rounded-lg transition-colors shrink-0',
             ruta === '/settings'
-              ? 'bg-accent text-foreground'
-              : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
+              ? 'bg-[var(--bg-soft)] border border-[var(--line)] text-[var(--ink)]'
+              : 'text-[var(--ink-3)] hover:text-[var(--ink)] hover:bg-[var(--bg-soft)]',
           )}
           aria-label={t('configuracion')}
         >
           <Settings size={16} />
         </Link>
       </div>
+
+      {/* Espaciado mobile para compensar el header fijo */}
+      <style>{`@media (max-width: 767px) { main { padding-top: calc(52px + clamp(20px, 3vw, 40px)) !important; } }`}</style>
     </aside>
+    </>
   )
 }

@@ -4,10 +4,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { crearClienteNavegador } from '@/lib/supabase/client'
 
-
 export default function PaginaLogin() {
   const [email, setEmail] = useState('')
   const [contrasena, setContrasena] = useState('')
+  const [recordarme, setRecordarme] = useState(false)
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -43,18 +43,44 @@ export default function PaginaLogin() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">Iniciar sesion</h2>
-        <p className="text-sm text-gray-500 mt-1">Accede a tus recordatorios</p>
-      </div>
+    <div>
+      <h1
+        style={{
+          fontSize: '28px',
+          fontWeight: 500,
+          letterSpacing: '-0.025em',
+          color: 'var(--ink)',
+          lineHeight: 1.2,
+          marginBottom: '8px',
+        }}
+      >
+        Bienvenido de vuelta.
+      </h1>
+      <p style={{ fontSize: '14.5px', color: 'var(--ink-3)', marginBottom: '28px' }}>
+        Accede a tus recordatorios y lanzamientos.
+      </p>
 
+      {/* Boton Google */}
       <button
         onClick={manejarLoginGoogle}
         disabled={cargando}
-        className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-3 transition-colors"
+        style={{
+          padding: '10px 14px',
+          border: '1px solid var(--line-2)',
+          borderRadius: '10px',
+          fontSize: '13.5px',
+          fontWeight: 500,
+          color: 'var(--ink)',
+          background: 'var(--bg)',
+          cursor: cargando ? 'not-allowed' : 'pointer',
+          opacity: cargando ? 0.6 : 1,
+          marginBottom: '20px',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-soft)')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--bg)')}
       >
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" style={{ flexShrink: 0 }}>
           <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
           <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
           <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
@@ -63,21 +89,61 @@ export default function PaginaLogin() {
         Continuar con Google
       </button>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-gray-100" />
-        </div>
-        <div className="relative flex justify-center text-xs text-gray-400">
-          <span className="bg-white px-3">o con email</span>
-        </div>
+      {/* Divider */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '20px',
+        }}
+      >
+        <div style={{ flex: 1, height: '1px', background: 'var(--line)' }} />
+        <span
+          className="mono"
+          style={{
+            fontSize: '10.5px',
+            fontWeight: 500,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--ink-4)',
+          }}
+        >
+          O POR EMAIL
+        </span>
+        <div style={{ flex: 1, height: '1px', background: 'var(--line)' }} />
       </div>
 
-      <form onSubmit={manejarLoginEmail} className="space-y-4">
+      <form onSubmit={manejarLoginEmail} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+          <p
+            style={{
+              fontSize: '13px',
+              color: 'var(--cat-peliculas)',
+              background: 'color-mix(in oklab, var(--cat-peliculas) 8%, transparent)',
+              border: '1px solid color-mix(in oklab, var(--cat-peliculas) 20%, transparent)',
+              borderRadius: '8px',
+              padding: '8px 12px',
+            }}
+          >
+            {error}
+          </p>
         )}
+
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="email"
+            className="mono"
+            style={{
+              display: 'block',
+              fontSize: '11px',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--ink-3)',
+              marginBottom: '6px',
+            }}
+          >
             Email
           </label>
           <input
@@ -86,12 +152,36 @@ export default function PaginaLogin() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             placeholder="tu@email.com"
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              borderRadius: '10px',
+              border: '1px solid var(--line-2)',
+              background: 'var(--bg)',
+              color: 'var(--ink)',
+              fontSize: '14px',
+              outline: 'none',
+            }}
+            onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--ink)')}
+            onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--line-2)')}
           />
         </div>
+
         <div>
-          <label htmlFor="contrasena" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="contrasena"
+            className="mono"
+            style={{
+              display: 'block',
+              fontSize: '11px',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--ink-3)',
+              marginBottom: '6px',
+            }}
+          >
             Contrasena
           </label>
           <input
@@ -100,23 +190,88 @@ export default function PaginaLogin() {
             value={contrasena}
             onChange={(e) => setContrasena(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             placeholder="••••••••"
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              borderRadius: '10px',
+              border: '1px solid var(--line-2)',
+              background: 'var(--bg)',
+              color: 'var(--ink)',
+              fontSize: '14px',
+              outline: 'none',
+            }}
+            onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--ink)')}
+            onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--line-2)')}
           />
         </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={recordarme}
+              onChange={(e) => setRecordarme(e.target.checked)}
+              style={{ width: '14px', height: '14px', accentColor: 'var(--ink)' }}
+            />
+            <span style={{ fontSize: '13px', color: 'var(--ink-2)' }}>Recordarme</span>
+          </label>
+          <Link
+            href="/forgot-password"
+            style={{ fontSize: '13px', color: 'var(--ink-3)', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+          >
+            ¿Olvidaste tu contrasena?
+          </Link>
+        </div>
+
         <button
           type="submit"
           disabled={cargando}
-          className="w-full bg-gray-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+          style={{
+            width: '100%',
+            padding: '10px 14px',
+            borderRadius: '10px',
+            fontSize: '13.5px',
+            fontWeight: 500,
+            background: 'var(--ink)',
+            color: 'var(--bg)',
+            border: '1px solid var(--ink)',
+            cursor: cargando ? 'not-allowed' : 'pointer',
+            opacity: cargando ? 0.6 : 1,
+            transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+            marginTop: '4px',
+          }}
+          onMouseEnter={(e) => {
+            if (!cargando) {
+              e.currentTarget.style.transform = 'translateY(-1px)'
+              e.currentTarget.style.boxShadow = '0 8px 24px -8px rgba(10,10,10,0.5)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = ''
+            e.currentTarget.style.boxShadow = ''
+          }}
         >
           {cargando ? 'Iniciando...' : 'Iniciar sesion'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-gray-500">
-        No tienes cuenta?{' '}
-        <Link href="/register" className="text-gray-900 font-medium hover:underline">
-          Registrate
+      <p
+        className="mono"
+        style={{
+          textAlign: 'center',
+          fontSize: '12px',
+          color: 'var(--ink-3)',
+          fontWeight: 500,
+          marginTop: '24px',
+        }}
+      >
+        ¿Aun no tienes cuenta?{' '}
+        <Link
+          href="/register"
+          style={{ color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+        >
+          Crear una
         </Link>
       </p>
     </div>

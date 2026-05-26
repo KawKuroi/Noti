@@ -163,7 +163,7 @@ export async function candidatosPelicula(titulo: string, limite = 5): Promise<Re
 
   const resultados = await Promise.all(ordenados.map(peliculaAResultado))
   const filtrados = resultados.filter((r): r is ResultadoLanzamiento => r !== null)
-  console.log('[TMDB/movie/candidatos]', { titulo, candidatos: filtrados.length })
+  if (process.env.NODE_ENV !== 'production') console.log('[TMDB/movie/candidatos]', { titulo, candidatos: filtrados.length })
   return filtrados
 }
 
@@ -179,7 +179,7 @@ export async function candidatosSerie(titulo: string, limite = 5): Promise<Resul
 
   const resultados = await Promise.all(ordenados.map(serieAResultado))
   const filtrados = resultados.filter((r): r is ResultadoLanzamiento => r !== null)
-  console.log('[TMDB/tv/candidatos]', { titulo, candidatos: filtrados.length })
+  if (process.env.NODE_ENV !== 'production') console.log('[TMDB/tv/candidatos]', { titulo, candidatos: filtrados.length })
   return filtrados
 }
 

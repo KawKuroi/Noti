@@ -318,12 +318,52 @@ function BloqueCondicional({
   }
 }
 
-function BotonEnvio({ editar }: { editar: boolean }) {
+export function BotonEnvio({ editar, onCancelar }: { editar: boolean; onCancelar?: () => void }) {
   const { pending } = useFormStatus()
   return (
-    <Button type="submit" disabled={pending} className="w-full">
-      {pending ? 'Guardando...' : editar ? 'Guardar cambios' : 'Crear recordatorio'}
-    </Button>
+    <>
+      <span
+        className="mono mr-auto"
+        style={{ fontSize: '10.5px', color: 'var(--ink-4)', fontWeight: 500 }}
+      >
+        {editar ? '⌘↵ Guardar' : '⌘↵ Crear'}
+      </span>
+      {onCancelar && (
+        <button
+          type="button"
+          onClick={onCancelar}
+          style={{
+            padding: '8px 14px',
+            borderRadius: '10px',
+            fontSize: '13px',
+            fontWeight: 500,
+            background: 'var(--bg)',
+            color: 'var(--ink)',
+            border: '1px solid var(--line-2)',
+            cursor: 'pointer',
+          }}
+        >
+          Cancelar
+        </button>
+      )}
+      <button
+        type="submit"
+        disabled={pending}
+        style={{
+          padding: '8px 14px',
+          borderRadius: '10px',
+          fontSize: '13px',
+          fontWeight: 500,
+          background: 'var(--ink)',
+          color: 'var(--bg)',
+          border: '1px solid var(--ink)',
+          cursor: pending ? 'not-allowed' : 'pointer',
+          opacity: pending ? 0.6 : 1,
+        }}
+      >
+        {pending ? 'Guardando...' : editar ? 'Guardar cambios' : 'Crear'}
+      </button>
+    </>
   )
 }
 
@@ -332,9 +372,10 @@ interface Props {
   recordatorio?: Recordatorio
   slugInicial?: string
   onExito?: () => void
+  onCancelar?: () => void
 }
 
-export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, onExito }: Props) {
+export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, onExito, onCancelar }: Props) {
   const esEdicion = Boolean(recordatorio)
   const accion = esEdicion
     ? actualizarRecordatorio.bind(null, recordatorio!.id)
@@ -408,125 +449,217 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
   const metadatosParaCampos = slugActual === slugInicialEdicion ? metadatosIniciales : undefined
 
   return (
-    <form action={dispatch} className="space-y-4">
+    <form
+      action={dispatch}
+      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+      onKeyDown={(e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.currentTarget.requestSubmit()
+        }
+      }}
+    >
       <input type="hidden" name="slug" value={slugActual} />
       <input type="hidden" name="categoriaId" value={categoriaIdActual} />
       <input type="hidden" name="fechaHoraUtc" value={fechaHoraUtc} />
 
-      {/* Selector de categoria (visible siempre) */}
-      <div className="space-y-1">
-        <Label>Categoria</Label>
-        <div className="flex gap-1.5 flex-wrap">
-          {categorias.map((cat) => (
-            <button
-              key={cat.slug}
-              type="button"
-              onClick={() => alCambiarCategoria(cat.slug)}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                slugActual === cat.slug
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {cat.nombre}
-            </button>
-          ))}
-        </div>
-        {categoriaInferida && categoriaInferida !== slugActual && (
-          <button
-            type="button"
-            onClick={() => alCambiarCategoria(categoriaInferida)}
-            className="mt-1 text-xs text-gray-400 border border-dashed border-gray-300 rounded px-2 py-0.5 hover:text-gray-600 hover:border-gray-400 transition-colors"
+      {/* Body scroll */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+        {/* Selector de categoria */}
+        <div>
+          <label
+            className="mono"
+            style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '8px' }}
           >
-            Usar &ldquo;{categorias.find((c) => c.slug === categoriaInferida)?.nombre ?? categoriaInferida}&rdquo;
-          </button>
-        )}
-      </div>
+            Categoria
+          </label>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {categorias.map((cat) => {
+              const activo = slugActual === cat.slug
+              return (
+                <button
+                  key={cat.slug}
+                  type="button"
+                  onClick={() => alCambiarCategoria(cat.slug)}
+                  className="inline-flex items-center gap-1.5 transition-all duration-150"
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: '999px',
+                    fontSize: '12px',
+                    fontWeight: activo ? 500 : 400,
+                    background: activo ? 'var(--ink)' : 'var(--bg)',
+                    color: activo ? 'var(--bg)' : 'var(--ink-2)',
+                    border: `1px solid ${activo ? 'var(--ink)' : 'var(--line-2)'}`,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '7px',
+                      height: '7px',
+                      borderRadius: '999px',
+                      background: cat.color,
+                      flexShrink: 0,
+                    }}
+                  />
+                  {cat.nombre}
+                </button>
+              )
+            })}
+          </div>
+          {categoriaInferida && categoriaInferida !== slugActual && (
+            <button
+              type="button"
+              onClick={() => alCambiarCategoria(categoriaInferida)}
+              style={{
+                marginTop: '6px',
+                fontSize: '11.5px',
+                color: 'var(--ink-3)',
+                border: '1px dashed var(--line-2)',
+                borderRadius: '6px',
+                padding: '2px 8px',
+                background: 'transparent',
+                cursor: 'pointer',
+              }}
+            >
+              Usar &ldquo;{categorias.find((c) => c.slug === categoriaInferida)?.nombre ?? categoriaInferida}&rdquo;
+            </button>
+          )}
+        </div>
 
-      {/* Titulo */}
-      <div className="space-y-1">
-        <Label htmlFor="titulo">Titulo</Label>
-        <Input
-          id="titulo"
-          name="titulo"
-          defaultValue={recordatorio?.titulo}
-          placeholder="Ej: Estudiar calculo"
-          maxLength={100}
-          required
-          onChange={(e) => setTituloActual(e.target.value)}
-        />
-      </div>
-
-      {/* Descripcion / cuerpo de nota */}
-      <div className="space-y-1">
-        <Label htmlFor="descripcion">
-          {slugActual === 'notes' ? 'Contenido' : 'Descripcion (opcional)'}
-        </Label>
-        <Textarea
-          id="descripcion"
-          name="descripcion"
-          defaultValue={recordatorio?.descripcion ?? ''}
-          placeholder={slugActual === 'notes' ? 'Escribe tu nota aqui...' : 'Agrega detalles adicionales...'}
-          maxLength={slugActual === 'notes' ? 10000 : 500}
-          rows={slugActual === 'notes' ? 6 : 3}
-        />
-      </div>
-
-      {/* Fecha y hora (cumpleanos solo fecha) */}
-      <div className={`grid gap-3 ${slugActual !== 'birthdays' ? 'grid-cols-2' : 'grid-cols-1'}`}>
-        <div className="space-y-1">
-          <Label htmlFor="fechaVencimiento">
-            {slugActual === 'birthdays' ? 'Fecha de nacimiento' : 'Fecha'}
-          </Label>
+        {/* Titulo */}
+        <div>
+          <label
+            htmlFor="titulo"
+            className="mono"
+            style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+          >
+            Titulo
+          </label>
           <Input
-            id="fechaVencimiento"
-            name="fechaVencimiento"
-            type="date"
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            required={slugActual !== 'notes'}
+            id="titulo"
+            name="titulo"
+            defaultValue={recordatorio?.titulo}
+            placeholder="Ej: Estudiar calculo"
+            maxLength={100}
+            required
+            onChange={(e) => setTituloActual(e.target.value)}
           />
         </div>
-        {slugActual !== 'birthdays' && (
-          <div className="space-y-1">
-            <Label htmlFor="horaVencimiento">Hora</Label>
+
+        {/* Descripcion */}
+        <div>
+          <label
+            htmlFor="descripcion"
+            className="mono"
+            style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+          >
+            {slugActual === 'notes' ? 'Contenido' : 'Descripcion (opcional)'}
+          </label>
+          <Textarea
+            id="descripcion"
+            name="descripcion"
+            defaultValue={recordatorio?.descripcion ?? ''}
+            placeholder={slugActual === 'notes' ? 'Escribe tu nota aqui...' : 'Agrega detalles adicionales...'}
+            maxLength={slugActual === 'notes' ? 10000 : 500}
+            rows={slugActual === 'notes' ? 6 : 3}
+          />
+        </div>
+
+        {/* Fecha y hora */}
+        <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: slugActual !== 'birthdays' ? '1fr 1fr' : '1fr' }}>
+          <div>
+            <label
+              htmlFor="fechaVencimiento"
+              className="mono"
+              style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+            >
+              {slugActual === 'birthdays' ? 'Fecha de nacimiento' : 'Fecha'}
+            </label>
             <Input
-              id="horaVencimiento"
-              name="horaVencimiento"
-              type="time"
-              value={hora}
-              onChange={(e) => setHora(e.target.value)}
+              id="fechaVencimiento"
+              name="fechaVencimiento"
+              type="date"
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+              required={slugActual !== 'notes'}
             />
           </div>
+          {slugActual !== 'birthdays' && (
+            <div>
+              <label
+                htmlFor="horaVencimiento"
+                className="mono"
+                style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+              >
+                Hora
+              </label>
+              <Input
+                id="horaVencimiento"
+                name="horaVencimiento"
+                type="time"
+                value={hora}
+                onChange={(e) => setHora(e.target.value)}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Anticipacion */}
+        <div>
+          <label
+            htmlFor="anticipacionMin"
+            className="mono"
+            style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+          >
+            Notificar
+          </label>
+          <select
+            id="anticipacionMin"
+            name="anticipacionMin"
+            defaultValue={String(anticipacionMinInicial)}
+            style={{
+              width: '100%',
+              height: '38px',
+              borderRadius: '10px',
+              border: '1px solid var(--line-2)',
+              background: 'var(--bg)',
+              color: 'var(--ink)',
+              fontSize: '14px',
+              padding: '0 12px',
+              outline: 'none',
+            }}
+          >
+            {OPCIONES_ANTICIPACION.map((op) => (
+              <option key={op.valor} value={op.valor}>
+                {op.etiqueta}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Campos condicionales */}
+        <BloqueCondicional key={slugActual} slug={slugActual} metadatos={metadatosParaCampos} />
+
+        {/* Errores */}
+        {tieneError && (
+          <p style={{ fontSize: '13px', color: 'var(--cat-peliculas)' }}>{estado.error as string}</p>
         )}
       </div>
 
-      {/* Anticipacion de notificacion */}
-      <div className="space-y-1">
-        <Label htmlFor="anticipacionMin">Notificar</Label>
-        <select
-          id="anticipacionMin"
-          name="anticipacionMin"
-          defaultValue={String(anticipacionMinInicial)}
-          className="flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 py-1 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
-        >
-          {OPCIONES_ANTICIPACION.map((op) => (
-            <option key={op.valor} value={op.valor}>
-              {op.etiqueta}
-            </option>
-          ))}
-        </select>
+      {/* Footer fijo dentro del form */}
+      <div
+        style={{
+          flexShrink: 0,
+          padding: '14px 24px',
+          borderTop: '1px solid var(--line)',
+          background: 'var(--bg)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+        }}
+      >
+        <BotonEnvio editar={esEdicion} onCancelar={onCancelar} />
       </div>
-
-      {/* Campos condicionales por categoria */}
-      <BloqueCondicional key={slugActual} slug={slugActual} metadatos={metadatosParaCampos} />
-
-      {/* Errores */}
-      {tieneError && (
-        <p className="text-sm text-red-500">{estado.error as string}</p>
-      )}
-
-      <BotonEnvio editar={esEdicion} />
     </form>
   )
 }

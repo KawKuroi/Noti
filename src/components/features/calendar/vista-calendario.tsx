@@ -76,40 +76,51 @@ export function VistaCalendario({
   return (
     <div className="flex flex-col gap-4 h-full min-h-0">
       {/* Header del calendario */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2">
-          <Button variante="fantasma" tamano="icono" onClick={() => navegar(-1)} title="Anterior">
+          <button
+            onClick={() => navegar(-1)}
+            title="Anterior"
+            className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-[var(--line-2)] bg-[var(--bg)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-4)] transition-colors focus:outline-none"
+          >
             <ChevronLeft size={16} />
-          </Button>
-          <h2 className="text-base font-semibold text-foreground capitalize min-w-[180px] text-center">
+          </button>
+          <h2 className="font-mono text-[13px] font-medium text-[var(--ink)] capitalize min-w-[160px] text-center tracking-tight">
             {titulo}
           </h2>
-          <Button variante="fantasma" tamano="icono" onClick={() => navegar(1)} title="Siguiente">
+          <button
+            onClick={() => navegar(1)}
+            title="Siguiente"
+            className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-[var(--line-2)] bg-[var(--bg)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-4)] transition-colors focus:outline-none"
+          >
             <ChevronRight size={16} />
-          </Button>
-          <Button variante="contorno" tamano="sm" onClick={irAHoy}>
+          </button>
+          <button
+            onClick={irAHoy}
+            className="flex items-center px-3 py-1.5 rounded-[10px] text-[12.5px] font-medium text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--bg-soft)] border border-[var(--line-2)] hover:border-[var(--ink-4)] transition-colors focus:outline-none"
+          >
             Hoy
-          </Button>
+          </button>
         </div>
 
-        {/* Toggle vista */}
-        <div className="flex rounded-lg border border-border overflow-hidden">
+        {/* Toggle vista Mes/Semana — pill container */}
+        <div className="flex items-center gap-1 p-[3px] bg-[var(--bg-soft)] border border-[var(--line)] rounded-[999px] select-none">
           <button
             onClick={() => cambiarVista('mes')}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium transition-all focus:outline-none ${
               vista === 'mes'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-background text-muted-foreground hover:bg-accent/50'
+                ? 'bg-[var(--bg)] text-[var(--ink)] shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-[var(--line-2)]'
+                : 'text-[var(--ink-2)] hover:text-[var(--ink)] border border-transparent'
             }`}
           >
             Mes
           </button>
           <button
             onClick={() => cambiarVista('semana')}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium transition-all focus:outline-none ${
               vista === 'semana'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-background text-muted-foreground hover:bg-accent/50'
+                ? 'bg-[var(--bg)] text-[var(--ink)] shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-[var(--line-2)]'
+                : 'text-[var(--ink-2)] hover:text-[var(--ink)] border border-transparent'
             }`}
           >
             Semana
@@ -144,7 +155,10 @@ export function VistaCalendario({
 
         {recordatoriosFiltrados.length === 0 && (
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-            <div className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-card/95 px-3 py-1 text-xs text-muted-foreground shadow-sm ring-1 ring-border backdrop-blur">
+            <div
+              className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs text-[var(--ink-3)] backdrop-blur"
+              style={{ background: 'color-mix(in oklab, var(--bg) 90%, transparent)', border: '1px solid var(--line)' }}
+            >
               <Info size={12} />
               Sin recordatorios en este filtro
             </div>

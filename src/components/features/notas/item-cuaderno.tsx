@@ -23,16 +23,61 @@ export function ItemCuaderno({ cuaderno, onRenombrar, onEliminar }: Props) {
 
   return (
     <div
-      className="group flex items-center gap-3 px-3 py-3 rounded-xl border border-border hover:bg-accent/50 transition-colors cursor-pointer"
+      className="group flex items-center gap-3 px-3 py-3 cursor-pointer transition-all duration-150"
+      style={{
+        border: '1px solid var(--line)',
+        borderRadius: '14px',
+        background: 'var(--bg)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'var(--ink-4)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'var(--line)'
+      }}
       onClick={() => router.push(`/notes/${cuaderno.id}`)}
     >
-      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 select-none">
-        <span className="text-sm font-semibold text-indigo-600">{inicial}</span>
+      <div
+        className="w-[38px] h-[38px] rounded-full flex items-center justify-center flex-shrink-0 select-none"
+        style={{
+          background: 'color-mix(in oklab, var(--cat-notas) 14%, transparent)',
+        }}
+      >
+        <span
+          className="mono text-sm font-semibold"
+          style={{ color: 'var(--cat-notas)' }}
+        >
+          {inicial}
+        </span>
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground truncate">{cuaderno.titulo}</p>
-        <p className="text-xs text-muted-foreground truncate mt-0.5">
+        <div className="flex items-center gap-2">
+          <p
+            className="text-sm font-medium truncate"
+            style={{ color: 'var(--ink)', fontWeight: 500 }}
+          >
+            {cuaderno.titulo}
+          </p>
+          <span
+            className="mono shrink-0"
+            style={{
+              fontSize: '10.5px',
+              fontWeight: 500,
+              padding: '2px 7px',
+              borderRadius: '999px',
+              background: 'var(--bg-soft)',
+              border: '1px solid var(--line)',
+              color: 'var(--ink-3)',
+            }}
+          >
+            {cuaderno.totalEntradas}
+          </span>
+        </div>
+        <p
+          className="text-xs truncate mt-0.5"
+          style={{ color: 'var(--ink-3)' }}
+        >
           {cuaderno.ultimaEntrada
             ? cuaderno.ultimaEntrada.contenido
             : <span className="italic">Sin mensajes</span>}
@@ -40,7 +85,9 @@ export function ItemCuaderno({ cuaderno, onRenombrar, onEliminar }: Props) {
       </div>
 
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
-        <span className="text-xs text-muted-foreground">{tiempoRelativo}</span>
+        <span className="mono" style={{ fontSize: '11px', color: 'var(--ink-3)', fontWeight: 500 }}>
+          {tiempoRelativo}
+        </span>
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
             variante="fantasma"

@@ -88,7 +88,7 @@ export function ListaCuadernos({ cuadernos: cuadernosIniciales }: Props) {
 
   return (
     <>
-      <div className="divide-y divide-border">
+      <div className="flex flex-col gap-2">
         {lista.map((cuaderno) => (
           <ItemCuaderno
             key={cuaderno.id}
