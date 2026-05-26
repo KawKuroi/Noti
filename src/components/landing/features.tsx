@@ -13,7 +13,7 @@ export function Features() {
           <div className="eyebrow">Caracteristicas</div>
           <h2
             style={{
-              fontSize: 'clamp(32px,4vw,52px)',
+              fontSize: 'clamp(32px,4.5vw,56px)',
               lineHeight: 1.04,
               marginTop: 14,
             }}

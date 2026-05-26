@@ -81,7 +81,7 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="reveal in" data-d="5" style={{ marginTop: 64 }}>
+        <div className="reveal in" data-d="5" style={{ marginTop: 240 }}>
           <HeroChat />
         </div>
       </div>

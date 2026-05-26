@@ -15,7 +15,7 @@ export function FAQ() {
       <div className="wrap" style={{ maxWidth: 880 }}>
         <div className="reveal" style={{ marginBottom: 32 }}>
           <div className="eyebrow">Preguntas</div>
-          <h2 style={{ fontSize: 'clamp(32px,4.5vw,52px)', lineHeight: 1.04, marginTop: 14 }}>
+          <h2 style={{ fontSize: 'clamp(32px,4.5vw,56px)', lineHeight: 1.04, marginTop: 14 }}>
             Lo que <span style={{ color: 'var(--ink-3)' }}>te estas preguntando.</span>
           </h2>
         </div>

@@ -27,30 +27,16 @@ export function Nav() {
     >
       <div className="wrap flex items-center justify-between">
         <Link href="/" className="flex items-center gap-[10px]">
-          <div className="relative h-7 w-7">
-            <div
-              className="grid h-7 w-7 place-items-center rounded-[8px] font-semibold"
-              style={{
-                background: 'var(--ink)',
-                color: 'var(--bg)',
-                fontSize: 14,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              N
-            </div>
-            <span
-              className="anim-pulse absolute"
-              style={{
-                top: -2,
-                right: -2,
-                width: 8,
-                height: 8,
-                borderRadius: 99,
-                background: '#22c55e',
-                border: '2px solid var(--bg)',
-              }}
-            />
+          <div
+            className="grid h-7 w-7 place-items-center rounded-[8px] font-semibold"
+            style={{
+              background: 'var(--ink)',
+              color: 'var(--bg)',
+              fontSize: 14,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            N
           </div>
           <span className="font-semibold" style={{ fontSize: 16, letterSpacing: '-0.015em' }}>
             Noti
