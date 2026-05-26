@@ -155,7 +155,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
       <div
         ref={tarjetaRef}
         className={cn(
-          'group flex items-start gap-4 p-[10px_14px] bg-transparent hover:bg-[var(--bg-soft)] rounded-[14px] border border-transparent hover:border-[var(--line)] transition-all duration-150 relative min-w-0 w-full',
+          'group flex items-start gap-4 p-[10px_14px] min-h-[56px] bg-transparent hover:bg-[var(--bg-soft)] rounded-[14px] border border-transparent hover:border-[var(--line)] transition-all duration-150 relative min-w-0 w-full',
           estaCompletado ? 'opacity-60' : '',
           mostrarRing ? 'ring-2 ring-purple-400 ring-offset-2' : ''
         )}

@@ -7,10 +7,8 @@ import { useTranslations } from 'next-intl'
 import {
   LayoutDashboard,
   Search,
-  ChevronDown,
-  ChevronRight,
-  Calendar,
-  StickyNote,
+  CalendarDays,
+  NotebookText,
   Settings,
   Menu,
   X,
@@ -44,7 +42,6 @@ interface Props {
 export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
   const ruta = usePathname()
   const t = useTranslations('Sidebar')
-  const [herramientasAbiertas, setHerramientasAbiertas] = useState(true)
   const [drawerAbierto, setDrawerAbierto] = useState(false)
 
   // Cierra el drawer cuando cambia la ruta
@@ -134,9 +131,8 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
         </button>
       {/* 1. Logo Noti */}
       <div className="px-6 py-5 border-b border-[var(--line)] flex items-center gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-[var(--ink)] flex items-center justify-center text-[var(--bg)] font-bold text-base relative select-none">
+        <div className="w-8 h-8 rounded-lg bg-[var(--ink)] flex items-center justify-center text-[var(--bg)] font-bold text-base select-none">
           N
-          <span className="w-2 h-2 rounded-full bg-[#16a34a] absolute -bottom-0.5 -right-0.5 border border-[var(--bg)]" />
         </div>
         <span className="text-base font-semibold tracking-tight text-[var(--ink)]">Noti</span>
       </div>
@@ -210,43 +206,30 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
         {/* 4. Sección Herramientas */}
         <div className="space-y-0.5">
           <div className="pt-2 pb-1.5 px-3">
-            <button
-              onClick={() => setHerramientasAbiertas((prev) => !prev)}
-              className="flex items-center justify-between w-full group focus:outline-none"
-              aria-label={herramientasAbiertas ? t('cerrarHerramientas') : t('abrirHerramientas')}
-            >
-              <span className="font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]">
-                {t('herramientas')}
-              </span>
-              {herramientasAbiertas ? (
-                <ChevronDown size={12} className="text-[var(--ink-3)] group-hover:text-[var(--ink)]" />
-              ) : (
-                <ChevronRight size={12} className="text-[var(--ink-3)] group-hover:text-[var(--ink)]" />
-              )}
-            </button>
+            <span className="font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]">
+              {t('herramientas')}
+            </span>
           </div>
 
-          {herramientasAbiertas && (
-            <div className="space-y-0.5">
-              <Link
-                href="/calendar"
-                className={ruta === '/calendar' ? linkActivoClase : linkInactivoClase}
-              >
-                <Calendar size={16} className="text-[var(--ink-2)]" />
-                <span>{t('calendario')}</span>
-              </Link>
+          <div className="space-y-0.5">
+            <Link
+              href="/calendar"
+              className={ruta === '/calendar' ? linkActivoClase : linkInactivoClase}
+            >
+              <CalendarDays size={16} className="text-[var(--ink-2)]" />
+              <span>{t('calendario')}</span>
+            </Link>
 
-              <Link
-                href="/notes"
-                className={cn(
-                  ruta === '/notes' || ruta.startsWith('/notes/') ? linkActivoClase : linkInactivoClase
-                )}
-              >
-                <StickyNote size={16} className="text-[var(--ink-2)]" />
-                <span>{t('notas')}</span>
-              </Link>
-            </div>
-          )}
+            <Link
+              href="/notes"
+              className={cn(
+                ruta === '/notes' || ruta.startsWith('/notes/') ? linkActivoClase : linkInactivoClase
+              )}
+            >
+              <NotebookText size={16} className="text-[var(--ink-2)]" />
+              <span>{t('notas')}</span>
+            </Link>
+          </div>
         </div>
       </nav>
 

@@ -91,7 +91,7 @@ export function ListaRecordatorios({
 
   if (!agrupar) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {recordatorios.map((rec) => (
           <TarjetaRecordatorio
             key={rec.id}

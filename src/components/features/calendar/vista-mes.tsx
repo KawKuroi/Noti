@@ -29,7 +29,7 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
   const fin = endOfWeek(endOfMonth(referencia), { weekStartsOn: 1 })
   const dias = eachDayOfInterval({ start: inicio, end: fin })
 
-  function getDotInfo(dia: Date): { dots: { color: string; id: string }[]; total: number } {
+  function getDotInfo(dia: Date): { items: { titulo: string; color: string; id: string }[]; total: number } {
     const delDia = recordatorios.filter((rec) => {
       if (!rec.fechaVencimiento) return false
       const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento)
@@ -41,21 +41,13 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
       coloresPorCategoria.set(cat.id, cat.color)
     }
 
-    const vistos = new Set<number>()
-    const dots: { color: string; id: string }[] = []
+    const items = delDia.slice(0, 3).map((rec) => ({
+      titulo: rec.titulo,
+      color: coloresPorCategoria.get(rec.categoriaId) ?? '#6b7280',
+      id: rec.id,
+    }))
 
-    for (const rec of delDia) {
-      if (!vistos.has(rec.categoriaId)) {
-        vistos.add(rec.categoriaId)
-        dots.push({
-          color: coloresPorCategoria.get(rec.categoriaId) ?? '#6b7280',
-          id: `${rec.categoriaId}`,
-        })
-      }
-      if (dots.length >= 3) break
-    }
-
-    return { dots, total: delDia.length }
+    return { items, total: delDia.length }
   }
 
   const filas = dias.length / 7
@@ -82,8 +74,8 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
         {dias.map((dia, idx) => {
           const esDelMes = isSameMonth(dia, referencia)
           const esDiaHoy = isToday(dia)
-          const { dots, total } = getDotInfo(dia)
-          const extras = total - dots.length
+          const { items, total } = getDotInfo(dia)
+          const extras = total - items.length
 
           // Border separators
           const esUltFila = idx >= dias.length - 7
@@ -116,21 +108,22 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
                 {format(dia, 'd')}
               </span>
 
-              {dots.length > 0 && (
+              {items.length > 0 && (
                 <div className="flex flex-col gap-[2px] w-full">
-                  {dots.map((dot) => (
+                  {items.map((item) => (
                     <span
-                      key={dot.id}
-                      className="flex items-center gap-1 text-[10px] font-medium leading-tight px-1 py-[2px] rounded-[5px] truncate"
+                      key={item.id}
+                      className="flex items-center gap-1 text-[10px] font-medium leading-tight px-1 py-[2px] rounded-[5px] w-full"
                       style={{
-                        backgroundColor: `color-mix(in oklab, ${dot.color} 8%, transparent)`,
-                        color: dot.color,
+                        backgroundColor: `color-mix(in oklab, ${item.color} 8%, transparent)`,
+                        color: item.color,
                       }}
                     >
                       <span
                         className="w-[5px] h-[5px] rounded-full shrink-0"
-                        style={{ backgroundColor: dot.color }}
+                        style={{ backgroundColor: item.color }}
                       />
+                      <span className="truncate">{item.titulo}</span>
                     </span>
                   ))}
                   {extras > 0 && (

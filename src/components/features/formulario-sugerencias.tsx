@@ -70,7 +70,7 @@ export function FormularioSugerencias({ onEnviado }: Props = {}) {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             placeholder="Tu nombre"
-            className="w-full px-4 py-2.5 text-sm bg-[var(--bg)] border border-[var(--line-2)] rounded-[10px] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)] transition-colors"
+            className="w-full px-4 py-2.5 text-sm bg-[var(--bg-soft)] border border-[var(--line-2)] rounded-[10px] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)] transition-colors"
           />
         </div>
         <div>
@@ -83,7 +83,7 @@ export function FormularioSugerencias({ onEnviado }: Props = {}) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Para que pueda responderte"
-            className="w-full px-4 py-2.5 text-sm bg-[var(--bg)] border border-[var(--line-2)] rounded-[10px] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)] transition-colors"
+            className="w-full px-4 py-2.5 text-sm bg-[var(--bg-soft)] border border-[var(--line-2)] rounded-[10px] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)] transition-colors"
           />
         </div>
       </div>
@@ -98,12 +98,12 @@ export function FormularioSugerencias({ onEnviado }: Props = {}) {
           value={mensaje}
           onChange={(e) => setMensaje(e.target.value)}
           placeholder="Que mejorarias o agregarias a Noti?"
-          className="w-full px-4 py-2.5 text-sm bg-[var(--bg)] border border-[var(--line-2)] rounded-[10px] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)] transition-colors resize-none"
+          className="w-full px-4 py-2.5 text-sm bg-[var(--bg-soft)] border border-[var(--line-2)] rounded-[10px] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)] transition-colors resize-none"
         />
       </div>
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-[var(--cat-peliculas)]">{error}</p>
       )}
 
       <button
