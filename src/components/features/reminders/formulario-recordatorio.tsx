@@ -49,7 +49,17 @@ function CamposTareas({ prioridadInicial }: { prioridadInicial?: string }) {
         id="meta_prioridad"
         name="meta_prioridad"
         defaultValue={prioridadInicial ?? 'media'}
-        className="flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 py-1 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
+        style={{
+          width: '100%',
+          height: '38px',
+          borderRadius: '10px',
+          border: '1px solid var(--line-2)',
+          background: 'var(--bg)',
+          color: 'var(--ink)',
+          fontSize: '14px',
+          padding: '0 12px',
+          outline: 'none',
+        }}
       >
         {PRIORIDADES.map((p) => (
           <option key={p.valor} value={p.valor}>
@@ -78,7 +88,7 @@ function CamposCumpleanos({ edadInicial }: { edadInicial?: number }) {
           defaultValue={edadInicial}
         />
       </div>
-      <p className="text-xs text-gray-400">
+      <p style={{ fontSize: '12px', color: 'var(--ink-3)' }}>
         Este recordatorio se repetira cada ano automaticamente.
       </p>
     </>

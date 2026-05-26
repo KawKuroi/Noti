@@ -1,4 +1,4 @@
-const CACHE_NOMBRE = 'noti-v3'
+const CACHE_NOMBRE = 'noti-v4'
 const URLS_CACHE = ['/']
 const DB_NOMBRE = 'noti-sync'
 const STORE_PENDIENTES = 'operaciones-pendientes'
@@ -102,9 +102,11 @@ self.addEventListener('fetch', (evento) => {
   // Para mutaciones en rutas de la app: guardar si falla la red
   if (
     evento.request.method === 'POST' &&
-    (url.pathname.startsWith('/api/') && !url.pathname.includes('/api/push/'))
+    url.pathname.startsWith('/api/') &&
+    !url.pathname.includes('/api/push/') &&
+    !url.pathname.includes('/api/contacto')
   ) {
-    evento.waitUntil(
+    evento.respondWith(
       fetch(evento.request.clone()).catch(async () => {
         try {
           const cuerpo = await evento.request.clone().text()
@@ -113,8 +115,13 @@ self.addEventListener('fetch', (evento) => {
         } catch {
           // ignorar errores de almacenamiento
         }
+        return new Response(JSON.stringify({ ok: false, pendiente: true }), {
+          status: 202,
+          headers: { 'Content-Type': 'application/json' },
+        })
       }),
     )
+    return
   }
 })
 

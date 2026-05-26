@@ -6,16 +6,17 @@ import {
   Briefcase,
   Cake,
   Calendar as CalendarIcon,
+  CalendarDays,
   Check,
   Film,
   Gamepad2,
   GraduationCap,
-  LayoutGrid,
+  LayoutDashboard,
   MapPin,
   Music,
-  Plus,
+  NotebookText,
   Search,
-  Sparkles,
+  Settings,
   StickyNote,
   type LucideIcon,
 } from 'lucide-react'
@@ -26,7 +27,7 @@ export function AppPreview() {
   const [tab, setTab] = useState<TabId>('dashboard')
 
   const tabs: { id: TabId; label: string; icono: LucideIcon }[] = [
-    { id: 'dashboard', label: 'Dashboard', icono: LayoutGrid },
+    { id: 'dashboard', label: 'Dashboard', icono: LayoutDashboard },
     { id: 'calendar', label: 'Calendario', icono: CalendarIcon },
     { id: 'search', label: 'Busqueda', icono: Search },
   ]
@@ -252,86 +253,134 @@ function DashboardMock() {
     },
   ]
 
+  const categoriasNav: { color: string; label: string }[] = [
+    { color: 'var(--cat-series)', label: 'Lanzamientos' },
+    { color: 'var(--cat-peliculas)', label: 'Peliculas' },
+    { color: 'var(--cat-series)', label: 'Series' },
+    { color: 'var(--cat-juegos)', label: 'Videojuegos' },
+    { color: 'var(--cat-musica)', label: 'Musica' },
+    { color: 'var(--cat-libros)', label: 'Libros' },
+    { color: 'var(--cat-estudio)', label: 'Estudio' },
+    { color: 'var(--cat-cumple)', label: 'Cumpleanos' },
+    { color: 'var(--cat-pendientes)', label: 'Pendientes' },
+    { color: 'var(--cat-eventos)', label: 'Eventos' },
+  ]
+
   return (
     <MockShell titulo="noti.app/inicio" subtitulo="proximos - 8">
       <div className="dashboard-grid">
+        {/* Sidebar actual */}
         <div className="dashboard-sidebar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', marginBottom: 12 }}>
-            <div
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: 7,
-                background: 'var(--ink)',
-                color: 'var(--bg)',
-                display: 'grid',
-                placeItems: 'center',
-                fontWeight: 600,
-                fontSize: 12,
-              }}
-            >
+          {/* Logo */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '14px 16px 14px',
+            borderBottom: '1px solid var(--line)',
+            marginBottom: 4,
+          }}>
+            <div style={{
+              width: 26, height: 26, borderRadius: 7,
+              background: 'var(--ink)', color: 'var(--bg)',
+              display: 'grid', placeItems: 'center',
+              fontWeight: 700, fontSize: 13,
+            }}>
               N
             </div>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>Noti</div>
+            <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.015em' }}>Noti</div>
           </div>
-          <SideItem icono={LayoutGrid} label="Proximos" count="8" activo />
-          <SideItem icono={Sparkles} label="Lanzamientos" count="3" />
-          <SideItem icono={Cake} label="Cumpleanos" count="1" />
-          <SideItem icono={GraduationCap} label="Estudio" count="2" />
-          <SideItem icono={MapPin} label="Pendientes" count="1" />
-          <SideItem icono={Briefcase} label="Eventos" count="1" />
-          <div
-            className="mono"
-            style={{
-              fontSize: 10,
-              color: 'var(--ink-3)',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              marginTop: 16,
-              padding: '4px 8px',
-            }}
-          >
-            Herramientas
+
+          <div style={{ padding: '8px 8px 4px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {/* Inicio y Buscar */}
+            <SideItemIcon icono={LayoutDashboard} label="Inicio" activo />
+            <SideItemIcon icono={Search} label="Buscar" hint="⌘K" />
+
+            {/* Categorias */}
+            <div className="mono" style={{
+              fontSize: 10, color: 'var(--ink-3)',
+              letterSpacing: '0.09em', textTransform: 'uppercase',
+              padding: '10px 8px 4px',
+            }}>
+              Categorias
+            </div>
+            {categoriasNav.map((c) => (
+              <div key={c.label} style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '5px 8px', borderRadius: 8,
+                fontSize: 12.5, color: 'var(--ink-2)',
+              }}>
+                <span style={{
+                  width: 7, height: 7, borderRadius: 99,
+                  background: c.color, flexShrink: 0,
+                }} />
+                {c.label}
+              </div>
+            ))}
+
+            {/* Herramientas */}
+            <div className="mono" style={{
+              fontSize: 10, color: 'var(--ink-3)',
+              letterSpacing: '0.09em', textTransform: 'uppercase',
+              padding: '10px 8px 4px',
+            }}>
+              Herramientas
+            </div>
+            <SideItemIcon icono={CalendarDays} label="Calendario" />
+            <SideItemIcon icono={NotebookText} label="Notas" />
           </div>
-          <SideItem icono={StickyNote} label="Notas" />
-          <SideItem icono={CalendarIcon} label="Calendario" />
-          <SideItem icono={Search} label="Buscar" hint="Ctrl+K" />
+
+          {/* Footer usuario */}
+          <div style={{
+            marginTop: 'auto',
+            padding: '10px 10px',
+            borderTop: '1px solid var(--line)',
+            display: 'flex', alignItems: 'center', gap: 10,
+          }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 99,
+              background: 'var(--bg-soft)',
+              border: '1px solid var(--line-2)',
+              display: 'grid', placeItems: 'center',
+              fontSize: 11, fontWeight: 500,
+              color: 'var(--ink-2)', flexShrink: 0,
+            }}>
+              K
+            </div>
+            <span style={{ flex: 1, fontSize: 12.5, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              Kevin
+            </span>
+            <span style={{ color: 'var(--ink-3)', display: 'grid' }}>
+              <Settings size={14} />
+            </span>
+          </div>
         </div>
 
-        <div style={{ padding: 24 }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 22,
-            }}
-          >
-            <h3 style={{ fontSize: 22, fontWeight: 500, letterSpacing: '-0.02em' }}>Proximos</h3>
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{ padding: '8px 14px', fontSize: 13 }}
-            >
-              <Plus size={14} /> Nuevo
-            </button>
+        {/* Contenido principal */}
+        <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {/* Saludo */}
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 500, letterSpacing: '-0.02em' }}>Buenos dias, Kevin</div>
+            <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 4 }}>
+              Tienes 3 recordatorios para hoy.
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+
+          {/* Lista de recordatorios */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             {grupos.map((g) => (
               <div key={g.label}>
                 <div
                   className="mono"
                   style={{
-                    fontSize: 11,
+                    fontSize: 10.5,
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
                     color: 'var(--ink-3)',
-                    marginBottom: 10,
+                    marginBottom: 8,
                   }}
                 >
                   {g.label}
                 </div>
-                <div style={{ display: 'grid', gap: 6 }}>
+                <div style={{ display: 'grid', gap: 5 }}>
                   {g.items.map((it) => {
                     const Icono = it.icono
                     return (
@@ -340,9 +389,9 @@ function DashboardMock() {
                         style={{
                           display: 'grid',
                           gridTemplateColumns: 'auto auto 1fr auto',
-                          gap: 12,
+                          gap: 10,
                           alignItems: 'center',
-                          padding: '10px 14px',
+                          padding: '9px 12px',
                           borderRadius: 10,
                           background: 'var(--bg-elev)',
                           border: '1px solid var(--line)',
@@ -351,22 +400,23 @@ function DashboardMock() {
                       >
                         <div
                           style={{
-                            width: 18,
-                            height: 18,
-                            borderRadius: 6,
+                            width: 16,
+                            height: 16,
+                            borderRadius: 5,
                             border: `1.5px solid ${it.hecho ? it.color : 'var(--ink-4)'}`,
                             background: it.hecho ? it.color : 'transparent',
                             display: 'grid',
                             placeItems: 'center',
                             color: '#fff',
+                            flexShrink: 0,
                           }}
                         >
-                          {it.hecho && <Check size={11} />}
+                          {it.hecho && <Check size={10} />}
                         </div>
                         <div
                           style={{
-                            width: 28,
-                            height: 28,
+                            width: 26,
+                            height: 26,
                             borderRadius: 7,
                             display: 'grid',
                             placeItems: 'center',
@@ -374,12 +424,12 @@ function DashboardMock() {
                             color: it.color,
                           }}
                         >
-                          <Icono size={14} />
+                          <Icono size={13} />
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <div
                             style={{
-                              fontSize: 13.5,
+                              fontSize: 13,
                               fontWeight: 500,
                               textDecoration: it.hecho ? 'line-through' : 'none',
                             }}
@@ -388,7 +438,7 @@ function DashboardMock() {
                           </div>
                           <div
                             className="mono"
-                            style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2 }}
+                            style={{ fontSize: 10.5, color: 'var(--ink-3)', marginTop: 1 }}
                           >
                             {it.sub}
                           </div>
@@ -396,13 +446,13 @@ function DashboardMock() {
                         <button
                           type="button"
                           style={{
-                            width: 22,
-                            height: 22,
-                            borderRadius: 6,
+                            width: 20,
+                            height: 20,
+                            borderRadius: 5,
                             border: '1px solid var(--line)',
                             background: 'var(--bg)',
                             color: 'var(--ink-3)',
-                            fontSize: 12,
+                            fontSize: 11,
                             cursor: 'pointer',
                             display: 'grid',
                             placeItems: 'center',
@@ -423,16 +473,14 @@ function DashboardMock() {
       <style jsx>{`
         .dashboard-grid {
           display: grid;
-          grid-template-columns: 200px 1fr;
-          min-height: 460px;
+          grid-template-columns: 210px 1fr;
+          min-height: 529px;
         }
         .dashboard-sidebar {
-          padding: 16px;
           border-right: 1px solid var(--line);
-          background: var(--bg-soft);
+          background: var(--bg);
           display: flex;
           flex-direction: column;
-          gap: 4px;
         }
         @media (max-width: 760px) {
           .dashboard-grid {
@@ -447,44 +495,39 @@ function DashboardMock() {
   )
 }
 
-function SideItem({
+function SideItemIcon({
   icono: Icono,
   label,
-  count,
   activo,
   hint,
 }: {
   icono: LucideIcon
   label: string
-  count?: string
   activo?: boolean
   hint?: string
 }) {
   return (
     <div
       style={{
-        display: 'grid',
-        gridTemplateColumns: 'auto 1fr auto',
+        display: 'flex',
         alignItems: 'center',
         gap: 10,
-        padding: '7px 8px',
+        padding: '6px 8px',
         borderRadius: 8,
-        background: activo ? 'var(--bg-elev)' : 'transparent',
+        background: activo ? 'var(--bg-soft)' : 'transparent',
         border: activo ? '1px solid var(--line)' : '1px solid transparent',
         fontSize: 12.5,
+        justifyContent: 'space-between',
       }}
     >
-      <span style={{ color: activo ? 'var(--ink)' : 'var(--ink-2)', display: 'inline-flex' }}>
-        <Icono size={14} />
-      </span>
-      <span style={{ color: activo ? 'var(--ink)' : 'var(--ink-2)' }}>{label}</span>
-      {count && (
-        <span className="mono" style={{ fontSize: 10.5, color: 'var(--ink-3)' }}>
-          {count}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ color: 'var(--ink-2)', display: 'inline-flex' }}>
+          <Icono size={14} />
         </span>
-      )}
+        <span style={{ color: activo ? 'var(--ink)' : 'var(--ink-2)', fontWeight: activo ? 500 : 400 }}>{label}</span>
+      </div>
       {hint && (
-        <span className="mono" style={{ fontSize: 10.5, color: 'var(--ink-4)' }}>
+        <span className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', padding: '2px 5px', borderRadius: 4, border: '1px solid var(--line-2)', background: 'var(--bg-soft)' }}>
           {hint}
         </span>
       )}
@@ -596,7 +639,7 @@ function CalendarMock() {
               <div
                 key={i}
                 style={{
-                  minHeight: 78,
+                  minHeight: 90,
                   borderRadius: 10,
                   padding: 8,
                   background: esHoy

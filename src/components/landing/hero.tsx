@@ -7,12 +7,11 @@ import { EJEMPLOS_HERO, REPO_URL } from './data'
 import { useTypewriter } from './hooks'
 
 const HEADLINE = ['Recuerda lo que importa.', 'Sin apps. Sin ruido.']
-const EYE = 'Push reales - Sin apps - Sin ruido'
 const SUB = 'PWA minimalista con push reales, chat IA y categorias. Gratis, para siempre.'
 
 export function Hero() {
   return (
-    <section style={{ position: 'relative', paddingTop: 130, paddingBottom: 'var(--pad-section)' }}>
+    <section style={{ position: 'relative', paddingTop: 150, paddingBottom: 'var(--pad-section)' }}>
       <div
         className="dotgrid"
         style={{
@@ -26,15 +25,14 @@ export function Hero() {
       />
       <div className="wrap" style={{ position: 'relative' }}>
         <div style={{ textAlign: 'center', maxWidth: 820, margin: '0 auto' }}>
-          <div className="reveal in eyebrow">{EYE}</div>
           <h1
             className="reveal in"
             data-d="1"
             style={{
-              fontSize: 'clamp(44px, 7vw, 88px)',
+              fontSize: 'clamp(50px, 7vw, 101px)',
               lineHeight: 0.96,
-              marginTop: 22,
-              marginBottom: 22,
+              marginTop: 0,
+              marginBottom: 25,
               fontWeight: 500,
             }}
           >
@@ -52,7 +50,7 @@ export function Hero() {
             className="reveal in"
             data-d="2"
             style={{
-              fontSize: 'clamp(16px, 1.4vw, 19px)',
+              fontSize: 'clamp(18px, 1.4vw, 22px)',
               lineHeight: 1.55,
               color: 'var(--ink-2)',
               maxWidth: 600,
@@ -68,7 +66,7 @@ export function Hero() {
               display: 'flex',
               gap: 10,
               justifyContent: 'center',
-              marginTop: 32,
+              marginTop: 37,
               flexWrap: 'wrap',
             }}
           >
@@ -81,7 +79,7 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="reveal in" data-d="5" style={{ marginTop: 240 }}>
+        <div className="reveal in" data-d="5" style={{ marginTop: 276 }}>
           <HeroChat />
         </div>
       </div>

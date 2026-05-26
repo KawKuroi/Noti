@@ -24,7 +24,6 @@ import {
   TIPO_LANZAMIENTO_A_SLUG,
 } from '@/lib/utils/constants'
 import type { TipoLanzamiento } from '@/types/release.types'
-import { cn } from '@/lib/utils/cn'
 
 export interface DatosFormulario {
   titulo: string
@@ -202,16 +201,43 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
     })
   }
 
+  const estiloLabel: React.CSSProperties = {
+    fontSize: '11px',
+    color: 'var(--ink-3)',
+    marginBottom: '4px',
+    display: 'block',
+  }
+
   return (
-    <div className="rounded-lg border border-gray-900 ring-1 ring-gray-900 bg-white p-4 shadow-sm space-y-3">
+    <div
+      style={{
+        borderRadius: '12px',
+        border: '1px solid var(--line-2)',
+        background: 'var(--bg-elev)',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+      }}
+    >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs uppercase tracking-wider text-gray-400">
+        <p
+          className="mono"
+          style={{ fontSize: '10.5px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)' }}
+        >
           {modo === 'lanzamiento' ? 'Crear lanzamiento manual' : 'Crear recordatorio'}
         </p>
         <button
           type="button"
           onClick={onCancelar}
-          className="text-gray-400 hover:text-gray-700 transition-colors"
+          style={{
+            color: 'var(--ink-3)',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+            display: 'flex',
+          }}
           aria-label="Descartar"
         >
           <X size={14} />
@@ -219,18 +245,18 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       </div>
 
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Título</label>
+        <label style={estiloLabel}>Titulo</label>
         <Input
           autoFocus
           value={titulo}
           onChange={(e) => setTitulo(e.target.value)}
-          placeholder="Título del recordatorio"
+          placeholder="Titulo del recordatorio"
           disabled={creando}
         />
       </div>
 
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">Categoría</label>
+        <label style={estiloLabel}>Categoria</label>
         <Select value={categoriaSlug} onValueChange={setCategoriaSlug} disabled={creando}>
           <SelectTrigger>
             <SelectValue />
@@ -259,8 +285,8 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">
-            Fecha {esNota && <span className="text-gray-400">(opcional)</span>}
+          <label style={estiloLabel}>
+            Fecha {esNota && <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>}
           </label>
           <Input
             type="date"
@@ -270,7 +296,7 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Hora</label>
+          <label style={estiloLabel}>Hora</label>
           <Input
             type="time"
             value={horaVencimiento}
@@ -282,7 +308,7 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
       {!esNota && (
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Avisar</label>
+          <label style={estiloLabel}>Avisar</label>
           <Select
             value={String(anticipacionMin)}
             onValueChange={(v) => setAnticipacionMin(Number(v))}
@@ -303,9 +329,19 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       )}
 
       {esLanzamientoCategoria && (
-        <div className="space-y-3 rounded-md border border-gray-100 bg-gray-50 p-3">
+        <div
+          style={{
+            borderRadius: '10px',
+            border: '1px solid var(--line)',
+            background: 'var(--bg-soft)',
+            padding: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+          }}
+        >
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Tipo de lanzamiento</label>
+            <label style={estiloLabel}>Tipo de lanzamiento</label>
             <Select
               value={tipoLanzamiento ?? ''}
               onValueChange={(v) => setTipoLanzamiento(v as TipoLanzamiento)}
@@ -326,8 +362,8 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
           {tipoLanzamiento === 'book' && (
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">
-                Autor <span className="text-gray-400">(opcional)</span>
+              <label style={estiloLabel}>
+                Autor <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
               </label>
               <Input
                 value={autor}
@@ -339,8 +375,8 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
           {tipoLanzamiento === 'album' && (
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">
-                Artista <span className="text-gray-400">(opcional)</span>
+              <label style={estiloLabel}>
+                Artista <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
               </label>
               <Input
                 value={artista}
@@ -352,9 +388,9 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
           {(tipoLanzamiento === 'movie' || tipoLanzamiento === 'tv') && (
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">
+              <label style={estiloLabel}>
                 {tipoLanzamiento === 'tv' ? 'Showrunner' : 'Director'}{' '}
-                <span className="text-gray-400">(opcional)</span>
+                <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
               </label>
               <Input
                 value={director}
@@ -368,8 +404,8 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
       {categoriaSlug === 'birthdays' && (
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">
-            Edad <span className="text-gray-400">(opcional)</span>
+          <label style={estiloLabel}>
+            Edad <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
           </label>
           <Input
             type="number"
@@ -385,8 +421,8 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
       {categoriaSlug === 'events' && (
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">
-            Ubicación <span className="text-gray-400">(opcional)</span>
+          <label style={estiloLabel}>
+            Ubicacion <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
           </label>
           <Input
             value={ubicacion}
@@ -400,8 +436,8 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
       {categoriaSlug === 'study' && (
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">
-            Duración estimada (minutos) <span className="text-gray-400">(opcional)</span>
+          <label style={estiloLabel}>
+            Duracion estimada (minutos) <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
           </label>
           <Input
             type="number"
@@ -417,7 +453,7 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
 
       {categoriaSlug === 'tasks' && (
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Prioridad</label>
+          <label style={estiloLabel}>Prioridad</label>
           <Select
             value={prioridad}
             onValueChange={(v) => setPrioridad(v as 'baja' | 'media' | 'alta')}
@@ -435,8 +471,17 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
         </div>
       )}
 
-      <div className="space-y-2">
-        <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <label
+          style={{
+            fontSize: '13px',
+            color: 'var(--ink)',
+            cursor: creando ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
           <input
             type="checkbox"
             checked={esRecurrente}
@@ -445,13 +490,12 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
               if (e.target.checked && tipoRec === 'ninguna') setTipoRec('yearly')
             }}
             disabled={creando}
-            className="rounded border-gray-300"
           />
           Recurrente
         </label>
 
         {esRecurrente && (
-          <div className="ml-6 space-y-2">
+          <div style={{ marginLeft: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <Select
               value={tipoRec}
               onValueChange={(v) => setTipoRec(v as TipoRecurrencia)}
@@ -461,8 +505,8 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="yearly">Cada año (mismo día y mes)</SelectItem>
-                <SelectItem value="weekly">Cada semana (días específicos)</SelectItem>
+                <SelectItem value="yearly">Cada ano (mismo dia y mes)</SelectItem>
+                <SelectItem value="weekly">Cada semana (dias especificos)</SelectItem>
               </SelectContent>
             </Select>
 
@@ -474,12 +518,18 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
                     type="button"
                     onClick={() => toggleDia(d.codigo)}
                     disabled={creando}
-                    className={cn(
-                      'w-8 h-8 rounded-md text-xs font-medium transition-colors',
-                      diasSemana.includes(d.codigo)
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
-                    )}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      border: 'none',
+                      cursor: creando ? 'not-allowed' : 'pointer',
+                      background: diasSemana.includes(d.codigo) ? 'var(--ink)' : 'var(--bg-soft)',
+                      color: diasSemana.includes(d.codigo) ? 'var(--bg)' : 'var(--ink-2)',
+                      transition: 'background 0.15s, color 0.15s',
+                    }}
                     aria-label={d.codigo}
                   >
                     {d.etiqueta}
@@ -492,8 +542,8 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
       </div>
 
       <div>
-        <label className="text-xs text-gray-500 mb-1 block">
-          Descripción <span className="text-gray-400">(opcional)</span>
+        <label style={estiloLabel}>
+          Descripcion <span style={{ color: 'var(--ink-4)' }}>(opcional)</span>
         </label>
         <Textarea
           value={descripcion}
@@ -503,7 +553,7 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
         />
       </div>
 
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p style={{ fontSize: '12px', color: 'var(--cat-peliculas)' }}>{error}</p>}
 
       <div className="flex gap-2 pt-1">
         <Button

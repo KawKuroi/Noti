@@ -6,14 +6,14 @@ import { REPO_NOMBRE, REPO_URL } from './data'
 
 export function FooterCTA() {
   return (
-    <section style={{ paddingTop: 40, paddingBottom: 60 }}>
+    <section style={{ paddingTop: 46, paddingBottom: 69 }}>
       <div className="wrap">
         <div
           className="reveal card-landing"
           style={{
-            padding: '60px 40px',
+            padding: '69px 46px',
             textAlign: 'center',
-            borderRadius: 22,
+            borderRadius: 25,
             background: 'var(--ink)',
             color: 'var(--bg)',
             border: 'none',
@@ -34,7 +34,7 @@ export function FooterCTA() {
           <div style={{ position: 'relative' }}>
             <h2
               style={{
-                fontSize: 'clamp(34px,5vw,64px)',
+                fontSize: 'clamp(39px,5vw,74px)',
                 lineHeight: 1,
                 fontWeight: 500,
                 letterSpacing: '-0.03em',
@@ -42,7 +42,7 @@ export function FooterCTA() {
             >
               Empieza a recordar
               <br />
-              <span style={{ color: 'rgba(255,255,255,0.5)' }}>lo que importa.</span>
+              <span style={{ color: 'color-mix(in oklab, var(--bg) 50%, transparent)' }}>lo que importa.</span>
             </h2>
             <div
               style={{
@@ -65,7 +65,7 @@ export function FooterCTA() {
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-ghost"
-                style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'var(--bg)' }}
+                style={{ borderColor: 'color-mix(in oklab, var(--bg) 20%, transparent)', color: 'var(--bg)' }}
               >
                 <Github size={16} /> {REPO_NOMBRE}
               </a>

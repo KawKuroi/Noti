@@ -5,15 +5,8 @@ import { PlusCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import {
   Select,
   SelectContent,
@@ -108,164 +101,261 @@ export function FormularioManualLanzamiento({ tipoInicial }: Props) {
         Agregar manualmente
       </Button>
 
-      <Dialog open={abierto} onOpenChange={setAbierto}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Agregar lanzamiento</DialogTitle>
-            <DialogDescription>
-              Registra manualmente la fecha de un lanzamiento.
-            </DialogDescription>
-          </DialogHeader>
+      <Sheet open={abierto} onOpenChange={setAbierto}>
+        <SheetContent
+          title="Agregar lanzamiento"
+          description="Registra manualmente la fecha de un lanzamiento."
+          onClose={() => setAbierto(false)}
+        >
+          <form
+            onSubmit={manejarEnvio}
+            style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+          >
+            <div
+              style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '20px 24px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+              }}
+            >
+              <div>
+                <label
+                  htmlFor="tipo-lanzamiento"
+                  className="mono"
+                  style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                >
+                  Tipo
+                </label>
+                <Select value={tipo} onValueChange={(v) => setTipo(v as TipoLanzamiento)}>
+                  <SelectTrigger id="tipo-lanzamiento">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIPOS_LANZAMIENTO.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {ETIQUETAS_TIPO_LANZAMIENTO[t]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <form onSubmit={manejarEnvio} className="space-y-4 mt-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="tipo-lanzamiento">Tipo</Label>
-              <Select value={tipo} onValueChange={(v) => setTipo(v as TipoLanzamiento)}>
-                <SelectTrigger id="tipo-lanzamiento">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS_LANZAMIENTO.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {ETIQUETAS_TIPO_LANZAMIENTO[t]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div>
+                <label
+                  htmlFor="titulo-lanzamiento"
+                  className="mono"
+                  style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                >
+                  Titulo
+                </label>
+                <Input
+                  id="titulo-lanzamiento"
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  placeholder="Ej: Dune 3"
+                  required
+                />
+              </div>
+
+              {etiquetaExtra && (
+                <div>
+                  <label
+                    htmlFor="autor-lanzamiento"
+                    className="mono"
+                    style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  >
+                    {etiquetaExtra}
+                  </label>
+                  <Input
+                    id="autor-lanzamiento"
+                    value={autor}
+                    onChange={(e) => setAutor(e.target.value)}
+                    placeholder={mostrarAutor ? 'Ej: Brandon Sanderson' : 'Ej: Bad Bunny'}
+                  />
+                </div>
+              )}
+
+              {mostrarDirector && (
+                <div>
+                  <label
+                    htmlFor="director-lanzamiento"
+                    className="mono"
+                    style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  >
+                    {etiquetaDirector}
+                  </label>
+                  <Input
+                    id="director-lanzamiento"
+                    value={director}
+                    onChange={(e) => setDirector(e.target.value)}
+                    placeholder={tipo === 'tv' ? 'Ej: Vince Gilligan' : 'Ej: Denis Villeneuve'}
+                  />
+                </div>
+              )}
+
+              {mostrarPlataforma && (
+                <div>
+                  <label
+                    htmlFor="plataforma-lanzamiento"
+                    className="mono"
+                    style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  >
+                    Plataforma (opcional)
+                  </label>
+                  <Input
+                    id="plataforma-lanzamiento"
+                    value={plataforma}
+                    onChange={(e) => setPlataforma(e.target.value)}
+                    placeholder={tipo === 'game' ? 'Ej: PS5, PC, Xbox' : 'Ej: Netflix, HBO Max'}
+                  />
+                </div>
+              )}
+
+              {mostrarTemporada && (
+                <div>
+                  <label
+                    htmlFor="temporada-lanzamiento"
+                    className="mono"
+                    style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  >
+                    Temporada (opcional)
+                  </label>
+                  <Input
+                    id="temporada-lanzamiento"
+                    type="number"
+                    min={1}
+                    max={99}
+                    value={temporada}
+                    onChange={(e) => setTemporada(e.target.value)}
+                    placeholder="Ej: 2"
+                  />
+                </div>
+              )}
+
+              {mostrarDesarrolladora && (
+                <div>
+                  <label
+                    htmlFor="desarrolladora-lanzamiento"
+                    className="mono"
+                    style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  >
+                    Desarrolladora (opcional)
+                  </label>
+                  <Input
+                    id="desarrolladora-lanzamiento"
+                    value={desarrolladora}
+                    onChange={(e) => setDesarrolladora(e.target.value)}
+                    placeholder="Ej: Rockstar Games"
+                  />
+                </div>
+              )}
+
+              {mostrarEditorial && (
+                <div>
+                  <label
+                    htmlFor="editorial-lanzamiento"
+                    className="mono"
+                    style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                  >
+                    Editorial (opcional)
+                  </label>
+                  <Input
+                    id="editorial-lanzamiento"
+                    value={editorial}
+                    onChange={(e) => setEditorial(e.target.value)}
+                    placeholder="Ej: Tor Books"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label
+                  htmlFor="descripcion-lanzamiento"
+                  className="mono"
+                  style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                >
+                  Descripcion (opcional)
+                </label>
+                <Textarea
+                  id="descripcion-lanzamiento"
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                  placeholder="Breve descripcion..."
+                  rows={2}
+                  className="resize-none"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="fecha-lanzamiento"
+                  className="mono"
+                  style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
+                >
+                  Fecha de lanzamiento
+                </label>
+                <Input
+                  id="fecha-lanzamiento"
+                  type="date"
+                  value={fecha}
+                  onChange={(e) => setFecha(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="titulo-lanzamiento">Titulo</Label>
-              <Input
-                id="titulo-lanzamiento"
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
-                placeholder="Ej: Dune 3"
-                required
-              />
-            </div>
-
-            {etiquetaExtra && (
-              <div className="space-y-1.5">
-                <Label htmlFor="autor-lanzamiento">{etiquetaExtra}</Label>
-                <Input
-                  id="autor-lanzamiento"
-                  value={autor}
-                  onChange={(e) => setAutor(e.target.value)}
-                  placeholder={mostrarAutor ? 'Ej: Brandon Sanderson' : 'Ej: Bad Bunny'}
-                />
-              </div>
-            )}
-
-            {mostrarDirector && (
-              <div className="space-y-1.5">
-                <Label htmlFor="director-lanzamiento">{etiquetaDirector}</Label>
-                <Input
-                  id="director-lanzamiento"
-                  value={director}
-                  onChange={(e) => setDirector(e.target.value)}
-                  placeholder={tipo === 'tv' ? 'Ej: Vince Gilligan' : 'Ej: Denis Villeneuve'}
-                />
-              </div>
-            )}
-
-            {mostrarPlataforma && (
-              <div className="space-y-1.5">
-                <Label htmlFor="plataforma-lanzamiento">Plataforma (opcional)</Label>
-                <Input
-                  id="plataforma-lanzamiento"
-                  value={plataforma}
-                  onChange={(e) => setPlataforma(e.target.value)}
-                  placeholder={tipo === 'game' ? 'Ej: PS5, PC, Xbox' : 'Ej: Netflix, HBO Max'}
-                />
-              </div>
-            )}
-
-            {mostrarTemporada && (
-              <div className="space-y-1.5">
-                <Label htmlFor="temporada-lanzamiento">Temporada (opcional)</Label>
-                <Input
-                  id="temporada-lanzamiento"
-                  type="number"
-                  min={1}
-                  max={99}
-                  value={temporada}
-                  onChange={(e) => setTemporada(e.target.value)}
-                  placeholder="Ej: 2"
-                />
-              </div>
-            )}
-
-            {mostrarDesarrolladora && (
-              <div className="space-y-1.5">
-                <Label htmlFor="desarrolladora-lanzamiento">Desarrolladora (opcional)</Label>
-                <Input
-                  id="desarrolladora-lanzamiento"
-                  value={desarrolladora}
-                  onChange={(e) => setDesarrolladora(e.target.value)}
-                  placeholder="Ej: Rockstar Games"
-                />
-              </div>
-            )}
-
-            {mostrarEditorial && (
-              <div className="space-y-1.5">
-                <Label htmlFor="editorial-lanzamiento">Editorial (opcional)</Label>
-                <Input
-                  id="editorial-lanzamiento"
-                  value={editorial}
-                  onChange={(e) => setEditorial(e.target.value)}
-                  placeholder="Ej: Tor Books"
-                />
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <Label htmlFor="descripcion-lanzamiento">Descripcion (opcional)</Label>
-              <Textarea
-                id="descripcion-lanzamiento"
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                placeholder="Breve descripcion..."
-                rows={2}
-                className="resize-none"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="fecha-lanzamiento">Fecha de lanzamiento</Label>
-              <Input
-                id="fecha-lanzamiento"
-                type="date"
-                value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <Button
+            <div
+              style={{
+                flexShrink: 0,
+                padding: '14px 24px',
+                borderTop: '1px solid var(--line)',
+                background: 'var(--bg)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                justifyContent: 'flex-end',
+              }}
+            >
+              <button
                 type="button"
-                variante="contorno"
-                tamano="sm"
-                className="flex-1"
                 onClick={() => setAbierto(false)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  background: 'var(--bg)',
+                  color: 'var(--ink)',
+                  border: '1px solid var(--line-2)',
+                  cursor: 'pointer',
+                }}
               >
                 Cancelar
-              </Button>
-              <Button
+              </button>
+              <button
                 type="submit"
-                variante="primario"
-                tamano="sm"
-                className="flex-1"
                 disabled={pending || !titulo.trim() || !fecha}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  background: 'var(--ink)',
+                  color: 'var(--bg)',
+                  border: '1px solid var(--ink)',
+                  cursor: pending || !titulo.trim() || !fecha ? 'not-allowed' : 'pointer',
+                  opacity: pending || !titulo.trim() || !fecha ? 0.5 : 1,
+                }}
               >
                 {pending ? 'Guardando...' : 'Guardar'}
-              </Button>
+              </button>
             </div>
           </form>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   )
 }

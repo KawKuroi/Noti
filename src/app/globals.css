@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  font-size: 115%;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -151,8 +155,8 @@
     --line-2: rgba(10, 10, 10, 0.14);
     --landing-accent: #0a0a0a;
     --landing-accent-ink: #ffffff;
-    --landing-radius: 14px;
-    --landing-radius-sm: 10px;
+    --landing-radius: 16px;
+    --landing-radius-sm: 12px;
     --landing-maxw: 1180px;
 
     --cat-peliculas: #dc2626;
@@ -166,8 +170,8 @@
     --cat-pendientes: #f59e0b;
     --cat-eventos: #14b8a6;
 
-    --pad-section: 120px;
-    --gap: 20px;
+    --pad-section: 138px;
+    --gap: 23px;
 
     --font-mono: var(--font-sans);
   }
@@ -182,6 +186,7 @@
     --ink-4: rgba(250, 250, 250, 0.28);
     --line: rgba(250, 250, 250, 0.08);
     --line-2: rgba(250, 250, 250, 0.16);
+    --landing-accent: #fafafa;
     --landing-accent-ink: #0a0a0a;
   }
 }
@@ -214,7 +219,7 @@
 .landing-root .wrap {
   max-width: var(--landing-maxw);
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 32px;
 }
 
 @media (max-width: 720px) {
@@ -284,9 +289,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 16px;
+  padding: 13px 18px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.005em;
   border: 1px solid transparent;
@@ -326,7 +331,7 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono), ui-sans-serif, system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;

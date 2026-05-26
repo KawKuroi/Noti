@@ -52,7 +52,7 @@ export default async function PaginaCategoria({ params, searchParams }: Props) {
   const Icono = ICONOS[categoria.icono]
 
   return (
-    <div>
+    <div className="max-w-3xl mx-auto space-y-6">
       <PageHeader
         icon={Icono ? <Icono size={22} /> : undefined}
         iconColor={categoria.color}
@@ -60,9 +60,7 @@ export default async function PaginaCategoria({ params, searchParams }: Props) {
         action={<BotonNuevoRecordatorio categorias={categorias} slugInicial={slug} />}
       />
 
-      <div className="mb-6">
-        <BarraAsistente />
-      </div>
+      <BarraAsistente />
 
       <ListaRecordatoriosPaginada
         recordatoriosIniciales={recordatorios}

@@ -18,13 +18,13 @@ export function Categories() {
       }}
     >
       <div className="wrap">
-        <div className="reveal" style={{ marginBottom: 64 }}>
+        <div className="reveal" style={{ marginBottom: 74 }}>
           <div className="eyebrow">Una bandeja, diez tipos</div>
           <h2
             style={{
-              fontSize: 'clamp(32px,4.5vw,56px)',
+              fontSize: 'clamp(37px,4.5vw,64px)',
               lineHeight: 1.04,
-              marginTop: 14,
+              marginTop: 16,
               maxWidth: 760,
             }}
           >
@@ -114,7 +114,7 @@ export function Categories() {
             })}
           </div>
 
-          <div className="reveal cat-preview" data-d="2" style={{ position: 'sticky', top: 110 }}>
+          <div className="reveal cat-preview" data-d="2" style={{ position: 'sticky', top: 'max(80px, calc(50vh - 180px))' }}>
             <div
               className="mono"
               style={{
@@ -246,7 +246,7 @@ export function Categories() {
         .cat-grid {
           display: grid;
           grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-          gap: 48px;
+          gap: 55px;
           align-items: start;
         }
         @media (max-width: 840px) {

@@ -1,15 +1,38 @@
 'use client'
 
 import { useState } from 'react'
-import { cn } from '@/lib/utils/cn'
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
 import { FormularioManualLanzamiento } from './formulario-manual-lanzamiento'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { Categoria } from '@/types/category.types'
 import type { Recordatorio } from '@/types/reminder.types'
 import { SLUGS_LANZAMIENTO } from '@/lib/utils/constants'
 import type { TipoLanzamiento } from '@/types/release.types'
 
 type SlugLanzamiento = (typeof SLUGS_LANZAMIENTO)[number]
+type OrdenLanzamiento = 'fecha-asc' | 'fecha-desc' | 'reciente'
+
+function ordenarRecordatorios(records: Recordatorio[], orden: OrdenLanzamiento): Recordatorio[] {
+  return [...records].sort((a, b) => {
+    if (orden === 'fecha-asc') {
+      const fa = a.fechaVencimiento ? new Date(a.fechaVencimiento).getTime() : Infinity
+      const fb = b.fechaVencimiento ? new Date(b.fechaVencimiento).getTime() : Infinity
+      return fa - fb
+    }
+    if (orden === 'fecha-desc') {
+      const fa = a.fechaVencimiento ? new Date(a.fechaVencimiento).getTime() : -Infinity
+      const fb = b.fechaVencimiento ? new Date(b.fechaVencimiento).getTime() : -Infinity
+      return fb - fa
+    }
+    return new Date(b.creadoEn).getTime() - new Date(a.creadoEn).getTime()
+  })
+}
 
 interface DatosCategoria {
   cat: Categoria
@@ -52,6 +75,7 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
   })
 
   const [tabActiva, setTabActiva] = useState<string>('todos')
+  const [ordenamiento, setOrdenamiento] = useState<OrdenLanzamiento>('fecha-asc')
 
   const categoriaActiva = datosOrdenados.find((d) => d.cat.slug === tabActiva)
   const tipoActivo = SLUG_A_TIPO[tabActiva as SlugLanzamiento]
@@ -63,12 +87,27 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Eyebrow + manual trigger */}
+      {/* Eyebrow + ordenamiento + manual trigger */}
       <div className="flex items-center justify-between gap-4 pt-2">
         <span className="font-mono text-[10.5px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]">
           Mis lanzamientos seguidos
         </span>
-        <FormularioManualLanzamiento tipoInicial={tipoActivo} />
+        <div className="flex items-center gap-2">
+          <Select
+            value={ordenamiento}
+            onValueChange={(v) => setOrdenamiento(v as OrdenLanzamiento)}
+          >
+            <SelectTrigger className="w-44 h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fecha-asc">Mas proximo primero</SelectItem>
+              <SelectItem value="fecha-desc">Mas lejano primero</SelectItem>
+              <SelectItem value="reciente">Creacion reciente</SelectItem>
+            </SelectContent>
+          </Select>
+          <FormularioManualLanzamiento tipoInicial={tipoActivo} />
+        </div>
       </div>
 
       {/* Segmented Tab pills */}
@@ -102,7 +141,7 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
       <div className="pt-2">
         {tabActiva === 'todos' ? (
           <ListaRecordatorios
-            recordatorios={todos}
+            recordatorios={ordenarRecordatorios(todos, ordenamiento)}
             categorias={categorias}
             mostrarCategoria
             mensajeVacio="Sin lanzamientos. Usa el chat o agrega uno manualmente."
@@ -110,7 +149,7 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
         ) : (
           categoriaActiva && (
             <ListaRecordatorios
-              recordatorios={categoriaActiva.recordatorios}
+              recordatorios={ordenarRecordatorios(categoriaActiva.recordatorios, ordenamiento)}
               categorias={categorias}
               mensajeVacio={`Sin lanzamientos en ${categoriaActiva.cat.nombre}. Usa el chat o agrega uno manualmente.`}
             />
