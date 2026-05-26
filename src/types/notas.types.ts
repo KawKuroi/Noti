@@ -15,7 +15,7 @@ export interface CuadernoConPrevia {
   totalEntradas: number
 }
 
-export type TipoAdjunto = 'imagen' | 'audio' | 'documento' | 'video'
+export type TipoAdjunto = 'imagen' | 'audio' | 'documento' | 'video' | 'otros'
 
 export interface AdjuntoNota {
   id: string

@@ -1,11 +1,10 @@
 'use client'
 
-import { formatDistanceToNow } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { VisorImagen } from './visor-imagen'
 import { ReproductorAudio } from './reproductor-audio'
 import { VisorDocumento } from './visor-documento'
 import { ReproductorVideo } from './reproductor-video'
+import { formatearMomentoNota } from '@/lib/utils/date.utils'
 import type { AdjuntoNota } from '@/types/notas.types'
 
 interface Props {
@@ -14,10 +13,7 @@ interface Props {
 }
 
 export function BurbujaAdjunto({ adjunto, onEliminar }: Props) {
-  const horaRelativa = formatDistanceToNow(new Date(adjunto.creadoEn), {
-    locale: es,
-    addSuffix: true,
-  })
+  const momento = formatearMomentoNota(new Date(adjunto.creadoEn))
 
   function manejarEliminar() {
     onEliminar(adjunto.id)
@@ -39,7 +35,7 @@ export function BurbujaAdjunto({ adjunto, onEliminar }: Props) {
           onEliminar={manejarEliminar}
         />
       )}
-      {adjunto.tipo === 'documento' && (
+      {(adjunto.tipo === 'documento' || adjunto.tipo === 'otros') && (
         <VisorDocumento
           src={adjunto.url}
           nombreArchivo={adjunto.nombreArchivo}
@@ -54,7 +50,7 @@ export function BurbujaAdjunto({ adjunto, onEliminar }: Props) {
           onEliminar={manejarEliminar}
         />
       )}
-      <span className="text-xs text-gray-400">{horaRelativa}</span>
+      <span className="text-xs text-gray-400">{momento}</span>
     </div>
   )
 }

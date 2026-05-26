@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Loader2, Mic, Search, Sparkles, Square, X } from 'lucide-react'
 import { useAsistente } from './asistente-provider'
 import { CandidatoCard } from './candidato-card'
@@ -15,15 +15,14 @@ const EJEMPLOS = [
   'Cuándo sale el nuevo Zelda',
 ]
 
-interface PaletteContenidoProps {
-  // Permite que el contenedor padre (BarraAsistente) reciba el ref del input
-  // para auto-focus al expandir.
+interface BarraInputAsistenteProps {
   inputRef: React.RefObject<HTMLInputElement | null>
 }
 
-// Render puro del panel del asistente (sin overlay full-screen). El padre lo
-// posiciona como dropdown debajo de la barra "¿Qué te recuerdo o agendo?".
-export function PaletteContenido({ inputRef }: PaletteContenidoProps) {
+// Header/anchor del asistente: mismo padding y estructura que el boton cerrado de
+// BarraAsistente, pero con input real + acciones (mic, buscar, limpiar, cerrar).
+// Mantiene la misma apariencia para que no haya salto visual al abrir.
+export function BarraInputAsistente({ inputRef }: BarraInputAsistenteProps) {
   const {
     cerrar,
     query,
@@ -31,16 +30,10 @@ export function PaletteContenido({ inputRef }: PaletteContenidoProps) {
     estado,
     extraccion,
     candidatos,
-    error,
     procesar,
     confirmarCandidato,
-    confirmarRecordatorioEditado,
-    construirInicialFormulario,
     limpiar,
   } = useAsistente()
-
-  const [indiceSeleccionado, setIndiceSeleccionado] = useState(0)
-  const [mostrarFormManual, setMostrarFormManual] = useState(false)
 
   const alTranscribir = useCallback(
     (texto: string) => {
@@ -52,10 +45,11 @@ export function PaletteContenido({ inputRef }: PaletteContenidoProps) {
   const { estadoGrabacion, segundosGrabando, errorGrabacion, iniciarGrabacion, detenerGrabacion } =
     useAudioRecorder(alTranscribir)
 
-  useEffect(() => {
-    setIndiceSeleccionado(0)
-    setMostrarFormManual(false)
-  }, [candidatos, extraccion])
+  const cargando = estado === 'extrayendo' || estado === 'buscando'
+  const creando = estado === 'creando'
+  const hayResultado = !!extraccion || candidatos.length > 0
+  const puedeBuscar = query.trim().length >= 3 && !cargando && !creando
+  const micDeshabilitado = cargando || creando || estadoGrabacion === 'procesando'
 
   const ejecutarBusqueda = useCallback(() => {
     if (query.trim().length < 3) return
@@ -69,9 +63,9 @@ export function PaletteContenido({ inputRef }: PaletteContenidoProps) {
       return
     }
     if (e.key === 'Enter') {
-      if (candidatos.length > 0 && !mostrarFormManual) {
+      if (candidatos.length > 0) {
         e.preventDefault()
-        const c = candidatos[indiceSeleccionado]
+        const c = candidatos[0]
         if (c && c.fechaLanzamiento && !c.tba) {
           confirmarCandidato(c, c.fechaLanzamiento, c.fuente)
         }
@@ -79,52 +73,13 @@ export function PaletteContenido({ inputRef }: PaletteContenidoProps) {
       }
       e.preventDefault()
       ejecutarBusqueda()
-      return
-    }
-    if (candidatos.length === 0 || mostrarFormManual) return
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setIndiceSeleccionado((i) => Math.min(i + 1, candidatos.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setIndiceSeleccionado((i) => Math.max(i - 1, 0))
     }
   }
-
-  const cargando = estado === 'extrayendo' || estado === 'buscando'
-  const creando = estado === 'creando'
-  const hayResultado = !!extraccion || candidatos.length > 0
-  const puedeBuscar = query.trim().length >= 3 && !cargando && !creando
-
-  const usarEjemplo = (texto: string) => {
-    setQuery(texto)
-    procesar(texto)
-  }
-
-  const intencion = extraccion?.intencion
-  const esLanzamiento =
-    intencion === 'lanzamiento_especifico' || intencion === 'lanzamiento_generico'
-
-  const mostrarFormPersonal = intencion === 'recordatorio_personal'
-  const mostrarFormFallbackLanzamiento =
-    esLanzamiento && estado === 'listo' && candidatos.length === 0
-  const mostrarFormDesconocido = intencion === 'desconocido'
-  const mostrarFormVoluntario = esLanzamiento && candidatos.length > 0 && mostrarFormManual
-
-  const mostrarForm =
-    mostrarFormPersonal ||
-    mostrarFormFallbackLanzamiento ||
-    mostrarFormDesconocido ||
-    mostrarFormVoluntario
-
-  const modoForm: 'personal' | 'lanzamiento' = esLanzamiento ? 'lanzamiento' : 'personal'
-
-  const micDeshabilitado = cargando || creando || estadoGrabacion === 'procesando'
 
   return (
-    <div className="flex flex-col max-h-[70vh] bg-card rounded-xl shadow-2xl border border-border overflow-hidden">
-      <header className="flex items-center gap-2 px-4 py-3 border-b border-border">
-        <Sparkles size={16} className="text-purple-600 shrink-0" />
+    <>
+      <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-border bg-card shadow-sm">
+        <Sparkles size={18} className="text-purple-600 shrink-0" />
         <input
           ref={inputRef}
           value={query}
@@ -182,19 +137,78 @@ export function PaletteContenido({ inputRef }: PaletteContenidoProps) {
         <button
           type="button"
           onClick={cerrar}
-          className="text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+          className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
           aria-label="Cerrar"
         >
           <X size={16} />
         </button>
-      </header>
+      </div>
 
       {errorGrabacion && (
-        <div className="px-4 py-2 bg-red-50 border-b border-red-100">
+        <div className="mt-2 px-3 py-2 rounded-md bg-red-50 border border-red-100">
           <p className="text-xs text-red-600">{errorGrabacion}</p>
         </div>
       )}
+    </>
+  )
+}
 
+// Panel desplegable de sugerencias/resultados. Se renderiza posicionado absoluto
+// debajo de la barra para no empujar el contenido inferior.
+export function PanelSugerencias() {
+  const {
+    query,
+    setQuery,
+    estado,
+    extraccion,
+    candidatos,
+    error,
+    procesar,
+    confirmarCandidato,
+    confirmarRecordatorioEditado,
+    construirInicialFormulario,
+    limpiar,
+  } = useAsistente()
+
+  const [indiceSeleccionado, setIndiceSeleccionado] = useState(0)
+  const [mostrarFormManual, setMostrarFormManual] = useState(false)
+
+  useEffect(() => {
+    setIndiceSeleccionado(0)
+    setMostrarFormManual(false)
+  }, [candidatos, extraccion])
+
+  const cargando = estado === 'extrayendo' || estado === 'buscando'
+  const creando = estado === 'creando'
+  const hayResultado = !!extraccion || candidatos.length > 0
+
+  const usarEjemplo = (texto: string) => {
+    setQuery(texto)
+    procesar(texto)
+  }
+
+  const intencion = extraccion?.intencion
+  const esLanzamiento =
+    intencion === 'lanzamiento_especifico' || intencion === 'lanzamiento_generico'
+
+  const mostrarFormPersonal = intencion === 'recordatorio_personal'
+  const mostrarFormFallbackLanzamiento =
+    esLanzamiento && estado === 'listo' && candidatos.length === 0
+  const mostrarFormDesconocido = intencion === 'desconocido'
+  const mostrarFormVoluntario = esLanzamiento && candidatos.length > 0 && mostrarFormManual
+
+  const mostrarForm =
+    mostrarFormPersonal ||
+    mostrarFormFallbackLanzamiento ||
+    mostrarFormDesconocido ||
+    mostrarFormVoluntario
+
+  const modoForm: 'personal' | 'lanzamiento' = esLanzamiento ? 'lanzamiento' : 'personal'
+
+  // Cuando esta cerrado el query y no hay resultados ni carga, muestra solo ejemplos.
+  // Aunque el query sea breve, seguimos mostrando ejemplos para guiar al usuario.
+  return (
+    <div className="flex flex-col max-h-[60vh] bg-card rounded-xl shadow-2xl border border-border overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {!hayResultado && !cargando && (
           <div className="py-2">
@@ -297,9 +311,7 @@ export function PaletteContenido({ inputRef }: PaletteContenidoProps) {
   )
 }
 
-// Compatibilidad: el layout antiguo importaba `CommandPalette`. Lo mantenemos como
-// no-op para no romper imports mientras se migra completamente. Ya no se monta a
-// nivel layout; el dropdown vive dentro de `<BarraAsistente />`.
+// Compatibilidad con el layout antiguo (no se monta a nivel layout).
 export function CommandPalette() {
   return null
 }

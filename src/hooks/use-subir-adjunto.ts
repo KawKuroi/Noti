@@ -9,6 +9,7 @@ const LIMITE_MB: Record<TipoAdjunto, number> = {
   audio: 10,
   documento: 10,
   video: 25,
+  otros: 10,
 }
 
 const MIMES_A_TIPO: [string[], TipoAdjunto][] = [
@@ -25,11 +26,11 @@ const MIMES_A_TIPO: [string[], TipoAdjunto][] = [
   [['video/mp4', 'video/webm'], 'video'],
 ]
 
-export function determinarTipoArchivo(mime: string): TipoAdjunto | null {
+export function determinarTipoArchivo(mime: string): TipoAdjunto {
   for (const [mimes, tipo] of MIMES_A_TIPO) {
     if (mimes.includes(mime)) return tipo
   }
-  return null
+  return 'otros'
 }
 
 interface ResultadoSubirAdjunto {
@@ -46,11 +47,6 @@ export function useSubirAdjunto(
   const subirArchivo = useCallback(
     async (archivo: File) => {
       const tipo = determinarTipoArchivo(archivo.type)
-      if (!tipo) {
-        toast.error('Tipo de archivo no soportado')
-        return
-      }
-
       const limiteMb = LIMITE_MB[tipo]
       if (archivo.size > limiteMb * 1024 * 1024) {
         toast.error(`El archivo supera el limite de ${limiteMb} MB para ${tipo}`)

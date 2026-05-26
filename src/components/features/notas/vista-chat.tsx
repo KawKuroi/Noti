@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowLeft, Pencil, Trash2, Send, Upload } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2, Send, Upload, X, FileText, Image as ImageIcon, Music, Video, File } from 'lucide-react'
 import { useSubirAdjunto } from '@/hooks/use-subir-adjunto'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -45,12 +45,28 @@ interface Props {
   adjuntosIniciales: AdjuntoNota[]
 }
 
+function formatearTamano(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+}
+
+function IconoArchivo({ mime, className }: { mime: string; className?: string }) {
+  if (mime.startsWith('image/')) return <ImageIcon size={20} className={className} />
+  if (mime.startsWith('audio/')) return <Music size={20} className={className} />
+  if (mime.startsWith('video/')) return <Video size={20} className={className} />
+  if (mime === 'application/pdf' || mime === 'text/plain') return <FileText size={20} className={className} />
+  return <File size={20} className={className} />
+}
+
 export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales }: Props) {
   const router = useRouter()
   const [entradas, setEntradas] = useState<NotaEntrada[]>(entradasIniciales)
   const [adjuntos, setAdjuntos] = useState<AdjuntoNota[]>(adjuntosIniciales)
   const [textoNuevo, setTextoNuevo] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [archivoPendiente, setArchivoPendiente] = useState<File | null>(null)
+  const [previewImagen, setPreviewImagen] = useState<string | null>(null)
   const [tituloCuaderno, setTituloCuaderno] = useState(cuaderno.titulo)
   const [renombrando, setRenombrando] = useState(false)
   const [nuevoNombre, setNuevoNombre] = useState(cuaderno.titulo)
@@ -79,21 +95,48 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
     finRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [elementosTimeline])
 
+  // Genera/limpia el ObjectURL del preview de imagen segun el archivo pendiente.
+  useEffect(() => {
+    if (!archivoPendiente || !archivoPendiente.type.startsWith('image/')) {
+      setPreviewImagen(null)
+      return
+    }
+    const url = URL.createObjectURL(archivoPendiente)
+    setPreviewImagen(url)
+    return () => URL.revokeObjectURL(url)
+  }, [archivoPendiente])
+
+  function manejarAdjuntoSubido(adjunto: AdjuntoNota) {
+    setAdjuntos((prev) => [...prev, adjunto])
+  }
+
+  const { subiendo, subirArchivo } = useSubirAdjunto(cuaderno.id, manejarAdjuntoSubido)
+
   const manejarEnviar = useCallback(async () => {
     const limpio = textoNuevo.trim()
-    if (!limpio || enviando) return
+    if (!limpio && !archivoPendiente) return
+    if (enviando || subiendo) return
 
     setEnviando(true)
-    const resultado = await crearEntrada(cuaderno.id, limpio)
-    setEnviando(false)
-
-    if (resultado.ok && resultado.entrada) {
-      setEntradas((prev) => [...prev, resultado.entrada!])
-      setTextoNuevo('')
-    } else {
-      toast.error(resultado.error ?? 'No se pudo enviar el mensaje')
+    try {
+      // Subir archivo primero si hay; luego enviar texto (orden: archivo arriba, texto abajo)
+      if (archivoPendiente) {
+        await subirArchivo(archivoPendiente)
+        setArchivoPendiente(null)
+      }
+      if (limpio) {
+        const resultado = await crearEntrada(cuaderno.id, limpio)
+        if (resultado.ok && resultado.entrada) {
+          setEntradas((prev) => [...prev, resultado.entrada!])
+          setTextoNuevo('')
+        } else {
+          toast.error(resultado.error ?? 'No se pudo enviar el mensaje')
+        }
+      }
+    } finally {
+      setEnviando(false)
     }
-  }, [textoNuevo, enviando, cuaderno.id])
+  }, [textoNuevo, archivoPendiente, enviando, subiendo, cuaderno.id, subirArchivo])
 
   function manejarActualizarEntrada(id: string, contenido: string) {
     setEntradas((prev) => prev.map((e) => (e.id === id ? { ...e, contenido } : e)))
@@ -103,11 +146,13 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
     setEntradas((prev) => prev.filter((e) => e.id !== id))
   }
 
-  function manejarAdjuntoSubido(adjunto: AdjuntoNota) {
-    setAdjuntos((prev) => [...prev, adjunto])
+  function manejarSeleccionArchivo(archivo: File) {
+    setArchivoPendiente(archivo)
   }
 
-  const { subiendo, subirArchivo } = useSubirAdjunto(cuaderno.id, manejarAdjuntoSubido)
+  function quitarArchivoPendiente() {
+    setArchivoPendiente(null)
+  }
 
   function manejarDragEnter(e: React.DragEvent) {
     if (!e.dataTransfer.types.includes(DRAG_ACCEPT)) return
@@ -128,14 +173,16 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
     if (contadorDragRef.current === 0) setArrastrando(false)
   }
 
-  async function manejarDrop(e: React.DragEvent) {
+  function manejarDrop(e: React.DragEvent) {
     e.preventDefault()
     contadorDragRef.current = 0
     setArrastrando(false)
-    const archivos = Array.from(e.dataTransfer.files)
-    for (const archivo of archivos) {
-      await subirArchivo(archivo)
+    const archivo = e.dataTransfer.files[0]
+    if (!archivo) return
+    if (e.dataTransfer.files.length > 1) {
+      toast.info('Solo se admite un archivo a la vez')
     }
+    setArchivoPendiente(archivo)
   }
 
   async function manejarEliminarAdjunto(id: string) {
@@ -174,6 +221,8 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
     }
   }
 
+  const puedeEnviar = (textoNuevo.trim().length > 0 || !!archivoPendiente) && !enviando && !subiendo
+
   return (
     <>
       <div
@@ -181,12 +230,12 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
         onDragEnter={manejarDragEnter}
         onDragOver={manejarDragOver}
         onDragLeave={manejarDragLeave}
-        onDrop={(e) => void manejarDrop(e)}
+        onDrop={manejarDrop}
       >
         {arrastrando && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-indigo-400 bg-indigo-50/90 pointer-events-none">
             <Upload size={32} className="text-indigo-500" />
-            <p className="text-sm font-medium text-indigo-600">Suelta los archivos para adjuntarlos</p>
+            <p className="text-sm font-medium text-indigo-600">Suelta el archivo para adjuntarlo</p>
           </div>
         )}
         {/* Cabecera */}
@@ -253,14 +302,55 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
           <div ref={finRef} />
         </div>
 
+        {/* Chip-preview del archivo pendiente (estilo LLM) */}
+        {archivoPendiente && (
+          <div className="border-t border-border bg-background px-4 pt-3 pb-1 flex-shrink-0">
+            <div className="inline-flex items-center gap-2 bg-muted border border-border rounded-xl pl-2 pr-1 py-1.5 max-w-full">
+              {previewImagen ? (
+                <img
+                  src={previewImagen}
+                  alt={archivoPendiente.name}
+                  className="w-10 h-10 rounded-md object-cover flex-shrink-0"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-md bg-card border border-border flex items-center justify-center flex-shrink-0 text-muted-foreground">
+                  <IconoArchivo mime={archivoPendiente.type} />
+                </div>
+              )}
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-medium text-foreground truncate max-w-[240px]">
+                  {archivoPendiente.name}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {formatearTamano(archivoPendiente.size)}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={quitarArchivoPendiente}
+                className="ml-1 flex-shrink-0 w-6 h-6 rounded-full bg-foreground/80 hover:bg-foreground text-background flex items-center justify-center transition-colors"
+                title="Quitar archivo"
+                aria-label="Quitar archivo"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Zona de entrada */}
-        <div className="border-t border-border bg-background px-4 py-3 flex items-end gap-2 flex-shrink-0">
-          <SubirAdjunto subirArchivo={subirArchivo} subiendo={subiendo} />
+        <div className="border-t border-border bg-background px-4 py-3 flex items-center gap-2 flex-shrink-0">
+          <SubirAdjunto
+            onArchivoSeleccionado={manejarSeleccionArchivo}
+            subiendo={subiendo}
+            deshabilitado={!!archivoPendiente || enviando}
+          />
           <Textarea
             value={textoNuevo}
             onChange={(e) => setTextoNuevo(e.target.value)}
             placeholder="Escribe un mensaje..."
-            className="min-h-[40px] max-h-[120px] resize-none flex-1 text-sm"
+            rows={1}
+            className="h-10 min-h-10 max-h-[120px] resize-none flex-1 text-sm py-2"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
@@ -270,7 +360,7 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
           />
           <Button
             onClick={() => void manejarEnviar()}
-            disabled={!textoNuevo.trim() || enviando}
+            disabled={!puedeEnviar}
             className="flex-shrink-0 h-10 w-10 p-0"
             title="Enviar"
           >

@@ -2,7 +2,11 @@
 
 import { useState } from 'react'
 
-export function FormularioSugerencias() {
+interface Props {
+  onEnviado?: () => void
+}
+
+export function FormularioSugerencias({ onEnviado }: Props = {}) {
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -34,6 +38,9 @@ export function FormularioSugerencias() {
       }
 
       setEnviado(true)
+      if (onEnviado) {
+        setTimeout(onEnviado, 1500)
+      }
     } catch {
       setError('Error de red. Revisa tu conexion e intenta de nuevo.')
     } finally {
@@ -44,8 +51,8 @@ export function FormularioSugerencias() {
   if (enviado) {
     return (
       <div className="text-center py-8">
-        <p className="text-lg font-semibold text-gray-900 mb-2">Gracias por tu sugerencia.</p>
-        <p className="text-sm text-gray-500">La lei con atencion y me ayuda a mejorar Noti.</p>
+        <p className="text-lg font-semibold text-foreground mb-2">Gracias por tu sugerencia.</p>
+        <p className="text-sm text-muted-foreground">La lei con atencion y me ayuda a mejorar Noti.</p>
       </div>
     )
   }
@@ -54,8 +61,8 @@ export function FormularioSugerencias() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre <span className="text-gray-400 font-normal">(opcional)</span>
+          <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-1">
+            Nombre <span className="text-muted-foreground font-normal">(opcional)</span>
           </label>
           <input
             id="nombre"
@@ -63,12 +70,12 @@ export function FormularioSugerencias() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             placeholder="Tu nombre"
-            className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow"
+            className="w-full px-4 py-2.5 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow"
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email <span className="text-gray-400 font-normal">(opcional)</span>
+          <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+            Email <span className="text-muted-foreground font-normal">(opcional)</span>
           </label>
           <input
             id="email"
@@ -76,13 +83,13 @@ export function FormularioSugerencias() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Para que pueda responderte"
-            className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow"
+            className="w-full px-4 py-2.5 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="mensaje" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="mensaje" className="block text-sm font-medium text-foreground mb-1">
           Sugerencia
         </label>
         <textarea
@@ -91,8 +98,7 @@ export function FormularioSugerencias() {
           value={mensaje}
           onChange={(e) => setMensaje(e.target.value)}
           placeholder="Que mejorarias o agregarias a Noti?"
-          required
-          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow resize-none"
+          className="w-full px-4 py-2.5 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow resize-none"
         />
       </div>
 
@@ -103,7 +109,7 @@ export function FormularioSugerencias() {
       <button
         type="submit"
         disabled={enviando}
-        className="w-full sm:w-auto px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full sm:w-auto px-6 py-2.5 bg-foreground text-background text-sm font-medium rounded-xl hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {enviando ? 'Enviando...' : 'Enviar sugerencia'}
       </button>

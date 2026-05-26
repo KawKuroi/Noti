@@ -6,20 +6,21 @@ import { Button } from '@/components/ui/button'
 import { useGrabadorAudioAdjunto } from '@/hooks/use-grabador-audio-adjunto'
 
 interface Props {
-  subirArchivo: (archivo: File) => Promise<void>
+  onArchivoSeleccionado: (archivo: File) => void
   subiendo: boolean
+  deshabilitado?: boolean
 }
 
-export function SubirAdjunto({ subirArchivo, subiendo }: Props) {
+export function SubirAdjunto({ onArchivoSeleccionado, subiendo, deshabilitado }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const manejarBlobAudio = useCallback(
     (blob: Blob, mimeType: string) => {
       const extension = mimeType.includes('ogg') ? 'ogg' : 'webm'
       const archivo = new File([blob], `audio-${Date.now()}.${extension}`, { type: mimeType })
-      void subirArchivo(archivo)
+      onArchivoSeleccionado(archivo)
     },
-    [subirArchivo],
+    [onArchivoSeleccionado],
   )
 
   const { grabando, segundosGrabando, errorGrabacion, iniciarGrabacion, detenerGrabacion } =
@@ -27,7 +28,7 @@ export function SubirAdjunto({ subirArchivo, subiendo }: Props) {
 
   function manejarSeleccion(e: React.ChangeEvent<HTMLInputElement>) {
     const archivo = e.target.files?.[0]
-    if (archivo) void subirArchivo(archivo)
+    if (archivo) onArchivoSeleccionado(archivo)
     e.target.value = ''
   }
 
@@ -41,7 +42,7 @@ export function SubirAdjunto({ subirArchivo, subiendo }: Props) {
 
   if (subiendo) {
     return (
-      <div className="flex items-center gap-1 text-indigo-500">
+      <div className="flex items-center gap-1 text-indigo-500 h-10 px-2">
         <Loader2 size={15} className="animate-spin" />
         <span className="text-xs">Subiendo...</span>
       </div>
@@ -53,7 +54,7 @@ export function SubirAdjunto({ subirArchivo, subiendo }: Props) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,audio/mpeg,audio/ogg,audio/wav,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,video/mp4,video/webm"
+        accept="*/*"
         className="hidden"
         onChange={manejarSeleccion}
       />
@@ -61,24 +62,26 @@ export function SubirAdjunto({ subirArchivo, subiendo }: Props) {
         variante="fantasma"
         tamano="icono"
         onClick={() => inputRef.current?.click()}
-        className="h-8 w-8 text-gray-400 hover:text-gray-700"
+        disabled={deshabilitado}
+        className="h-10 w-10 text-gray-400 hover:text-gray-700 disabled:opacity-40"
         title="Adjuntar archivo"
       >
-        <Paperclip size={15} />
+        <Paperclip size={16} />
       </Button>
 
       <Button
         variante="fantasma"
         tamano="icono"
         onClick={alternarGrabacion}
+        disabled={deshabilitado && !grabando}
         className={
           grabando
-            ? 'h-8 w-8 text-red-500 hover:text-red-600'
-            : 'h-8 w-8 text-gray-400 hover:text-gray-700'
+            ? 'h-10 w-10 text-red-500 hover:text-red-600'
+            : 'h-10 w-10 text-gray-400 hover:text-gray-700 disabled:opacity-40'
         }
         title={grabando ? `Detener (${segundosGrabando}s)` : 'Grabar audio'}
       >
-        {grabando ? <MicOff size={15} /> : <Mic size={15} />}
+        {grabando ? <MicOff size={16} /> : <Mic size={16} />}
       </Button>
 
       {errorGrabacion && (

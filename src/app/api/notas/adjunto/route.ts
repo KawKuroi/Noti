@@ -6,7 +6,7 @@ import { recordatorios } from '@/db/schema'
 import { crearClienteServidor } from '@/lib/supabase/server'
 import type { TipoAdjunto } from '@/types/notas.types'
 
-const MIMES_POR_TIPO: Record<TipoAdjunto, string[]> = {
+const MIMES_POR_TIPO: Record<Exclude<TipoAdjunto, 'otros'>, string[]> = {
   imagen: ['image/jpeg', 'image/png', 'image/webp'],
   audio: ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/webm'],
   documento: [
@@ -22,9 +22,10 @@ const LIMITE_MB_POR_TIPO: Record<TipoAdjunto, number> = {
   audio: 10,
   documento: 10,
   video: 25,
+  otros: 10,
 }
 
-const TIPOS_VALIDOS: TipoAdjunto[] = ['imagen', 'audio', 'documento', 'video']
+const TIPOS_VALIDOS: TipoAdjunto[] = ['imagen', 'audio', 'documento', 'video', 'otros']
 
 interface DatosClientePayload {
   cuadernoId: string
@@ -67,8 +68,12 @@ export async function POST(request: Request): Promise<NextResponse> {
 
         if (!filaCuaderno[0]) throw new Error('Cuaderno no encontrado')
 
+        // Para 'otros' no restringimos por mime (cualquier tipo permitido).
+        const allowedContentTypes =
+          datos.tipo === 'otros' ? undefined : MIMES_POR_TIPO[datos.tipo]
+
         return {
-          allowedContentTypes: MIMES_POR_TIPO[datos.tipo],
+          allowedContentTypes,
           maximumSizeInBytes: limiteMb * 1024 * 1024,
           tokenPayload: JSON.stringify({
             ...datos,

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { Sparkles } from 'lucide-react'
 import { useAsistente } from './asistente-provider'
-import { PaletteContenido } from './command-palette'
+import { BarraInputAsistente, PanelSugerencias } from './command-palette'
 
 export function BarraAsistente() {
   const { abrir, cerrar, abierto, registrarBarra } = useAsistente()
@@ -41,7 +41,7 @@ export function BarraAsistente() {
         <button
           type="button"
           onClick={abrir}
-          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-border bg-card shadow-sm hover:border-border/80 hover:shadow-md transition-all text-left group"
+          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-border bg-card shadow-sm hover:border-border/80 hover:shadow-md transition-colors text-left group"
         >
           <Sparkles size={18} className="text-purple-600 shrink-0" />
           <span className="flex-1 text-sm text-muted-foreground group-hover:text-foreground/70 transition-colors">
@@ -52,7 +52,12 @@ export function BarraAsistente() {
           </kbd>
         </button>
       ) : (
-        <PaletteContenido inputRef={inputRef} />
+        <>
+          <BarraInputAsistente inputRef={inputRef} />
+          <div className="absolute top-full left-0 right-0 mt-2 z-40">
+            <PanelSugerencias />
+          </div>
+        </>
       )}
     </div>
   )

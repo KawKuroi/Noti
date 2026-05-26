@@ -3,11 +3,10 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Pencil, Trash2, Check, X } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { actualizarEntrada, eliminarEntrada } from '@/lib/actions/notas.actions'
+import { formatearMomentoNota } from '@/lib/utils/date.utils'
 import type { NotaEntrada } from '@/types/notas.types'
 
 interface Props {
@@ -21,7 +20,7 @@ export function BurbujaEntrada({ entrada, onActualizar, onEliminar }: Props) {
   const [textoEdit, setTextoEdit] = useState(entrada.contenido)
   const [cargando, setCargando] = useState(false)
 
-  const hora = format(new Date(entrada.creadoEn), 'HH:mm', { locale: es })
+  const momento = formatearMomentoNota(new Date(entrada.creadoEn))
 
   async function manejarGuardar() {
     const limpio = textoEdit.trim()
@@ -112,7 +111,7 @@ export function BurbujaEntrada({ entrada, onActualizar, onEliminar }: Props) {
             <div className="bg-indigo-500 text-white text-sm rounded-2xl rounded-br-md px-4 py-2.5 leading-relaxed break-words">
               {entrada.contenido}
             </div>
-            <span className="text-xs text-gray-400 px-1">{hora}</span>
+            <span className="text-xs text-gray-400 px-1">{momento}</span>
           </div>
         </>
       )}

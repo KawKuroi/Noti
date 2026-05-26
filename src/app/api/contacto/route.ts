@@ -15,6 +15,11 @@ export async function POST(req: Request) {
     })
   }
 
+  if (!process.env.RESEND_API_KEY) {
+    console.error('[contacto] RESEND_API_KEY no configurada')
+    return new Response('Servicio no configurado', { status: 503 })
+  }
+
   let body: unknown
   try {
     body = await req.json()
@@ -39,15 +44,29 @@ export async function POST(req: Request) {
 
   const destinatario = process.env.CONTACT_DESTINATION_EMAIL
   if (!destinatario) {
+    console.error('[contacto] CONTACT_DESTINATION_EMAIL no configurada')
     return new Response('Servicio no configurado', { status: 503 })
   }
 
-  await resend.emails.send({
-    from: 'Noti Sugerencias <onboarding@resend.dev>',
-    to: destinatario,
-    subject: `Sugerencia de ${nombre}`,
-    text: lineas.join('\n'),
-  })
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Noti Sugerencias <onboarding@resend.dev>',
+      to: destinatario,
+      replyTo: emailRemitente ?? undefined,
+      subject: `Sugerencia de ${nombre}`,
+      text: lineas.join('\n'),
+    })
 
-  return Response.json({ ok: true })
+    if (error) {
+      console.error('[contacto] Resend rechazo el envio:', error)
+      const detalle = error.message ?? 'error desconocido'
+      return new Response(`Resend: ${detalle}`, { status: 502 })
+    }
+
+    console.log('[contacto] Email enviado, id=', data?.id)
+    return Response.json({ ok: true, id: data?.id })
+  } catch (e) {
+    console.error('[contacto] Excepcion al enviar:', e)
+    return new Response('Error al enviar el correo', { status: 502 })
+  }
 }

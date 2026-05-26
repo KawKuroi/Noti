@@ -2,6 +2,7 @@ import {
   isToday,
   isTomorrow,
   isThisWeek,
+  isYesterday,
   startOfDay,
   endOfDay,
   addWeeks,
@@ -12,6 +13,7 @@ import {
   getMonth,
   getDate,
   getDay,
+  getYear,
   format,
   isBefore,
   isAfter,
@@ -68,7 +70,8 @@ export interface ReglaRecurrencia {
 }
 
 export function parsearReglaRecurrencia(regla: string): ReglaRecurrencia | null {
-  if (regla === 'yearly') return { tipo: 'yearly' }
+  // Acepta tanto "yearly" como "yearly:DD-MM" (el dia/mes se toma de la ancla).
+  if (regla === 'yearly' || regla.startsWith('yearly:')) return { tipo: 'yearly' }
 
   if (regla.startsWith('weekly:')) {
     const partes = regla.slice(7).split(',').map(Number).filter(Boolean)
@@ -182,7 +185,8 @@ export function expandirOcurrenciasEnRango(
       ? rec.fechaVencimiento
       : new Date(rec.fechaVencimiento)
 
-    // Expandir desde el inicio del rango hasta el fin
+    // Defensa en profundidad: evitar duplicados del mismo dia si la regla no avanza
+    const insertadas = new Set<number>()
     let cursor = startOfDay(inicio)
     const maxIteraciones = 400 // tope de seguridad (rango max ~1 año con recurrencia diaria)
 
@@ -192,7 +196,11 @@ export function expandirOcurrenciasEnRango(
       if (isAfter(ocurrencia, endOfDay(fin))) break
 
       if (!isBefore(ocurrencia, startOfDay(inicio))) {
-        resultado.push({ ...rec, fechaVencimiento: ocurrencia })
+        const clave = startOfDay(ocurrencia).getTime()
+        if (!insertadas.has(clave)) {
+          insertadas.add(clave)
+          resultado.push({ ...rec, fechaVencimiento: ocurrencia })
+        }
       }
 
       // Avanzar cursor al dia siguiente de la ocurrencia, garantizando avance estricto
@@ -203,6 +211,17 @@ export function expandirOcurrenciasEnRango(
   }
 
   return resultado
+}
+
+// Formato para timestamps de burbujas de nota: hoy solo hora, ayer "Ayer HH:mm",
+// resto del año "d MMM HH:mm", años anteriores "d MMM yyyy HH:mm".
+export function formatearMomentoNota(fecha: Date): string {
+  if (isToday(fecha)) return format(fecha, 'HH:mm')
+  if (isYesterday(fecha)) return `Ayer ${format(fecha, 'HH:mm')}`
+  const mismoAno = getYear(fecha) === getYear(new Date())
+  return mismoAno
+    ? format(fecha, "d MMM HH:mm", { locale: es })
+    : format(fecha, "d MMM yyyy HH:mm", { locale: es })
 }
 
 export function formatearMesAno(fecha: Date): string {

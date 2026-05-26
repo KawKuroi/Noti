@@ -115,7 +115,7 @@ export const notasAdjuntos = pgTable(
     cuadernoId: uuid('cuaderno_id')
       .notNull()
       .references(() => recordatorios.id, { onDelete: 'cascade' }),
-    tipo: text('tipo').notNull().$type<'imagen' | 'audio' | 'documento' | 'video'>(),
+    tipo: text('tipo').notNull().$type<'imagen' | 'audio' | 'documento' | 'video' | 'otros'>(),
     url: text('url').notNull(),
     nombreArchivo: text('nombre_archivo').notNull(),
     mime: text('mime').notNull(),
