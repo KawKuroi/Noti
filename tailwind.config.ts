@@ -9,6 +9,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -44,12 +48,16 @@ const config: Config = {
           foreground: 'hsl(var(--card-foreground))',
         },
         categoria: {
-          peliculas: '#7C3AED',
-          estudio: '#0284C7',
-          clases: '#059669',
-          cumpleanos: '#DB2777',
-          tareas: '#D97706',
-          eventos: '#DC2626',
+          peliculas: '#dc2626',
+          series: '#7c3aed',
+          juegos: '#16a34a',
+          musica: '#ea580c',
+          libros: '#2563eb',
+          notas: '#d97706',
+          estudio: '#0ea5e9',
+          cumple: '#db2777',
+          pendientes: '#f59e0b',
+          eventos: '#14b8a6',
         },
       },
       borderRadius: {

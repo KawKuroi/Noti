@@ -24,6 +24,10 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+
+    /* Tokens de acento del sistema de diseño */
+    --app-accent: #0a0a0a;
+    --app-accent-ink: #ffffff;
   }
 }
 
@@ -48,6 +52,9 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    --app-accent: #fafafa;
+    --app-accent-ink: #0a0a0a;
   }
 }
 
@@ -57,5 +64,368 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: 'ss01', 'cv11';
   }
+  h1 {
+    letter-spacing: -0.028em;
+    font-weight: 500;
+  }
+  h2 {
+    letter-spacing: -0.025em;
+    font-weight: 500;
+  }
+  h3,
+  h4 {
+    font-weight: 500;
+  }
+  p {
+    margin: 0;
+  }
+}
+
+/* Utilidad mono global (disponible en toda la app, no solo en landing) */
+.mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+
+/* Animaciones globales del sistema de diseño */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.2;
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Reveal on scroll — aplica fuera de landing-root también */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+.reveal[data-d='1'] { transition-delay: 60ms; }
+.reveal[data-d='2'] { transition-delay: 120ms; }
+.reveal[data-d='3'] { transition-delay: 180ms; }
+.reveal[data-d='4'] { transition-delay: 240ms; }
+.reveal[data-d='5'] { transition-delay: 300ms; }
+
+/* ---------------------------------------------------------------------------
+ * Landing design tokens (replica 1:1 de Landing/Noti.html)
+ * Independientes de shadcn: prefieren --ink/--bg/--line sobre los HSL de arriba.
+ * ------------------------------------------------------------------------- */
+@layer base {
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #fafafa;
+    --bg-elev: #ffffff;
+    --ink: #0a0a0a;
+    --ink-2: rgba(10, 10, 10, 0.62);
+    --ink-3: rgba(10, 10, 10, 0.42);
+    --ink-4: rgba(10, 10, 10, 0.28);
+    --line: rgba(10, 10, 10, 0.08);
+    --line-2: rgba(10, 10, 10, 0.14);
+    --landing-accent: #0a0a0a;
+    --landing-accent-ink: #ffffff;
+    --landing-radius: 14px;
+    --landing-radius-sm: 10px;
+    --landing-maxw: 1180px;
+
+    --cat-peliculas: #dc2626;
+    --cat-series: #7c3aed;
+    --cat-juegos: #16a34a;
+    --cat-musica: #ea580c;
+    --cat-libros: #2563eb;
+    --cat-notas: #d97706;
+    --cat-estudio: #0ea5e9;
+    --cat-cumple: #db2777;
+    --cat-pendientes: #f59e0b;
+    --cat-eventos: #14b8a6;
+
+    --pad-section: 120px;
+    --gap: 20px;
+  }
+
+  .dark {
+    --bg: #0a0a0a;
+    --bg-soft: #0f0f0f;
+    --bg-elev: #141414;
+    --ink: #fafafa;
+    --ink-2: rgba(250, 250, 250, 0.66);
+    --ink-3: rgba(250, 250, 250, 0.42);
+    --ink-4: rgba(250, 250, 250, 0.28);
+    --line: rgba(250, 250, 250, 0.08);
+    --line-2: rgba(250, 250, 250, 0.16);
+    --landing-accent-ink: #0a0a0a;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Landing utilities and primitives
+ * ------------------------------------------------------------------------- */
+.landing-root {
+  background: var(--bg);
+  color: var(--ink);
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+.landing-root .wrap {
+  max-width: var(--landing-maxw);
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+@media (max-width: 720px) {
+  .landing-root .wrap {
+    padding: 0 20px;
+  }
+}
+
+.landing-root .mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.landing-root a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.landing-root h1,
+.landing-root h2,
+.landing-root h3,
+.landing-root h4 {
+  margin: 0;
+  letter-spacing: -0.028em;
+  font-weight: 500;
+}
+
+.landing-root h2 {
+  letter-spacing: -0.03em;
+}
+
+.landing-root p {
+  margin: 0;
+}
+
+/* Reveal-on-scroll */
+.landing-root .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.landing-root .reveal.in {
+  opacity: 1;
+  transform: none;
+}
+.landing-root .reveal[data-d='1'] {
+  transition-delay: 60ms;
+}
+.landing-root .reveal[data-d='2'] {
+  transition-delay: 120ms;
+}
+.landing-root .reveal[data-d='3'] {
+  transition-delay: 180ms;
+}
+.landing-root .reveal[data-d='4'] {
+  transition-delay: 240ms;
+}
+.landing-root .reveal[data-d='5'] {
+  transition-delay: 300ms;
+}
+
+/* Buttons */
+.landing-root .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.landing-root .btn-primary {
+  background: var(--landing-accent);
+  color: var(--landing-accent-ink);
+}
+
+.landing-root .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -8px color-mix(in oklab, var(--landing-accent) 50%, transparent);
+}
+
+.landing-root .btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line-2);
+}
+
+.landing-root .btn-ghost:hover {
+  background: var(--bg-soft);
+  border-color: var(--ink-4);
+}
+
+/* Eyebrow tag */
+.landing-root .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.landing-root .eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--landing-accent);
+}
+
+/* Card */
+.landing-root .card-landing {
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: var(--landing-radius);
+}
+
+/* Sticky nav glass */
+.landing-root .nav-glass {
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  background: color-mix(in oklab, var(--bg) 70%, transparent);
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.landing-root .nav-glass.scrolled {
+  border-bottom-color: var(--line);
+}
+
+/* Subtle dot-grid background */
+.landing-root .dotgrid {
+  background-image: radial-gradient(var(--line-2) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: -1px -1px;
+}
+
+.landing-root :focus-visible {
+  outline: 2px solid var(--landing-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.landing-root ::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.landing-root .noscroll::-webkit-scrollbar {
+  display: none;
+}
+.landing-root .noscroll {
+  scrollbar-width: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Landing animations
+ * ------------------------------------------------------------------------- */
+@keyframes landing-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes landing-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.2;
+  }
+}
+
+@keyframes landing-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes landing-notif-stack-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  8% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  85%,
+  100% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+}
+
+.landing-root .anim-blink {
+  animation: landing-blink 1s steps(2) infinite;
+}
+.landing-root .anim-pulse {
+  animation: landing-pulse 2.4s ease-in-out infinite;
+}
+.landing-root .anim-float-in {
+  animation: landing-float-in 0.8s both;
 }
