@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { CATEGORIAS_LANDING } from './data'
 
 export function Categories() {
@@ -8,40 +8,8 @@ export function Categories() {
   const activa = CATEGORIAS_LANDING[hover] ?? CATEGORIAS_LANDING[0]
   const IconoActivo = activa.icono
 
-  const containerRef = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    // IntersectionObserver para el comportamiento scroll-driven
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Encontrar la entrada que está más intersectando, o si pasa el umbral
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = Number(entry.target.getAttribute('data-index'))
-            if (!isNaN(index)) {
-              setHover(index)
-            }
-          }
-        })
-      },
-      {
-        // Se activa cuando el elemento está en la franja central de la pantalla
-        rootMargin: '-25% 0px -40% 0px',
-        threshold: 0.5,
-      }
-    )
-
-    if (containerRef.current) {
-      const rows = containerRef.current.querySelectorAll('.cat-row')
-      rows.forEach((row) => observer.observe(row))
-    }
-
-    return () => observer.disconnect()
-  }, [])
-
   return (
     <section
-      ref={containerRef}
       style={{
         paddingTop: 'var(--pad-section)',
         paddingBottom: 'var(--pad-section)',
@@ -73,8 +41,7 @@ export function Categories() {
               return (
                 <div
                   key={c.slug}
-                  className="cat-row"
-                  data-index={i}
+                  onMouseEnter={() => setHover(i)}
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'auto auto 1fr auto',
@@ -162,11 +129,11 @@ export function Categories() {
             </div>
             <div
               key={activa.slug}
-              className="card-landing anim-float-in"
+              className="card-landing"
               style={{
                 padding: 28,
                 borderRadius: 18,
-                animationDuration: '.4s',
+                animation: 'landing-float-in .4s both',
                 boxShadow: '0 30px 80px -40px rgba(10,10,10,.18)',
               }}
             >

@@ -9,7 +9,7 @@ import { REPO_URL } from './data'
 export function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [montado, setMontado] = useState(false)
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
 
   useEffect(() => {
     setMontado(true)
@@ -19,7 +19,7 @@ export function Nav() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const oscuro = montado && theme === 'dark'
+  const oscuro = montado && resolvedTheme === 'dark'
 
   return (
     <nav
