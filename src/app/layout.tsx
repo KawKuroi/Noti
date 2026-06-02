@@ -61,7 +61,7 @@ export default async function LayoutRaiz({ children }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning className={geist.variable}>
       <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+        <link rel="apple-touch-icon" href="/icons/icon-180.png" />
       </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>

@@ -11,6 +11,7 @@ import { FormularioResumenDiario } from '@/components/features/settings/formular
 import { FormularioAutoDeleteTareas } from '@/components/features/settings/formulario-auto-delete-tareas'
 import { FormularioApariencia } from '@/components/features/settings/formulario-apariencia'
 import { FormularioIdioma } from '@/components/features/settings/formulario-idioma'
+import { FormularioInstalacion } from '@/components/features/settings/formulario-instalacion'
 import { BotonSugerencias } from '@/components/features/settings/boton-sugerencias'
 import { BotonCerrarSesion } from '@/components/features/settings/boton-cerrar-sesion'
 import { BotonBorrarCuenta } from '@/components/features/settings/boton-borrar-cuenta'
@@ -102,6 +103,10 @@ export default async function PaginaSettings() {
 
       <ConfigCard titulo="Tareas completadas" descripcion="Cuanto tiempo se conservan las tareas marcadas como completadas antes de eliminarse automaticamente.">
         <FormularioAutoDeleteTareas valorActual={perfil?.autoEliminarTareasCompletadasDias ?? null} />
+      </ConfigCard>
+
+      <ConfigCard titulo="Aplicacion" descripcion="Instala Noti como app nativa para recibir notificaciones aunque el navegador este cerrado.">
+        <FormularioInstalacion />
       </ConfigCard>
 
       <ConfigCard titulo="Idioma" descripcion="Elige el idioma de la interfaz.">

@@ -12,7 +12,17 @@ El detalle de sub-fases de 25 vive en `Docs/ROADMAP.md`.
 
 ## Fase 25 — notas de implementacion
 
-Auditoria previa: el Service Worker y el manifest ya cubren ~70% del trabajo. Falta: iconos PNG maskables, hook `use-pwa-install`, banner `<InstallPrompt />`, seccion en `/settings`, i18n namespace `Instalacion`, y ajustar `showNotification` en el SW (SVG → PNG para que Windows lo renderice en el centro de notificaciones).
+Sub-fases completadas en esta sesion:
+- 25.1 PNGs generados: icon-192.png, icon-512.png, icon-maskable-512.png, icon-180.png (via sharp-cli desde icon-512.svg)
+- 25.2 Hook `src/hooks/use-pwa-install.ts` creado
+- 25.3 Componente `src/components/features/install-prompt.tsx` creado (3 ramas: nativo / iOS 16.4+ / iOS antiguo)
+- 25.4 Seccion "Aplicacion" en `/settings` con `formulario-instalacion.tsx`
+- 25.5 Namespace `Instalacion` en `messages/es.json` y `messages/en.json`; SW ajustado (SVG → PNG en icon/badge)
+- manifest.json y layout.tsx actualizados con PNGs
+
+Pendiente manual:
+- Tomar screenshots reales (wide 1280x720, mobile 750x1334) y colocarlas en `public/screenshots/`, luego poblar `screenshots[]` en manifest.json
+- Verificacion Lighthouse PWA (sub-fase 25.6): debe pasar a "Installable"
 
 ## Pendientes manuales bloqueantes
 

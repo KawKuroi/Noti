@@ -22,6 +22,19 @@
     "nuevo": "New",
     "confirmar": "Confirm"
   },
+  "Instalacion": {
+    "titulo": "Application",
+    "descripcion": "Install Noti as a native app to receive notifications even when the browser is closed.",
+    "botonInstalar": "Install Noti",
+    "botonComoInstalar": "How to install",
+    "iosTitulo": "Install Noti on iOS",
+    "iosPaso1": "Tap the share button at the bottom of Safari.",
+    "iosPaso2": "Scroll down and tap Add to Home Screen.",
+    "iosPaso3": "Confirm by tapping Add in the top right corner.",
+    "iosVersionAntigua": "To install Noti and receive notifications on iOS, update to iOS 16.4 or later.",
+    "yaInstalada": "Already installed on this device",
+    "instaladaExitosamente": "Noti installed"
+  },
   "Settings": {
     "titulo": "Settings",
     "subtitulo": "Manage your notification preferences",

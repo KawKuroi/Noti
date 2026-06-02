@@ -170,8 +170,8 @@ self.addEventListener('push', (evento) => {
 
   const opciones = {
     body: datos.body,
-    icon: '/icons/icon-192.svg',
-    badge: '/icons/icon-192.svg',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
     data: datos.data,
     tag: datos.data?.reminderId ?? 'noti-general',
     renotify: true,

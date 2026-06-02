@@ -9,6 +9,7 @@ import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
 import { NotificationPrompt } from '@/components/features/notification-prompt'
+import { InstallPrompt } from '@/components/features/install-prompt'
 import { RecoveryToast } from '@/components/features/recovery-toast'
 import { SaludoDinamico } from '@/components/features/inicio/saludo-dinamico'
 import { BarraAsistente } from '@/components/features/asistente'
@@ -77,6 +78,7 @@ export default async function PaginaInicio({ searchParams }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto">
+      <InstallPrompt />
       <NotificationPrompt />
       <RecoveryToast recovered={recovered === 'true'} error={error} />
 
