@@ -98,8 +98,9 @@ export async function softDeleteCuenta(): Promise<{ ok: boolean; error?: string 
     const urlRecuperacion = `${appUrl}/api/auth/recuperar?token=${token}`
 
     const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: 'Noti <onboarding@resend.dev>',
+    const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+    const { error: resendError } = await resend.emails.send({
+      from: `Noti <${fromEmail}>`,
       to: emailUsuario,
       subject: 'Tu cuenta de Noti fue eliminada — tienes 30 dias para recuperarla',
       html: plantillaRecuperacionCuenta({
@@ -107,6 +108,9 @@ export async function softDeleteCuenta(): Promise<{ ok: boolean; error?: string 
         urlRecuperacion,
       }),
     })
+    if (resendError) {
+      console.error('[softDeleteCuenta] Error al enviar email de recuperacion:', resendError)
+    }
 
     const supabase = await crearClienteServidor()
     await supabase.auth.signOut()
@@ -182,8 +186,9 @@ export async function softDeleteRecordatorios(payload: {
     const urlRecuperacion = `${appUrl}/api/auth/recuperar?token=${token}`
 
     const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: 'Noti <onboarding@resend.dev>',
+    const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+    const { error: resendError } = await resend.emails.send({
+      from: `Noti <${fromEmail}>`,
       to: emailUsuario,
       subject: 'Tus recordatorios de Noti fueron eliminados — tienes 30 dias para recuperarlos',
       html: plantillaRecuperacionRecordatorios({
@@ -192,6 +197,9 @@ export async function softDeleteRecordatorios(payload: {
         urlRecuperacion,
       }),
     })
+    if (resendError) {
+      console.error('[softDeleteRecordatorios] Error al enviar email de recuperacion:', resendError)
+    }
 
     revalidatePath('/inicio')
     revalidatePath('/settings')

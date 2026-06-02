@@ -9,6 +9,7 @@ import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { BotonNuevoRecordatorio } from '@/components/features/reminders/boton-nuevo-recordatorio'
 import { ListaRecordatorios } from '@/components/features/reminders/lista-recordatorios'
 import { NotificationPrompt } from '@/components/features/notification-prompt'
+import { RecoveryToast } from '@/components/features/recovery-toast'
 import { SaludoDinamico } from '@/components/features/inicio/saludo-dinamico'
 import { BarraAsistente } from '@/components/features/asistente'
 import { MiniCalendario } from '@/components/features/inicio/mini-calendario'
@@ -17,7 +18,7 @@ import { ChipsCategoriasSidebar } from '@/components/features/inicio/chips-categ
 export const metadata: Metadata = { title: 'Inicio | Noti' }
 
 interface Props {
-  searchParams: Promise<{ categoria?: string }>
+  searchParams: Promise<{ categoria?: string; recovered?: string; error?: string }>
 }
 
 function construirResumen(recordatorios: { fechaVencimiento: Date | null }[]): string {
@@ -57,7 +58,7 @@ function obtenerDiasConRecordatorios(
 
 export default async function PaginaInicio({ searchParams }: Props) {
   const user = await requerirUsuario()
-  const { categoria: categoriaIdParam } = await searchParams
+  const { categoria: categoriaIdParam, recovered, error } = await searchParams
 
   const [perfil, categorias, todosLosRecordatorios, contadores] = await Promise.all([
     getPerfilDelUsuarioActual(),
@@ -77,6 +78,7 @@ export default async function PaginaInicio({ searchParams }: Props) {
   return (
     <div className="max-w-5xl mx-auto">
       <NotificationPrompt />
+      <RecoveryToast recovered={recovered === 'true'} error={error} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
         {/* Columna principal */}
