@@ -17,7 +17,8 @@ src/
 │       ├── chat/            streamText + tools (lanzamientos)
 │       ├── ai/              recordatorio (generateObject), transcribir (Whisper)
 │       ├── search/          Búsqueda global
-│       └── cron/            check-reminders (1min), resumen-diario (1h), limpiar-tareas (diario)
+│       ├── cron/            check-reminders (1min), resumen-diario (1h), limpiar-tareas (diario), limpiar-eliminados (04:00 UTC)
+│       └── auth/            recuperar (GET ?token= — restaura soft delete)
 ├── components/
 │   ├── ui/                  shadcn primitives
 │   └── features/            Componentes por dominio
@@ -62,7 +63,8 @@ Sidebar
 
 ```sql
 profiles          -- Extiende auth.users. Campos clave: timezone, notification_advance,
-                  --   daily_summary (bool), summary_hour, auto_delete_completed_tasks_days
+                  --   daily_summary (bool), summary_hour, auto_delete_completed_tasks_days,
+                  --   deleted_at (nullable — soft delete, zona de peligro)
 
 categories        -- Fijas. Campos: id, name, slug, color, icon.
                   -- Slug `classes` retirado en Fase 14 (fusionado en `study`).
@@ -71,13 +73,17 @@ reminders         -- Campos clave: id, user_id, category_id, title, description,
                   --   due_date (nullable desde Fase 9), notify_at (nullable desde Fase 9),
                   --   is_completed, completed_at, is_recurring, recurrence_rule,
                   --   release_type, image_url (DEPRECATED desde Fase 16 — no se escribe,
-                  --   queda hasta limpieza futura), metadatos (jsonb)
+                  --   queda hasta limpieza futura), metadatos (jsonb),
+                  --   deleted_at (nullable — soft delete, zona de peligro)
 
 push_subscriptions -- endpoint, p256dh, auth, device_name. UNIQUE(user_id, endpoint)
 
 notification_log  -- reminder_id, user_id, status ('sent'|'failed'), sent_at
 
 note_attachments  -- reminder_id, tipo, url, mime, tamano (Fase 16+)
+
+recovery_tokens   -- id, user_id, tipo ('cuenta'|'recordatorios'), token (uuid unico),
+                  --   metadatos (jsonb — categorias afectadas), expires_at, created_at
 ```
 
 ## Flujos clave
@@ -91,6 +97,11 @@ Vercel cron (cada minuto) → GET /api/cron/check-reminders
 SW → recibe push → showNotification con acciones Ver/Posponer/Completar
 SW → notificationclick → POST /api/push/action o abre app
 ```
+
+> Cuando la PWA esta instalada (display-mode: standalone), el SO mantiene el SW activo
+> en su propio scheduler — las notificaciones llegan al centro de notificaciones del SO
+> con el navegador cerrado. En modo navegador requiere Chrome/Edge corriendo en background.
+> Ver Fase 25 en `ROADMAP.md` para el flujo de instalacion.
 
 ### Pipeline asistente (Fase 12b — actual)
 Un command palette global (Ctrl+I o FAB sparkles) que ejecuta un pipeline determinístico de 3 pasos. Persistido en sessionStorage para sobrevivir cambios de ruta.
@@ -164,15 +175,19 @@ Cron diario 03:00 UTC → /api/cron/limpiar-tareas
 
 ## Migraciones
 
-Las migraciones en `src/db/migrations/` marcadas como "aplicar manualmente" se ejecutan en el SQL Editor de Supabase (afectan RLS o requieren privilegios de superusuario). Las demás se aplican con Drizzle.
+Todas las migraciones viven en `src/db/migrations/`. Las marcadas como **manual** se ejecutan en el SQL Editor de Supabase porque afectan RLS o requieren privilegios de superusuario; las demas se aplican con Drizzle. El estado puntual en produccion vive en `Docs/CURRENT.md` (seccion "Pendientes manuales bloqueantes").
 
-| Migración | Estado |
-|-----------|--------|
-| 0000 | Aplicada |
-| 0001_rls_policies.sql | Manual — aplicada |
-| 0002_magical_maddog.sql | Manual — aplicada |
-| 0003_lanzamientos.sql | **Manual — PENDIENTE en producción** |
-| 0004_notas.sql | Pendiente (Fase 9) |
-| 0005_note_attachments.sql | Pendiente (Fase 16) |
-| 0006_auto_delete_tasks.sql | Aplicada |
-| 0007_fusion_classes_study.sql | Pendiente (Fase 14) |
+| Migracion | Tipo |
+|---|---|
+| 0000_chilly_hellfire_club.sql | Drizzle (schema base) |
+| 0001_burly_peter_quill.sql | Drizzle |
+| 0002_magical_maddog.sql | Manual |
+| 0002_rls_policies.sql | Manual (RLS) |
+| 0003_bitter_tyger_tiger.sql | Drizzle |
+| 0003_lanzamientos.sql | Manual |
+| 0004_notas.sql | Drizzle |
+| 0006_auto_delete_tasks.sql | Manual |
+| 0007_fusion_classes_study.sql | Drizzle |
+| 0008_note_entries.sql | Manual |
+| 0009_note_attachments.sql | Manual |
+| 0010_soft_delete_cuenta.sql | Manual |

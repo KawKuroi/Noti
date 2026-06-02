@@ -2,70 +2,133 @@
 
 ## Estado actual
 
-El roadmap completo (Fases 0-23) esta terminado. No hay fases activas pendientes.
+Fases 0–23 completadas. En progreso: **Fase 24 — Zona de peligro** y **Fase 25 — Instalacion PWA nativa**.
+
+> El detalle granular de fases ya entregadas vive en `CURRENT.md` (sesiones recientes) y en `git log` (sesiones antiguas). Este archivo solo lista el titulo y el outcome para mantener bajo el coste de contexto.
 
 ---
 
-## Historico de fases completadas (0-16)
+## Historico (resumen de una linea por fase)
 
-- **Fase 0 — Setup inicial:** PRD, Arquitectura, Roadmap, CLAUDE.md, .gitignore, .env.example, .editorconfig.
-- **Fase 1 — Foundation:** Next.js 15 + App Router + TypeScript + Tailwind, Supabase (DB + Auth), Drizzle, Google OAuth + email/password, middleware de proteccion, layouts auth/dashboard, seed de 6 categorias, PWA basica, primer deploy a Vercel.
-- **Fase 2 — CRUD de recordatorios:** schema `reminders`, server actions completas, queries por categoria/upcoming, validaciones Zod, formulario modal con campos por categoria, soporte de recurrencias (semanal/anual), dashboard agrupado por dia, pagina por categoria.
-- **Fase 3 — Notificaciones push:** VAPID keys, Service Worker con `push` y `notificationclick`, schema `push_subscriptions` y `notification_log`, endpoints `subscribe` y `action`, cron `check-reminders` cada minuto, multi-dispositivo, anticipacion configurable, acciones desde la notificacion, reprogramacion de recurrentes.
-- **Fase 4 — Chat IA para lanzamientos:** servicios TMDB / RAWG / MusicBrainz + orquestador, capa `tools.ts` y `prompt.ts` (`buscarLanzamiento`, `pedirFechaManual`, `agregarRecordatorio`) con AI SDK v6, endpoint `/api/chat`, pagina `/movies`, anti-alucinacion, atribuciones obligatorias.
-- **Fase 5 — Pomodoro + calendario:** PomodoroTimer 25/5/15, sonido opcional, integracion con estudio, vista calendario mensual y semanal con dots y dialog por dia. *(Pomodoro queda marcado para eliminacion en Fase 15.)*
-- **Fase 6 — Pulido + deploy publico:** landing, perfil, gestion de dispositivos, empty states, skeletons, error handling con toasts, meta tags, favicon, README, RLS y rate limiting. *Pendientes manuales:* Lighthouse audit, testing manual multi-browser, screenshots para portafolio.
-- **Fase 7 — Busqueda, IA general y segundo plano:** Ctrl+K con debounce, asistente IA en dashboard (`/api/ai/recordatorio` con `generateObject`), `crearRecordatorioDesdeIA`, resumen diario por push (cron `resumen-diario` cada hora), Background Sync en Service Worker, shortcuts y `window-controls-overlay` en manifest.
-- **Fase 8 — Reestructuracion de Lanzamientos:** categoria `movies` dividida en 5 (`movies`, `tv`, `games`, `music`, `books`), hub `/lanzamientos` con tabs y formulario manual, Google Books para libros, `SLUGS_LANZAMIENTO`, sidebar con entrada unica "Lanzamientos", mapeo tipo→slug en `crearRecordatorioLanzamiento`. *Pendiente manual:* aplicar `0003_lanzamientos.sql` en Supabase.
-- **Fase 9 — Categoria Notas:** schema nullable para `due_date` y `notify_at`, migracion `0004_notas.sql`, categoria `notes` en constantes y seed, grid de tarjetas en `/notes`, editor con titulo y cuerpo, vista detalle `/notes/[id]`, toggle `Recordarme` con fecha opcional, acciones editar/eliminar/duplicar, integracion en busqueda global Ctrl+K.
-- **Fase 10 — Refinar busqueda y modelo de IA para lanzamientos:** Mejoras en RAWG, TMDB, MusicBrainz, y prompts para IA. *Pendiente:* Pruebas manuales.
-- **Fase 11 — Calendario:** Bugfix vista semana, filtro por categoria, corrección del error gráfico de las fechas.
-- **Fase 12 — Refactor IA lanzamientos:** Bug RAWG resuelto, chat unificado con bottom sheet y Ctrl+I, validacion de coincidencia de titulo, edicion inline de fecha tentativa.
-- **Fase 12b — Pipeline deterministico + command palette:** Reemplazo del chat conversacional por pipeline de 3 pasos (extraccion estructurada, busqueda multi-candidato, UI de seleccion estilo Raycast). Precision ~95%.
-- **Fase 13 — Eliminar Pomodoro:** Retirado del producto todo lo relacionado con el temporizador Pomodoro.
-- **Fase 14 — Bugfixes criticos + refactor de categorias:** Cursor de recurrencia con avance estricto (bug 400 ocurrencias). Formulario de notas sin fecha obligatoria. Fusion `classes → study` en BD, constants, seed, extractor, validaciones y tipos. Rename "Tareas" → "Pendientes". Checkbox oculto en cards recurrentes.
-- **Fase 15 — Reestructuracion del sidebar y navegacion:** Grupo "Herramientas" colapsable en el sidebar (Calendario + Notas). Busqueda global movida a un icono de lupa en el sidebar (Ctrl+K), eliminando la barra superior del dashboard. Footer del sidebar con nombre del usuario e icono de engranaje (settings) y boton de cerrar sesion reubicado dentro de la pagina de configuracion (`/settings`).
-- **Fase 16 — Lanzamientos - pestana Todos, paleta de color, formulario completo, portadas no persistentes:** Pestana "Todos" en `/lanzamientos` con orden cronologico. Paleta de colores sutiles por tipo de lanzamiento. Formulario manual extendido con descripcion, autor, artista/banda y director/showrunner persistidos en metadatos JSONB. Portadas visuales no persistentes al guardar (eliminado `image_url` en escrituras y reemplazo por iconos de tipo en las cards).
-- **Fase 17 — Rediseno del inicio:** Layout de dos columnas en `/inicio`. Saludo dinamico por hora local con nombre del usuario y resumen de recordatorios del dia. Input IA prominente (full-width) que abre el asistente compartiendo estado con Ctrl+I. Mini-calendario lateral del mes actual con dots en dias con recordatorios. Chips de categorias filtrables en sidebar derecho. Boton de nuevo recordatorio reubicado junto al saludo. Ampliacion 2026-05-19: saludo escalado a `text-4xl`, eliminacion del FAB de asistente, promocion de la barra "Que te recuerdo o agendo" a componente reutilizable (`BarraAsistente`) extendido a Inicio + Lanzamientos + categorias simples, calendario ocupa el alto completo, vista Semana refactorizada como timeline tipo Google Calendar con columna de horas a la izquierda y scroll inicial a 07:00, padding superior del dashboard ampliado (`pt-10`).
-- **Fase 18 — IA fechas naturales y edicion inline completa:** Utility `parsearFechaNatural` con tabla de meses ES que resuelve `dd/mm`, `dd-mm`, `dd mmm`, `mmm dd`, `dd de mmmm` y suma 1 ano cuando la fecha es anterior a hoy. Extractor IA gana campo `lanzamiento.fechaTentativa` y ejemplos en el prompt. Pipeline determinista aplica el parser como fallback cuando el LLM devuelve `null` y propaga `fechaTentativa` a candidatos sin fecha confirmada. Card de extraccion editable completa: anticipacion (`OPCIONES_ANTICIPACION`), tipo de lanzamiento, autor/artista/director condicionales. Card de candidato auto-abre el datepicker con la fecha tentativa cuando la fuente devuelve TBA. `crearRecordatorioDesdeIA` acepta `anticipacionMin?`. Ruteo dual en `confirmarRecordatorioEditado`: lanzamientos persisten metadatos JSONB via `crearRecordatorioLanzamiento` con `fuente='manual'`.
-- **Fase 19 — Landing enlace a GitHub:** Boton secundario "Ver en GitHub" (icono `Github` + texto outline) en el hero de la landing junto a los CTAs principales. Link con icono GitHub en el footer junto al texto del proyecto. Ambos abren el repositorio en nueva pestana.
-- **Fase 20 — Auto-eliminacion de tareas completadas** — migracion `0006_auto_delete_tasks.sql` con columnas `auto_delete_completed_tasks_days` en `profiles` y `completed_at` en `reminders`; `alternarCompletado` graba la fecha de completado; cron `limpiar-tareas` diario a las 03:00 UTC; selector en settings (Nunca / 7 / 30 / 90 dias); countdown ambar en tarjetas cuando quedan 3 dias o menos.
-- **Fase 21 — Entrada por audio en el asistente IA** — endpoint `src/app/api/ai/transcribir/route.ts` con `whisper-large-v3-turbo` y rate-limit 10 req/min; hook `src/hooks/use-audio-recorder.ts` con seleccion de mimeType por compatibilidad, timer, auto-stop a 60 s y manejo de permisos denegados; boton Mic integrado en `CommandPalette` con estados grabando (rojo + timer), procesando (loader purpura) y error inline bajo el header.
-- **Fase 22 — Notas multimedia (22.0–22.D):** 22.0: cuadernos tipo chat WhatsApp con tabla `note_entries` (migracion `0008`). 22.A–22.D: adjuntos multimedia — tabla `note_attachments` (migracion `0009`), `@vercel/blob`, API route `/api/notas/adjunto` con token de subida, actions `registrarAdjunto` y `eliminarAdjunto`, componentes `VisorImagen`, `ReproductorAudio`, `VisorDocumento`, `ReproductorVideo`, `BurbujaAdjunto`, hook `useGrabadorAudioAdjunto`, `SubirAdjunto` con clip+mic. Timeline mezclada ordenada por `creadoEn` en `VistaChatNotas`.
-- **Fase 23 — Mejoras aditivas completas:** Dark mode, optimistic updates, infinite scroll + ordenamiento, countdown cumpleanos, deteccion duplicados IA, sugerencias de categoria, cache SWR en busqueda global, full-text search con tsvector, Tests E2E con Playwright (flujo critico sin auth + test salteable con credenciales), PWA Widget API (manifest + sw.js + Adaptive Card template + endpoint /api/widget), i18n con next-intl cookie-based (sidebar y settings traducidos ES/EN, toggle en configuracion).
-
----
-
-## Fase 22: Notas multimedia (multi-iteracion)
-
-**Objetivo:** convertir las notas en un baul de cosas - texto, imagenes, audio, documentos y video - implementado en sub-fases progresivas. Depende de la Fase 9.
-
-### Fase 22.0: Reestructuracion de notas [x]
-Notas convertidas en cuadernos tipo chat de WhatsApp. Lista de cuadernos con avatar inicial, preview del ultimo mensaje y tiempo relativo. Vista de chat con burbujas alineadas a la derecha, edicion inline y envio con Enter. Cuadernos renombrables y eliminables. Nueva tabla `note_entries` con RLS y migracion de descripciones existentes.
-
-Cada sub-fase amplia la tabla `note_attachments (id, reminder_id, tipo, url, mime, tamano, creado_en)` (creada en 22.A) y la UI; cada una es un PR independiente.
-
-### Fase 22.A - Imagenes
-- [x] Migracion `0009_note_attachments.sql`: CREATE TABLE `note_attachments`
-- [x] Integracion con Vercel Blob (variable `BLOB_READ_WRITE_TOKEN`)
-- [x] Server action `registrarAdjunto` con validacion (JPG/PNG/WebP, max 5MB) y `eliminarAdjunto`
-- [x] UI: boton clip + drag-and-drop, lightbox con Dialog
-- [x] Borrado de adjunto y de blob asociado via `del()` de @vercel/blob
-
-### Fase 22.B - Audios
-- [x] Aceptar MP3/OGG/WAV/WebM; hook `useGrabadorAudioAdjunto` con `MediaRecorder`
-- [x] Reproductor con play/pause/seek y barra de progreso
-
-### Fase 22.C - Documentos
-- [x] Aceptar PDF/DOCX/TXT
-- [x] Icono por tipo + boton de descarga; preview de PDF con `<embed>` en Dialog
-
-### Fase 22.D - Videos
-- [x] Aceptar MP4/WebM con limite de 25 MB
-- [x] Reproductor inline con controles nativos
-
-**Done when (toda la fase):** Una nota puede tener texto + cualquier combinacion de imagenes, audios, documentos y videos como un baul personal.
+- **Fase 0** — Setup (PRD, Arquitectura, Roadmap, CLAUDE.md, env).
+- **Fase 1** — Foundation Next.js 15 + Supabase + Drizzle + auth + PWA basica + primer deploy.
+- **Fase 2** — CRUD de recordatorios con recurrencias y dashboard agrupado por dia.
+- **Fase 3** — Notificaciones push (VAPID, SW, multi-dispositivo, anticipacion configurable).
+- **Fase 4** — Chat IA para lanzamientos (TMDB/RAWG/MusicBrainz, AI SDK v6).
+- **Fase 5** — Pomodoro + vistas mes/semana del calendario. *(Pomodoro retirado en Fase 13.)*
+- **Fase 6** — Landing, perfil, gestion de dispositivos, empty states, RLS y rate limiting.
+- **Fase 7** — Ctrl+K, asistente IA general, resumen diario, Background Sync.
+- **Fase 8** — Reestructuracion de Lanzamientos en 5 tipos + hub `/lanzamientos` + Google Books.
+- **Fase 9** — Categoria Notas con `due_date`/`notify_at` nullable.
+- **Fase 10** — Refinamiento de busquedas y prompts IA.
+- **Fase 11** — Bugfixes calendario + filtro por categoria.
+- **Fase 12** — Refactor IA lanzamientos (RAWG fix, validacion titulo, edicion inline).
+- **Fase 12b** — Pipeline IA deterministico + command palette (precision ~95%).
+- **Fase 13** — Retirar Pomodoro.
+- **Fase 14** — Bugfixes criticos + fusion `classes`→`study` + rename "Tareas"→"Pendientes".
+- **Fase 15** — Reestructuracion del sidebar (Herramientas, lupa Ctrl+K, settings con cerrar sesion).
+- **Fase 16** — Lanzamientos: tab "Todos", paleta de color por tipo, formulario completo, portadas no persistentes.
+- **Fase 17** — Rediseno de `/inicio` (saludo dinamico, BarraAsistente, mini-calendario, chips).
+- **Fase 18** — IA fechas naturales (`parsearFechaNatural`) + edicion inline completa.
+- **Fase 19** — Landing con enlace a GitHub (hero + footer).
+- **Fase 20** — Auto-eliminacion de tareas completadas (7/30/90 dias, cron 03:00 UTC).
+- **Fase 21** — Entrada por audio en el asistente IA (Whisper Large v3 Turbo).
+- **Fase 22** — Notas multimedia (chat WhatsApp + adjuntos imagen/audio/doc/video via Vercel Blob).
+- **Fase 23** — Dark mode, optimistic updates, infinite scroll, FTS, SWR, Playwright E2E, PWA Widget API, i18n next-intl.
 
 ---
 
-El roadmap esta completo. No hay fases ni items pendientes.
+## Fase 24 — Zona de peligro (en progreso)
+
+**Objetivo:** Dos funciones destructivas en `/settings` con soft delete y ventana de recuperacion de 30 dias: borrar todos los recordatorios (por categoria o todos) y borrar la cuenta completa. Ambas con verificacion textual ("ELIMINAR"), correos HTML estilizados y cron de limpieza definitiva.
+
+### 24.1 — Base de datos [x]
+- `perfiles`: campo `deleted_at` (timestamp nullable)
+- `reminders`: campo `deleted_at` (timestamp nullable)
+- Nueva tabla `recovery_tokens`: id, user_id, tipo, token, metadatos (jsonb), expires_at
+- Migracion `0010_soft_delete_cuenta.sql` — **aplicar manualmente en Supabase**
+- Tipo `Perfil` actualizado con `eliminadoEn`; `mapearPerfil` en `user.queries.ts` actualizado
+
+### 24.2 — Server actions [ ]
+- `softDeleteCuenta()`: marca `deleted_at`, genera token, envia correo, cierra sesion, redirige a `/`
+- `softDeleteRecordatorios(payload)`: soft delete por categorias o todos, genera token, envia correo con categorias afectadas
+- Ambas en `src/lib/actions/user.actions.ts`
+
+### 24.3 — Endpoint de recuperacion [ ]
+- `GET /api/auth/recuperar?token=...`
+- Valida token, restaura `deleted_at = null` en perfil o recordatorios
+- Token expirado o invalido → redirige a `/` con `?error=token-invalido`
+- Token valido → redirige a `/inicio?recovered=true`
+
+### 24.4 — Cron de limpieza definitiva [ ]
+- `GET /api/cron/limpiar-eliminados`: elimina permanentemente registros con `deleted_at < NOW() - 30 dias`
+- Para cuentas: `supabase.auth.admin.deleteUser()` (hace cascade)
+- Cron en `vercel.json`: `0 4 * * *`
+
+### 24.5 — Plantillas de correo HTML [ ]
+- `src/lib/services/email-templates.ts`
+- `plantillaRecuperacionCuenta(...)`: link de recuperacion + advertencia 30 dias
+- `plantillaRecuperacionRecordatorios(...)`: lista de categorias afectadas + link de recuperacion
+- HTML puro con estilos inline que imitan el tema de la app (fondo oscuro, colores de la app)
+
+### 24.6 — Componentes UI [ ]
+- `boton-borrar-recordatorios.tsx`: modal con Select de categoria + input "ELIMINAR"
+- `boton-borrar-cuenta.tsx`: modal con advertencia + input "ELIMINAR"
+- `settings/page.tsx`: nueva seccion "Zona de peligro" al final
+
+### 24.7 — Filtrado de soft-deleted en queries [ ]
+- `src/lib/queries/reminder.queries.ts`: filtrar `deleted_at IS NULL` en todos los queries que devuelven recordatorios al usuario
+
+**Done when:** El usuario puede borrar recordatorios o su cuenta desde settings, recibe un correo con link de recuperacion valido 30 dias, y tras ese plazo el cron elimina los datos definitivamente.
+
+---
+
+## Fase 25 — Instalacion PWA nativa (en progreso)
+
+**Objetivo:** Que el usuario pueda "descargar" Noti como app del sistema en Android y desktop (Windows/macOS/Linux) sin pasar por tiendas, para que las notificaciones push lleguen al SO aunque el navegador este cerrado. iOS 16.4+ via "Agregar a inicio".
+
+**Decision clave:** sin PWABuilder, Tauri ni Electron — la PWA instalada usa el mismo bundle de Vercel (cero overhead). Ver `DECISIONS.md`.
+
+### 25.1 — Iconos PNG y screenshots [ ]
+- PNGs maskables 192/512 + maskable-512 (con safe area 20%) + apple-touch-icon-180 en `public/icons/`
+- Generar desde `icon-512.svg` con `npx --yes sharp-cli` (sin agregar `sharp` al package.json)
+- Screenshots wide (1280×720) y mobile (750×1334) en `public/screenshots/`
+- `public/manifest.json`: agregar entradas PNG al array `icons` (manteniendo SVG como fallback) y poblar `screenshots[]`
+- `src/app/layout.tsx:64`: apple-touch-icon → PNG
+
+### 25.2 — Hook `use-pwa-install` [ ]
+- `src/hooks/use-pwa-install.ts` siguiendo patron de `use-push-notifications.ts`
+- API: `{ soportado, instalado, esIOS, esIOSSinSoportePush, instalar() }`
+- Listener `beforeinstallprompt` con `preventDefault()` + guardado del evento
+- `instalado` derivado de `matchMedia('(display-mode: standalone)')` + `navigator.standalone` (iOS)
+- `esIOSSinSoportePush` parsea version del UA y compara < 16.4
+- Sin `any` (regla CLAUDE.md): usar `navigator as unknown as { standalone?: boolean }`
+
+### 25.3 — Banner `<InstallPrompt />` [ ]
+- `src/components/features/install-prompt.tsx` analogo a `notification-prompt.tsx`
+- 3 ramas: nativo (`soportado`) / iOS 16.4+ (Dialog con pasos ilustrados) / iOS antiguo (mensaje)
+- Toast "Noti instalada" al aceptar
+- Descarte persistido en `localStorage` con clave `noti-install-prompt-dismissed-at`, re-show a 14 dias
+- Montar en `src/app/(dashboard)/inicio/page.tsx:79` ENCIMA de `<NotificationPrompt />`
+
+### 25.4 — Seccion "Aplicacion" en /settings [ ]
+- `src/components/features/settings/formulario-instalacion.tsx`
+- Boton permanente "Instalar Noti" o badge "Ya instalada"
+- Cumple regla de memoria "Controles de config van en /settings"
+
+### 25.5 — i18n y ajuste de SW [ ]
+- Namespace `Instalacion` en `messages/es.json` y `messages/en.json`:
+  `titulo`, `descripcion`, `botonInstalar`, `botonComoInstalar`, `iosTitulo`, `iosPaso1`, `iosPaso2`, `iosPaso3`, `iosVersionAntigua`, `yaInstalada`, `instaladaExitosamente`
+- `public/sw.js`: `showNotification` apunta a `/icons/icon-192.png` (Windows no renderiza SVG en el centro de notificaciones)
+
+### 25.6 — Verificacion end-to-end [ ]
+- Lighthouse PWA audit pasa de "Not installable" a "Installable"
+- Desktop: instalar via Edge/Chrome → cerrar navegador → cron dispara notificacion → llega al Action Center
+- Android: instalar via Chrome → cerrar navegador → cron dispara notificacion → llega al centro del SO
+- iOS 16.4+: Dialog con pasos → "Agregar a inicio" → notificacion llega
+- `npm run lint && npm run build` sin errores
+- `npm run test:e2e` sin regresiones
+
+**Done when:** El usuario instala Noti desde el banner o desde /settings, cierra el navegador, y recibe la notificacion push del recordatorio en el centro de notificaciones del SO con el icono PNG.
+
+**Fuera de alcance:** generar `.apk` / `.msix` / `.ipa`, subir a tiendas, soportar iOS < 16.4.

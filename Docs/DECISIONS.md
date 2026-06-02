@@ -59,6 +59,10 @@ _Razón:_ En la pestaña "Todos" la diferenciación visual ayuda al escaneo ráp
 _Alternativa:_ Flutter o React Native
 _Razón:_ La PWA cubre los casos de uso (push notifications reales en Android y Windows), es deployable en Vercel gratis y no requiere cuentas de developer store.
 
+**Mejorar instalación PWA antes que generar instaladores nativos** _(Fase 25)_
+_Alternativa:_ PWABuilder (.msix Windows + .apk Android TWA), Tauri 2.0, o Electron
+_Razón:_ El usuario quiere notificaciones nativas sin browser abierto. Una vez instalada, la PWA cubre ese caso en Android y desktop con cero overhead. PWABuilder/Tauri agregan binarios para mantener (regenerar al cambiar manifest, builds CI, hosting de archivos) sin mejorar el runtime — la app instalada y un .msix de PWABuilder corren el mismo bundle. Electron descartado por peso (~100 MB vs ~2 KB de hook). iOS sin instalador descartado por costo (Apple Dev USD 99/año); queda vía "Agregar a inicio" con instrucciones in-app.
+
 ---
 
 ## Técnico

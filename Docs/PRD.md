@@ -42,7 +42,7 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 
 10. **Calendario** — Vistas mes y semana sincronizadas, filtro multi-select por categoría, click en día para ver recordatorios de esa fecha
 
-11. **PWA instalable** — Instalable desde Chrome en Android y Windows; shortcuts en el icono (Nuevo, Calendario); `window-controls-overlay` en Windows
+11. **PWA instalable** — Botón "Instalar Noti" con `beforeinstallprompt` en Android/Edge/Chrome desktop; modal con pasos para iOS 16.4+ ("Compartir → Agregar a inicio"). Una vez instalada, las notificaciones push llegan al SO con el navegador cerrado. Shortcuts en el icono (Nuevo, Calendario); `window-controls-overlay` en Windows; iconos PNG maskables para Android. (Reforzado en Fase 25)
 
 12. **Background Sync** — El Service Worker guarda mutaciones fallidas en IndexedDB y las reintenta automáticamente al recuperar la conexión
 
@@ -72,8 +72,9 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 
 ## Success criteria
 
-- La app se puede instalar como PWA en Android y Windows
+- La app se puede instalar como PWA en Android y Windows con un solo click (`beforeinstallprompt`)
 - Las notificaciones push llegan correctamente en ambas plataformas
+- Las notificaciones llegan al centro de notificaciones del SO con la app instalada y el navegador cerrado
 - Un usuario puede crear recordatorios en todas las categorías (incluyendo notas y los 5 tipos de lanzamiento), por lenguaje natural escrito o dictado por audio
 - El chat IA encuentra fechas exactas de lanzamientos (cine, TV, juegos, música, libros) y las agenda al calendario; al menos 8 de cada 10 consultas reales resuelven correctamente
 - La búsqueda global encuentra recordatorios en menos de 300ms
@@ -90,6 +91,7 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
 - **Minimalista:** UI blanca, limpia, con poco color. El color se usa solo para diferenciar categorías
 - **Español primero:** Toda la UI en español. Inglés en iteración futura con i18n
 - **PWA-first:** No hay app nativa. La PWA se instala desde Chrome con shortcuts en el icono
+- **PWA con instalación mejorada sobre instaladores nativos:** Generar .msix/.apk via PWABuilder o wrappear con Tauri no aporta runtime nuevo — una PWA instalada y un .msix corren el mismo bundle. Priorizamos UX del `beforeinstallprompt` y guía in-app para iOS sobre mantenimiento de binarios (Fase 25)
 - **Supabase como backend:** Auth, DB y cron en un solo servicio
 - **Sin onboarding largo:** Login directo, dashboard vacío con CTA para crear primer recordatorio
 - **IA como atajo, no como sustituto:** El asistente IA es un input adicional junto al formulario manual, no lo reemplaza. A partir de la Fase 12 vive como acceso opcional fuera de la lista de recordatorios para no dominar el dashboard

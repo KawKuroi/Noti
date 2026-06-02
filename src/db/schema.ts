@@ -20,6 +20,7 @@ export const perfiles = pgTable('profiles', {
   resumenDiario: boolean('daily_summary').default(false).notNull(),
   horaResumen: text('summary_hour').default('07:00').notNull(),
   autoEliminarTareasCompletadasDias: integer('auto_delete_completed_tasks_days'),
+  eliminadoEn: timestamp('deleted_at', { withTimezone: true }),
   creadoEn: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   actualizadoEn: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
@@ -55,6 +56,7 @@ export const recordatorios = pgTable(
     completadoEn: timestamp('completed_at', { withTimezone: true }),
     tmdbId: integer('tmdb_id'),
     metadatos: jsonb('metadata'),
+    eliminadoEn: timestamp('deleted_at', { withTimezone: true }),
     creadoEn: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     actualizadoEn: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
@@ -126,6 +128,20 @@ export const notasAdjuntos = pgTable(
     idxAdjuntosCuaderno: index('idx_note_attachments_cuaderno').on(tabla.cuadernoId),
   }),
 )
+
+export const tokensRecuperacion = pgTable('recovery_tokens', {
+  id: uuid('id')
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  usuarioId: uuid('user_id')
+    .notNull()
+    .references(() => perfiles.id, { onDelete: 'cascade' }),
+  tipo: text('tipo').notNull().$type<'cuenta' | 'recordatorios'>(),
+  token: text('token').notNull().unique(),
+  metadatos: jsonb('metadatos'),
+  expiraEn: timestamp('expires_at', { withTimezone: true }).notNull(),
+  creadoEn: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+})
 
 export const logNotificaciones = pgTable('notification_log', {
   id: uuid('id')

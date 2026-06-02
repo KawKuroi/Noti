@@ -3,12 +3,12 @@ PWA minimalista de recordatorios con notificaciones push reales, categorías fij
 
 ## Archivos de contexto — cuándo leer cada uno
 
-Lee `context/CURRENT.md` → SIEMPRE, en cada tarea. Tiene la tarea activa y bugs conocidos.
-Lee `context/PROJECT.md` → SIEMPRE, en cada tarea. Tiene el stack y las convenciones de código.
-Lee `context/PRD.md` → cuando la tarea involucra features, categorías, UX o decisiones de producto.
-Lee `context/ARCHITECTURE.md` → cuando la tarea toca rutas de API, DB, servicios, flujos de datos o estructura de carpetas.
-Lee `context/ROADMAP.md` → cuando la tarea involucra planificación, fases o priorización.
-Lee `context/DECISIONS.md` → cuando evalúas cambiar algo que ya fue decidido o necesitas contexto de por qué algo está hecho así.
+Lee `Docs/CURRENT.md` → SIEMPRE, en cada tarea. Tiene la tarea activa y bugs conocidos.
+Lee `Docs/PROJECT.md` → SIEMPRE, en cada tarea. Tiene el stack y las convenciones de código.
+Lee `Docs/PRD.md` → cuando la tarea involucra features, categorías, UX o decisiones de producto.
+Lee `Docs/ARCHITECTURE.md` → cuando la tarea toca rutas de API, DB, servicios, flujos de datos o estructura de carpetas.
+Lee `Docs/ROADMAP.md` → cuando la tarea involucra planificación, fases o priorización.
+Lee `Docs/DECISIONS.md` → cuando evalúas cambiar algo que ya fue decidido o necesitas contexto de por qué algo está hecho así.
 
 ## Lo que NUNCA debes hacer
 

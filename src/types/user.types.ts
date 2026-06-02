@@ -6,6 +6,7 @@ export interface Perfil {
   resumenDiario: boolean
   horaResumen: string
   autoEliminarTareasCompletadasDias: number | null
+  eliminadoEn: Date | null
   creadoEn: Date
   actualizadoEn: Date
 }
