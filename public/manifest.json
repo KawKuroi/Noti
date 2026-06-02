@@ -39,7 +39,43 @@
       "purpose": "any"
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "/screenshots/inicio.png",
+      "sizes": "1920x901",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Panel de inicio con recordatorios del dia"
+    },
+    {
+      "src": "/screenshots/calendario.png",
+      "sizes": "1920x901",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Vista de calendario mensual"
+    },
+    {
+      "src": "/screenshots/chat-lanzamientos.png",
+      "sizes": "1920x901",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Chat para agendar lanzamientos"
+    },
+    {
+      "src": "/screenshots/busqueda.png",
+      "sizes": "1920x901",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Busqueda global con Ctrl+K"
+    },
+    {
+      "src": "/screenshots/dark-mode.png",
+      "sizes": "1920x901",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Modo oscuro"
+    }
+  ],
   "categories": ["productivity", "utilities"],
   "display_override": ["window-controls-overlay", "standalone"],
   "shortcuts": [

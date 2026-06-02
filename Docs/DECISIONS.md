@@ -71,9 +71,9 @@ _Razón:_ El usuario quiere notificaciones nativas sin browser abierto. Una vez 
 _Alternativa:_ Prisma
 _Razón:_ Drizzle es más ligero, type-safe nativo con Supabase/Postgres y no genera un cliente pesado. Mejor para Vercel Hobby.
 
-**Vercel Cron sobre pg_cron de Supabase para reminders**
-_Alternativa:_ pg_cron en Supabase
-_Razón:_ Vercel Cron tiene granularidad de 1 minuto en Hobby (necesario para `check-reminders`). pg_cron en Supabase gratis es menos predecible.
+**Pinger externo (cron-job.org) sobre Vercel Cron para `check-reminders`**
+_Alternativa:_ Vercel Cron / pg_cron en Supabase
+_Razón:_ CORRECCION (premisa original equivocada): Vercel Cron en Hobby **solo permite una ejecucion diaria** — expresiones mas frecuentes (`* * * * *`) fallan en el deploy, y la diaria se dispara en cualquier momento dentro de la hora. Eso rompia `check-reminders`, que necesita granularidad de minuto. Solucion en tier gratuito: un job de cron-job.org pinea `GET /api/cron/check-reminders` cada minuto con el header `Authorization: Bearer ${CRON_SECRET}`; otro job hace lo mismo cada hora con `/api/cron/resumen-diario`. La query usa ventana de 5 min + deduplicacion via `notification_log` (`yaSeNotifico`) para tolerar pings retrasados/omitidos sin enviar push duplicados. Las entradas en `vercel.json` quedan como fallback diario inofensivo (la dedup evita duplicados). Ver `ARCHITECTURE.md` (flujo Push) y `CURRENT.md` (pendiente manual).
 
 **Groq sobre OpenAI para IA**
 _Alternativa:_ OpenAI GPT-4o / GPT-4o mini

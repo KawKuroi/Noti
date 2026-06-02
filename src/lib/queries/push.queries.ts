@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm'
+import { and, eq, gte } from 'drizzle-orm'
 import { db } from '@/db'
-import { suscripcionesPush } from '@/db/schema'
+import { suscripcionesPush, logNotificaciones } from '@/db/schema'
 import { requerirUsuario } from '@/lib/auth'
 
 export interface SuscripcionPush {
@@ -37,4 +37,27 @@ export async function getSuscripcionesPorUsuario(usuarioId: string): Promise<Sus
 export async function getSuscripcionesDelUsuarioActual(): Promise<SuscripcionPush[]> {
   const usuario = await requerirUsuario()
   return getSuscripcionesPorUsuario(usuario.id)
+}
+
+/**
+ * Indica si ya se envio una notificacion exitosa de este recordatorio para la
+ * ocurrencia actual. Se usa para deduplicar cuando el pinger externo (cron-job.org)
+ * dispara varias veces dentro de la ventana de notificacion: solo cuenta un log
+ * con `estado='sent'` cuyo `enviadoEn` sea posterior o igual al `notificarEn` de la
+ * ocurrencia. Un envio fallido (estado='failed') no bloquea el reintento.
+ */
+export async function yaSeNotifico(recordatorioId: string, desde: Date): Promise<boolean> {
+  const filas = await db
+    .select({ id: logNotificaciones.id })
+    .from(logNotificaciones)
+    .where(
+      and(
+        eq(logNotificaciones.recordatorioId, recordatorioId),
+        eq(logNotificaciones.estado, 'sent'),
+        gte(logNotificaciones.enviadoEn, desde),
+      ),
+    )
+    .limit(1)
+
+  return filas.length > 0
 }

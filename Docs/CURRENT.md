@@ -6,7 +6,7 @@
 ## Fase activa
 
 **En progreso:** Fase 25 (Instalacion PWA nativa).
-**Estado:** Fases 0-24 completadas. Fase 25 planificada, todo pendiente.
+**Estado:** Fases 0-24 completadas. Fase 25 implementada (hook, banner, settings, iconos PNG y screenshots presentes; commit fb2ab97); pendiente solo la verificacion 25.6 (Lighthouse "Installable" + `test:e2e`).
 
 El detalle de sub-fases de 25 vive en `Docs/ROADMAP.md`.
 
@@ -19,14 +19,28 @@ Sub-fases completadas en esta sesion:
 - 25.4 Seccion "Aplicacion" en `/settings` con `formulario-instalacion.tsx`
 - 25.5 Namespace `Instalacion` en `messages/es.json` y `messages/en.json`; SW ajustado (SVG → PNG en icon/badge)
 - manifest.json y layout.tsx actualizados con PNGs
+- `screenshots[]` en manifest.json poblado con los 5 PNG de `public/screenshots/` (1920x901, `form_factor: wide`). Hecho.
 
-Pendiente manual:
-- Tomar screenshots reales (wide 1280x720, mobile 750x1334) y colocarlas en `public/screenshots/`, luego poblar `screenshots[]` en manifest.json
-- Verificacion Lighthouse PWA (sub-fase 25.6): debe pasar a "Installable"
+## Verificacion Fase 25 (25.6) — checklist de cierre
+
+Codigo: completo y verificado (build + lint + typecheck OK). Falta solo lo manual:
+
+1. [ ] **cron-job.org (CRITICO)** — crear los 2 jobs (ver "Pendientes manuales bloqueantes"). Validar que cada ejecucion devuelve HTTP 200 (401 = header mal puesto).
+2. [ ] **Env vars en Vercel (Production):** `CRON_SECRET` (igual al header de cron-job.org), `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `NEXT_PUBLIC_APP_URL`.
+3. [ ] **Prueba E2E Windows:** instalar via Edge/Chrome → activar notificaciones → crear recordatorio a +2 min → cerrar navegador por completo → la notificacion llega al Centro de actividades.
+4. [ ] **Prueba E2E Android:** instalar via Chrome → activar notificaciones → recordatorio a +2 min → cerrar Chrome → llega al centro de notificaciones del SO.
+5. [ ] **Lighthouse PWA:** DevTools → Lighthouse → categoria PWA → debe figurar como "Installable" sin errores de manifest.
+6. [ ] **`npm run test:e2e`** sin regresiones.
+
+Orden de sospecha si una notificacion no llega: (a) job en cron-job.org con respuesta != 200, (b) permiso de notificacion no concedido, (c) ahorro de bateria del SO matando el proceso en background del navegador.
 
 ## Pendientes manuales bloqueantes
 
 - [ ] Agregar `BLOB_READ_WRITE_TOKEN` en Vercel → Settings → Environment Variables (obtenida en Vercel → Storage → Blob).
+- [ ] **Notificaciones (CRITICO):** crear dos jobs en cron-job.org (gratis) porque Vercel Hobby solo permite crons diarios. Sin esto, las notificaciones solo se disparan ~1 vez/dia. Ver `DECISIONS.md`.
+  - Job 1 — cada 1 min → `GET https://<APP_URL>/api/cron/check-reminders`, header `Authorization: Bearer <CRON_SECRET>`.
+  - Job 2 — cada 1 h (minuto 0) → `GET https://<APP_URL>/api/cron/resumen-diario`, mismo header.
+  - El codigo ya tolera pings retrasados/omitidos: ventana de 5 min + dedup via `notification_log` (`yaSeNotifico`), sin push duplicados.
 
 ## Pruebas manuales pendientes
 

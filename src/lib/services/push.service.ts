@@ -2,7 +2,7 @@ import webpush from 'web-push'
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
 import { suscripcionesPush, logNotificaciones, recordatorios } from '@/db/schema'
-import { getSuscripcionesPorUsuario } from '@/lib/queries/push.queries'
+import { getSuscripcionesPorUsuario, yaSeNotifico } from '@/lib/queries/push.queries'
 import { getRecordatoriosANotificar, getRecordatoriosEnRango, getCumpleanosEnDias } from '@/lib/queries/reminder.queries'
 import { calcularProximaOcurrencia } from '@/lib/utils/date.utils'
 
@@ -120,11 +120,24 @@ export async function enviarResumenDiario(usuarioId: string): Promise<void> {
 
 export async function procesarRecordatoriosPendientes(): Promise<{ procesados: number }> {
   const ahora = new Date()
-  const pendientes = await getRecordatoriosANotificar(ahora)
+  // Ventana de 5 min: el pinger externo (cron-job.org) corre cada minuto, pero un
+  // ping retrasado u omitido no debe perder la notificacion. La deduplicacion via
+  // `yaSeNotifico` garantiza un unico envio por ocurrencia aunque varios pings
+  // caigan dentro de la ventana.
+  const pendientes = await getRecordatoriosANotificar(ahora, 5)
 
   let procesados = 0
 
   for (const recordatorio of pendientes) {
+    // La query filtra isNotNull(notificarEn), pero el tipo lo permite nullable.
+    if (!recordatorio.notificarEn) continue
+    const notificarEn = recordatorio.notificarEn instanceof Date
+      ? recordatorio.notificarEn
+      : new Date(recordatorio.notificarEn)
+
+    // Saltar si esta ocurrencia ya se notifico con exito en un ping anterior.
+    if (await yaSeNotifico(recordatorio.id, notificarEn)) continue
+
     const payload: PayloadPush = {
       title: recordatorio.titulo,
       body: recordatorio.descripcion ?? 'Es momento de revisar este recordatorio',
