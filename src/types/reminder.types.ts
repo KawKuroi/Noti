@@ -43,6 +43,7 @@ export interface Recordatorio {
   reglaRecurrencia: string | null
   estaCompletado: boolean
   completadoEn: Date | null
+  eliminadoEn: Date | null
   tmdbId: number | null
   metadatos: Record<string, unknown> | null
   creadoEn: Date

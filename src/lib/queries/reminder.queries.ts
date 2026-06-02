@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, count, lte, gte, or, ilike, isNotNull, sql, type SQL } from 'drizzle-orm'
+import { eq, and, desc, asc, count, lte, gte, or, ilike, isNotNull, isNull, sql, type SQL } from 'drizzle-orm'
 import { db } from '@/db'
 import { recordatorios, categorias, perfiles } from '@/db/schema'
 import type { Recordatorio, OrdenamientoRecordatorio } from '@/types/reminder.types'
@@ -31,6 +31,7 @@ function mapearRecordatorio(fila: typeof recordatorios.$inferSelect): Recordator
     reglaRecurrencia: fila.reglaRecurrencia,
     estaCompletado: fila.estaCompletado,
     completadoEn: fila.completadoEn,
+    eliminadoEn: fila.eliminadoEn,
     tmdbId: fila.tmdbId,
     metadatos: fila.metadatos as Record<string, unknown> | null,
     creadoEn: fila.creadoEn,
@@ -50,6 +51,7 @@ export async function getRecordatoriosProximos(
         eq(recordatorios.usuarioId, usuarioId),
         eq(recordatorios.estaCompletado, false),
         isNotNull(recordatorios.fechaVencimiento),
+        isNull(recordatorios.eliminadoEn),
       ),
     )
     .orderBy(asc(recordatorios.fechaVencimiento))
@@ -70,6 +72,7 @@ export async function getRecordatoriosPorCategoria(
       and(
         eq(recordatorios.usuarioId, usuarioId),
         eq(recordatorios.categoriaId, categoriaId),
+        isNull(recordatorios.eliminadoEn),
       ),
     )
     .orderBy(asc(recordatorios.fechaVencimiento))
@@ -91,6 +94,7 @@ export async function getRecordatoriosPorCategoriaPaginados(
       and(
         eq(recordatorios.usuarioId, usuarioId),
         eq(recordatorios.categoriaId, categoriaId),
+        isNull(recordatorios.eliminadoEn),
       ),
     )
     .orderBy(...obtenerOrden(ordenamiento))
@@ -114,6 +118,7 @@ export async function getRecordatorioPorId(
       and(
         eq(recordatorios.id, id),
         eq(recordatorios.usuarioId, usuarioId),
+        isNull(recordatorios.eliminadoEn),
       ),
     )
     .limit(1)
@@ -131,6 +136,7 @@ export async function getContadoresPorCategoria(
       and(
         eq(recordatorios.usuarioId, usuarioId),
         eq(recordatorios.estaCompletado, false),
+        isNull(recordatorios.eliminadoEn),
       ),
     )
     .groupBy(recordatorios.categoriaId)
@@ -146,7 +152,12 @@ export async function getRecordatoriosTodos(usuarioId: string): Promise<Recordat
   const filas = await db
     .select()
     .from(recordatorios)
-    .where(eq(recordatorios.usuarioId, usuarioId))
+    .where(
+      and(
+        eq(recordatorios.usuarioId, usuarioId),
+        isNull(recordatorios.eliminadoEn),
+      ),
+    )
     .orderBy(desc(recordatorios.creadoEn))
 
   return filas.map(mapearRecordatorio)
@@ -161,6 +172,7 @@ export async function getLanzamientosTodos(usuarioId: string): Promise<Recordato
     .where(
       and(
         eq(recordatorios.usuarioId, usuarioId),
+        isNull(recordatorios.eliminadoEn),
         or(...SLUGS.map((slug) => eq(categorias.slug, slug))),
       ),
     )
@@ -183,6 +195,7 @@ export async function getRecordatoriosEnRango(
       and(
         eq(recordatorios.usuarioId, usuarioId),
         eq(recordatorios.estaCompletado, false),
+        isNull(recordatorios.eliminadoEn),
         or(
           eq(recordatorios.esRecurrente, true),
           and(
@@ -210,6 +223,7 @@ export async function buscarRecordatorios(
       and(
         eq(recordatorios.usuarioId, usuarioId),
         eq(recordatorios.estaCompletado, false),
+        isNull(recordatorios.eliminadoEn),
         or(
           sql`to_tsvector('spanish', coalesce(${recordatorios.titulo}, '') || ' ' || coalesce(${recordatorios.descripcion}, '')) @@ websearch_to_tsquery('spanish', ${texto})`,
           ilike(recordatorios.titulo, termino),
@@ -245,6 +259,7 @@ export async function buscarRecordatoriosSimilares(
         eq(recordatorios.usuarioId, usuarioId),
         eq(recordatorios.categoriaId, categoria.id),
         eq(recordatorios.estaCompletado, false),
+        isNull(recordatorios.eliminadoEn),
         ilike(recordatorios.titulo, `%${titulo}%`),
       ),
     )
@@ -280,6 +295,7 @@ export async function getCumpleanosEnDias(
       and(
         eq(categorias.slug, 'birthdays'),
         eq(recordatorios.estaCompletado, false),
+        isNull(recordatorios.eliminadoEn),
         isNotNull(recordatorios.fechaVencimiento),
         gte(recordatorios.fechaVencimiento, inicioObjetivo),
         lte(recordatorios.fechaVencimiento, finObjetivo),
@@ -306,6 +322,7 @@ export async function getRecordatoriosANotificar(
       reglaRecurrencia: recordatorios.reglaRecurrencia,
       estaCompletado: recordatorios.estaCompletado,
       completadoEn: recordatorios.completadoEn,
+      eliminadoEn: recordatorios.eliminadoEn,
       tmdbId: recordatorios.tmdbId,
       metadatos: recordatorios.metadatos,
       creadoEn: recordatorios.creadoEn,
@@ -320,6 +337,7 @@ export async function getRecordatoriosANotificar(
         lte(recordatorios.notificarEn, ahora),
         gte(recordatorios.notificarEn, limiteInferior),
         eq(recordatorios.estaCompletado, false),
+        isNull(recordatorios.eliminadoEn),
       ),
     )
     .orderBy(asc(recordatorios.notificarEn))

@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-Fases 0–23 completadas. En progreso: **Fase 24 — Zona de peligro** y **Fase 25 — Instalacion PWA nativa**.
+Fases 0–24 completadas. En progreso: **Fase 25 — Instalacion PWA nativa**.
 
 > El detalle granular de fases ya entregadas vive en `CURRENT.md` (sesiones recientes) y en `git log` (sesiones antiguas). Este archivo solo lista el titulo y el outcome para mantener bajo el coste de contexto.
 
@@ -38,7 +38,7 @@ Fases 0–23 completadas. En progreso: **Fase 24 — Zona de peligro** y **Fase 
 
 ---
 
-## Fase 24 — Zona de peligro (en progreso)
+## Fase 24 — Zona de peligro [completada]
 
 **Objetivo:** Dos funciones destructivas en `/settings` con soft delete y ventana de recuperacion de 30 dias: borrar todos los recordatorios (por categoria o todos) y borrar la cuenta completa. Ambas con verificacion textual ("ELIMINAR"), correos HTML estilizados y cron de limpieza definitiva.
 
@@ -83,7 +83,7 @@ Fases 0–23 completadas. En progreso: **Fase 24 — Zona de peligro** y **Fase 
 
 ---
 
-## Fase 25 — Instalacion PWA nativa (en progreso)
+## Fase 25 — Instalacion PWA nativa [en progreso]
 
 **Objetivo:** Que el usuario pueda "descargar" Noti como app del sistema en Android y desktop (Windows/macOS/Linux) sin pasar por tiendas, para que las notificaciones push lleguen al SO aunque el navegador este cerrado. iOS 16.4+ via "Agregar a inicio".
 

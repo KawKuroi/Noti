@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server'
 import { requerirUsuario } from '@/lib/auth'
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { getSuscripcionesDelUsuarioActual } from '@/lib/queries/push.queries'
+import { getCategorias } from '@/lib/queries/category.queries'
 import { FormularioAnticipacion } from '@/components/features/settings/formulario-anticipacion'
 import { ListaDispositivos } from '@/components/features/settings/lista-dispositivos'
 import { FormularioPerfil } from '@/components/features/settings/formulario-perfil'
@@ -12,6 +13,8 @@ import { FormularioApariencia } from '@/components/features/settings/formulario-
 import { FormularioIdioma } from '@/components/features/settings/formulario-idioma'
 import { BotonSugerencias } from '@/components/features/settings/boton-sugerencias'
 import { BotonCerrarSesion } from '@/components/features/settings/boton-cerrar-sesion'
+import { BotonBorrarCuenta } from '@/components/features/settings/boton-borrar-cuenta'
+import { BotonBorrarRecordatorios } from '@/components/features/settings/boton-borrar-recordatorios'
 import { PageHeader } from '@/components/ui/page-header'
 import { Settings } from 'lucide-react'
 
@@ -56,10 +59,11 @@ function ConfigCard({
 export default async function PaginaSettings() {
   await requerirUsuario()
 
-  const [perfil, suscripciones, localeActual] = await Promise.all([
+  const [perfil, suscripciones, localeActual, todasLasCategorias] = await Promise.all([
     getPerfilDelUsuarioActual(),
     getSuscripcionesDelUsuarioActual(),
     getLocale(),
+    getCategorias(),
   ])
 
   return (
@@ -110,6 +114,18 @@ export default async function PaginaSettings() {
 
       <ConfigCard titulo="Cuenta" descripcion="Gestiona tu sesion activa.">
         <BotonCerrarSesion />
+      </ConfigCard>
+
+      <ConfigCard
+        titulo="Zona de peligro"
+        descripcion="Acciones destructivas con ventana de recuperacion de 30 dias. Recibirás un correo con el enlace para deshacer la accion."
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <BotonBorrarRecordatorios
+            categorias={todasLasCategorias.map((c) => ({ id: c.id, nombre: c.nombre }))}
+          />
+          <BotonBorrarCuenta />
+        </div>
       </ConfigCard>
     </div>
   )
