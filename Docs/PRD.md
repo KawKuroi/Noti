@@ -26,7 +26,7 @@ Una PWA minimalista que unifica todos tus recordatorios en un solo lugar, con ca
    - Lanzamientos (películas, series, videojuegos, música y libros agendados vía chat IA o manualmente, en un hub unificado con pestaña "Todos" y color por tipo)
    - Notas (archivos individuales tipo Google Keep con recordatorio opcional, evolucionables a baúl multimedia). Agrupada visualmente bajo "Herramientas" en el sidebar junto al Calendario
    - Estudio (sesiones de lectura, aprendizaje y horario de clases — fusionadas en Fase 14)
-   - Cumpleaños (recurrencia anual)
+   - Cumpleaños (recurrencia anual; aviso automático 3 días antes y el día, a las 6:00 am hora local)
    - Pendientes (fecha límite, con auto-eliminación configurable)
    - Eventos personales (fecha y hora específica, para casos excepcionales que no encajan en Estudio/Pendientes)
 

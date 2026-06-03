@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { crearRecordatorio, actualizarRecordatorio } from '@/lib/actions/reminder.actions'
-import { PRIORIDADES, OPCIONES_ANTICIPACION } from '@/lib/utils/constants'
+import { PRIORIDADES } from '@/lib/utils/constants'
 import { format } from 'date-fns'
 import type { Categoria } from '@/types/category.types'
 import type { Recordatorio, EstadoAccionRecordatorio } from '@/types/reminder.types'
@@ -443,16 +443,6 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
     return isNaN(d.getTime()) ? '' : d.toISOString()
   }, [fecha, hora])
 
-  const anticipacionMinInicial = useMemo(() => {
-    if (!recordatorio?.fechaVencimiento || !recordatorio?.notificarEn) return 15
-    const diff = Math.round(
-      (new Date(recordatorio.fechaVencimiento).getTime() -
-        new Date(recordatorio.notificarEn).getTime()) /
-        60000,
-    )
-    return diff > 0 ? diff : 15
-  }, [recordatorio])
-
   const tieneError = !estado.ok && estado.error && typeof estado.error === 'string'
   const categoriaInferida = useMemo(() => inferirCategoria(tituloActual), [tituloActual])
 
@@ -612,39 +602,6 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
               />
             </div>
           )}
-        </div>
-
-        {/* Anticipacion */}
-        <div>
-          <label
-            htmlFor="anticipacionMin"
-            className="mono"
-            style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-3)', display: 'block', marginBottom: '6px' }}
-          >
-            Notificar
-          </label>
-          <select
-            id="anticipacionMin"
-            name="anticipacionMin"
-            defaultValue={String(anticipacionMinInicial)}
-            style={{
-              width: '100%',
-              height: '38px',
-              borderRadius: '10px',
-              border: '1px solid var(--line-2)',
-              background: 'var(--bg)',
-              color: 'var(--ink)',
-              fontSize: '14px',
-              padding: '0 12px',
-              outline: 'none',
-            }}
-          >
-            {OPCIONES_ANTICIPACION.map((op) => (
-              <option key={op.valor} value={op.valor}>
-                {op.etiqueta}
-              </option>
-            ))}
-          </select>
         </div>
 
         {/* Campos condicionales */}

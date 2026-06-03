@@ -158,6 +158,70 @@ export function combinarFechaHora(fecha: string, hora: string): Date {
   return parseISO(`${fecha}T${hora}:00`)
 }
 
+// --- Helpers de zona horaria (Intl, sin dependencias extra) ---
+
+export interface PartesFechaLocal {
+  anio: number
+  mes: number // 1-12
+  dia: number // 1-31
+  hora: number // 0-23
+  minuto: number // 0-59
+}
+
+// Descompone un instante UTC en las partes de fecha/hora de una zona horaria dada.
+export function partesEnZona(fecha: Date, zona: string): PartesFechaLocal {
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone: zona,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+  const partes = fmt.formatToParts(fecha)
+  const valor = (tipo: string) => Number(partes.find((p) => p.type === tipo)?.value)
+  // Intl puede devolver "24" para la medianoche en hour12:false; normalizar a 0.
+  const horaCruda = valor('hour')
+  return {
+    anio: valor('year'),
+    mes: valor('month'),
+    dia: valor('day'),
+    hora: horaCruda === 24 ? 0 : horaCruda,
+    minuto: valor('minute'),
+  }
+}
+
+// Offset de la zona (local - UTC) en ms en el instante `fecha`. Para America/Bogota = -5h.
+function offsetZonaMs(fecha: Date, zona: string): number {
+  const p = partesEnZona(fecha, zona)
+  const comoSiFueraUTC = Date.UTC(p.anio, p.mes - 1, p.dia, p.hora, p.minuto, 0)
+  const baseAlMinuto = Math.floor(fecha.getTime() / 60000) * 60000
+  return comoSiFueraUTC - baseAlMinuto
+}
+
+// Instante UTC correspondiente a la medianoche (00:00) local del dia de `fecha` en `zona`.
+export function inicioDiaLocalEnUTC(fecha: Date, zona: string): Date {
+  const { anio, mes, dia } = partesEnZona(fecha, zona)
+  const medianocheComoUTC = Date.UTC(anio, mes - 1, dia, 0, 0, 0)
+  // local 00:00 como-si-UTC, menos el offset, da el instante UTC real de esa medianoche local.
+  return new Date(medianocheComoUTC - offsetZonaMs(fecha, zona))
+}
+
+// Dias-calendario locales desde hoy hasta la proxima ocurrencia del mes-dia de un
+// cumpleanos (0 = es hoy, 3 = faltan 3 dias). Ignora el ano del cumpleanos.
+export function diasHastaCumple(fechaCumple: Date, zona: string, ahora: Date = new Date()): number {
+  const hoy = partesEnZona(ahora, zona)
+  const cumple = partesEnZona(fechaCumple, zona)
+
+  const hoyUTC = Date.UTC(hoy.anio, hoy.mes - 1, hoy.dia)
+  let objetivo = Date.UTC(hoy.anio, cumple.mes - 1, cumple.dia)
+  if (objetivo < hoyUTC) {
+    objetivo = Date.UTC(hoy.anio + 1, cumple.mes - 1, cumple.dia)
+  }
+  return Math.round((objetivo - hoyUTC) / (24 * 60 * 60 * 1000))
+}
+
 // Expande los recordatorios en ocurrencias concretas dentro del rango [inicio, fin].
 // Los no recurrentes se incluyen si su fechaVencimiento cae en el rango.
 // Los recurrentes se expanden en cada ocurrencia dentro del rango clonando el objeto.

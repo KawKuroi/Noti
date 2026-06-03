@@ -27,6 +27,14 @@ _Razón:_ Una fecha incorrecta en un recordatorio es peor que no tener fecha. Si
 _Alternativa:_ usar la anticipación configurable del usuario (5min/15min/etc.)
 _Razón:_ Los lanzamientos no tienen hora exacta conocida — la notificación temprana tiene más valor que la precisión del minuto.
 
+**Anticipación de notificación GLOBAL, no por recordatorio**
+_Alternativa:_ un selector "Notificar (X min antes)" en cada alta/edición de recordatorio.
+_Razón:_ El selector por recordatorio era confuso y causaba footguns (ej: recordatorio a +3 min con anticipación 15 → `notify_at` 12 min en el pasado → el cron nunca lo enviaba). Ahora el sistema deriva `notify_at = fechaVencimiento − anticipaciónGlobal` leyendo la anticipación única del perfil (`notification_advance`, configurable en `/settings`). Si el cálculo cae en el pasado, se hace clamp a "ahora" para que el siguiente tick del cron lo entregue. Selector eliminado del formulario manual y de la card del asistente IA.
+
+**Cumpleaños: aviso 3 días antes y el día, a las 6:00 am hora local**
+_Alternativa:_ avisar 3 y 1 día antes sin hora fija (comportamiento previo) / usar la anticipación global como cualquier recordatorio.
+_Razón:_ Un cumpleaños es un evento de día completo: importa avisar con margen (3 días antes para comprar/organizar) y el mismo día, a una hora civilizada (6am local, no medianoche). Por eso los cumpleaños NO usan `notify_at` (queda `NULL`); los maneja `procesarCumpleanos`, que calcula los días en la zona del usuario (`Intl`, default America/Bogota), dispara solo desde las 6am local y deduplica con `notification_log` (una vez por día) para sobrevivir al pinger de cada minuto.
+
 **Notas como archivos individuales**
 _Alternativa:_ un único documento tipo Notion donde el usuario escribe todo
 _Razón:_ Permite búsqueda, filtros, recordatorios individuales por nota y extensión futura a multimedia (Fase 16).

@@ -272,35 +272,34 @@ export interface RecordatorioConAnticipacion extends Recordatorio {
 
 // Devuelve recordatorios cuyo notify_at cayo en la ventana [ahora - ventanaMin, ahora]
 // Se usa en el cron para saber que notificaciones enviar cada minuto
-export async function getCumpleanosEnDias(
-  diasAnticipacion: number,
-): Promise<{ id: string; usuarioId: string; titulo: string }[]> {
-  const hoy = new Date()
-  const inicioObjetivo = new Date(
-    Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), hoy.getUTCDate() + diasAnticipacion, 0, 0, 0, 0),
-  )
-  const finObjetivo = new Date(
-    Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), hoy.getUTCDate() + diasAnticipacion, 23, 59, 59, 999),
-  )
-
-  return db
+// Todos los cumpleanos activos con su fecha y la zona horaria del usuario. El calculo
+// de "3 dias antes / el dia a las 6am local" se hace en `procesarCumpleanos`.
+export async function getCumpleanosActivos(): Promise<
+  { id: string; usuarioId: string; titulo: string; fechaVencimiento: Date; zonaHoraria: string }[]
+> {
+  const filas = await db
     .select({
       id: recordatorios.id,
       usuarioId: recordatorios.usuarioId,
       titulo: recordatorios.titulo,
+      fechaVencimiento: recordatorios.fechaVencimiento,
+      zonaHoraria: perfiles.zonaHoraria,
     })
     .from(recordatorios)
     .innerJoin(categorias, eq(recordatorios.categoriaId, categorias.id))
+    .innerJoin(perfiles, eq(recordatorios.usuarioId, perfiles.id))
     .where(
       and(
         eq(categorias.slug, 'birthdays'),
         eq(recordatorios.estaCompletado, false),
         isNull(recordatorios.eliminadoEn),
         isNotNull(recordatorios.fechaVencimiento),
-        gte(recordatorios.fechaVencimiento, inicioObjetivo),
-        lte(recordatorios.fechaVencimiento, finObjetivo),
       ),
     )
+
+  return filas
+    .filter((f): f is typeof f & { fechaVencimiento: Date } => f.fechaVencimiento !== null)
+    .map((f) => ({ ...f, fechaVencimiento: new Date(f.fechaVencimiento) }))
 }
 
 export async function getRecordatoriosANotificar(

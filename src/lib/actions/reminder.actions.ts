@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
-import { recordatorios } from '@/db/schema'
+import { recordatorios, perfiles } from '@/db/schema'
 import { obtenerUsuario } from '@/lib/auth'
 import { validarRecordatorio } from '@/lib/validations/reminder.schemas'
 import { calcularProximaOcurrencia, combinarFechaHora } from '@/lib/utils/date.utils'
@@ -23,6 +23,29 @@ function revalidarRutas(slug?: string) {
   if (slug) {
     revalidatePath(`/${slug}`)
   }
+}
+
+// Deriva notify_at automaticamente desde la anticipacion GLOBAL del perfil (no por
+// recordatorio). Los cumpleanos no usan notify_at: los maneja procesarCumpleanos
+// (3 dias antes + el dia, 6am local). Si el aviso queda en el pasado, se ajusta a
+// "ahora" para que el siguiente tick del cron lo entregue en vez de perderse.
+async function calcularNotificarEn(
+  slug: string,
+  fechaVencimiento: Date,
+  usuarioId: string,
+): Promise<Date | null> {
+  if (slug === 'birthdays') return null
+
+  const [perfil] = await db
+    .select({ anticipacion: perfiles.anticipacionNotificacion })
+    .from(perfiles)
+    .where(eq(perfiles.id, usuarioId))
+    .limit(1)
+  const anticipacionMin = perfil?.anticipacion ?? 15
+
+  const notificar = new Date(fechaVencimiento.getTime() - anticipacionMin * 60 * 1000)
+  const ahora = new Date()
+  return notificar.getTime() < ahora.getTime() ? ahora : notificar
 }
 
 export async function crearRecordatorio(
@@ -58,8 +81,7 @@ export async function crearRecordatorio(
     } else {
       return { ok: false, error: 'La fecha es requerida' }
     }
-    const anticipacionMs = (datos.anticipacionMin ?? 15) * 60 * 1000
-    notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+    notificarEn = await calcularNotificarEn(slug, fechaVencimiento, usuarioId)
   }
 
   try {
@@ -121,8 +143,7 @@ export async function actualizarRecordatorio(
     } else {
       return { ok: false, error: 'La fecha es requerida' }
     }
-    const anticipacionMs = (datos.anticipacionMin ?? 15) * 60 * 1000
-    notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+    notificarEn = await calcularNotificarEn(slug, fechaVencimiento, usuarioId)
   }
 
   try {
@@ -280,8 +301,7 @@ export async function crearRecordatorioDesdeIA(
       input.fechaHoraUtc && !isNaN(new Date(input.fechaHoraUtc).getTime())
         ? new Date(input.fechaHoraUtc)
         : combinarFechaHora(input.fechaVencimiento, hora)
-    const anticipacionMs = (input.anticipacionMin ?? 15) * 60 * 1000
-    notificarEn = new Date(fechaVencimiento.getTime() - anticipacionMs)
+    notificarEn = await calcularNotificarEn(input.categoriaSlug, fechaVencimiento, usuarioId)
   } else if (!esNota) {
     return { ok: false, error: 'La fecha es requerida' }
   }

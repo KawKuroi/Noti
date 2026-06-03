@@ -17,7 +17,6 @@ import {
 import {
   CATEGORIAS,
   ETIQUETAS_TIPO_LANZAMIENTO,
-  OPCIONES_ANTICIPACION,
   SLUGS_LANZAMIENTO,
   TIPOS_LANZAMIENTO,
   TIPO_LANZAMIENTO_A_SLUG,
@@ -92,7 +91,7 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
   )
   const [diasSemana, setDiasSemana] = useState<string[]>(initRecurrencia.dias)
   const [descripcion, setDescripcion] = useState(inicial.descripcion ?? '')
-  const [anticipacionMin, setAnticipacionMin] = useState<number>(inicial.anticipacionMin)
+  const anticipacionMin = inicial.anticipacionMin
   const [tipoLanzamiento, setTipoLanzamiento] = useState<TipoLanzamiento | null>(
     inicial.tipoLanzamiento,
   )
@@ -304,28 +303,6 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
           />
         </div>
       </div>
-
-      {!esNota && (
-        <div>
-          <label style={estiloLabel}>Avisar</label>
-          <Select
-            value={String(anticipacionMin)}
-            onValueChange={(v) => setAnticipacionMin(Number(v))}
-            disabled={creando}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {OPCIONES_ANTICIPACION.map((op) => (
-                <SelectItem key={op.valor} value={String(op.valor)}>
-                  {op.etiqueta}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
 
       {esLanzamientoCategoria && (
         <div

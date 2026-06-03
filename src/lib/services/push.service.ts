@@ -3,8 +3,14 @@ import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
 import { suscripcionesPush, logNotificaciones, recordatorios } from '@/db/schema'
 import { getSuscripcionesPorUsuario, yaSeNotifico } from '@/lib/queries/push.queries'
-import { getRecordatoriosANotificar, getRecordatoriosEnRango, getCumpleanosEnDias } from '@/lib/queries/reminder.queries'
-import { calcularProximaOcurrencia } from '@/lib/utils/date.utils'
+import { getRecordatoriosANotificar, getRecordatoriosEnRango, getCumpleanosActivos } from '@/lib/queries/reminder.queries'
+import { calcularProximaOcurrencia, diasHastaCumple, inicioDiaLocalEnUTC, partesEnZona } from '@/lib/utils/date.utils'
+import { ZONA_HORARIA_DEFECTO } from '@/lib/utils/constants'
+
+// Hora local (inclusive) a partir de la cual se envian los avisos de cumpleanos.
+const HORA_AVISO_CUMPLEANOS = 6
+// Dias de anticipacion para cumpleanos: el dia (0) y 3 dias antes.
+const DIAS_AVISO_CUMPLEANOS = [0, 3]
 
 let vapidConfigurado = false
 
@@ -185,25 +191,36 @@ export async function procesarRecordatoriosPendientes(): Promise<{ procesados: n
   return { procesados }
 }
 
-export async function procesarCountdownCumpleanos(): Promise<{ enviados: number }> {
+export async function procesarCumpleanos(): Promise<{ enviados: number }> {
+  const ahora = new Date()
+  const cumpleanos = await getCumpleanosActivos()
+
   let enviados = 0
 
-  for (const dias of [3, 1]) {
-    const cumpleanos = await getCumpleanosEnDias(dias)
+  for (const c of cumpleanos) {
+    const zona = c.zonaHoraria || ZONA_HORARIA_DEFECTO
 
-    for (const c of cumpleanos) {
-      const payload: PayloadPush = {
-        title: dias === 1 ? 'Manana es el cumpleanos' : `Faltan ${dias} dias para el cumpleanos`,
-        body: c.titulo,
-        data: {
-          url: '/inicio',
-          reminderId: c.id,
-        },
-      }
+    // Regla "desde las 6am hora local": no avisar antes de esa hora.
+    if (partesEnZona(ahora, zona).hora < HORA_AVISO_CUMPLEANOS) continue
 
-      await enviarPushAUsuario(c.usuarioId, c.id, payload)
-      enviados++
+    const dias = diasHastaCumple(c.fechaVencimiento, zona, ahora)
+    if (!DIAS_AVISO_CUMPLEANOS.includes(dias)) continue
+
+    // Dedup: una sola vez por dia local (sobrevive al pinger cada minuto).
+    const inicioDia = inicioDiaLocalEnUTC(ahora, zona)
+    if (await yaSeNotifico(c.id, inicioDia)) continue
+
+    const payload: PayloadPush = {
+      title: dias === 0 ? 'Hoy es el cumpleanos' : `Faltan ${dias} dias para el cumpleanos`,
+      body: c.titulo,
+      data: {
+        url: '/inicio',
+        reminderId: c.id,
+      },
     }
+
+    await enviarPushAUsuario(c.usuarioId, c.id, payload)
+    enviados++
   }
 
   return { enviados }

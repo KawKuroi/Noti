@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { procesarRecordatoriosPendientes, procesarCountdownCumpleanos } from '@/lib/services/push.service'
+import { procesarRecordatoriosPendientes, procesarCumpleanos } from '@/lib/services/push.service'
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   try {
     const [{ procesados }, { enviados: cumpleanosEnviados }] = await Promise.all([
       procesarRecordatoriosPendientes(),
-      procesarCountdownCumpleanos(),
+      procesarCumpleanos(),
     ])
     return NextResponse.json({ ok: true, procesados, cumpleanosEnviados })
   } catch (e) {

@@ -106,7 +106,6 @@ export const esquemaRecordatorioBase = z
       (v) => (v === '' ? undefined : v),
       z.string().regex(horaRegex, 'Formato HH:mm requerido').optional(),
     ),
-    anticipacionMin: z.coerce.number().int().min(0).default(15),
     esRecurrente: z
       .string()
       .transform((v) => v === 'true')
