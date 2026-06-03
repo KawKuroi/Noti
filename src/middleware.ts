@@ -33,7 +33,11 @@ export async function middleware(solicitud: NextRequest) {
 
   const ruta = solicitud.nextUrl.pathname
   const estaEnRutaAuth = ruta.startsWith('/login') || ruta.startsWith('/register')
-  const esRutaPublica = ruta === '/' || ruta === '/auth/callback'
+  const esRutaPublica =
+    ruta === '/' ||
+    ruta === '/auth/callback' ||
+    ruta.startsWith('/api/cron/') ||
+    ruta.startsWith('/api/push/')
 
   if (!user && !estaEnRutaAuth && !esRutaPublica) {
     return NextResponse.redirect(new URL('/login', solicitud.url))
