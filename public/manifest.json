@@ -77,6 +77,13 @@
     }
   ],
   "categories": ["productivity", "utilities"],
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://noti-seven-peach.vercel.app/manifest.json"
+    }
+  ],
   "display_override": ["window-controls-overlay", "standalone"],
   "shortcuts": [
     {

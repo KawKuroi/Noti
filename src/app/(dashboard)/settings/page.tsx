@@ -6,6 +6,7 @@ import { getSuscripcionesDelUsuarioActual } from '@/lib/queries/push.queries'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { FormularioAnticipacion } from '@/components/features/settings/formulario-anticipacion'
 import { ListaDispositivos } from '@/components/features/settings/lista-dispositivos'
+import { BotonEnviarPushPrueba } from '@/components/features/settings/boton-enviar-push-prueba'
 import { FormularioPerfil } from '@/components/features/settings/formulario-perfil'
 import { FormularioResumenDiario } from '@/components/features/settings/formulario-resumen-diario'
 import { FormularioAutoDeleteTareas } from '@/components/features/settings/formulario-auto-delete-tareas'
@@ -92,6 +93,9 @@ export default async function PaginaSettings() {
 
       <ConfigCard titulo="Dispositivos registrados" descripcion="Dispositivos que recibiran notificaciones push.">
         <ListaDispositivos suscripciones={suscripciones} />
+        <div className="mt-4">
+          <BotonEnviarPushPrueba />
+        </div>
       </ConfigCard>
 
       <ConfigCard titulo="Resumen diario" descripcion="Recibe una notificacion push cada manana con el resumen de tus recordatorios del dia.">

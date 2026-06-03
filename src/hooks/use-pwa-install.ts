@@ -36,6 +36,19 @@ export function usePWAInstall(): EstadoPWAInstall {
 
     setInstalado(enStandalone)
 
+    // En una pestana normal, display-mode no es standalone aunque la app este
+    // instalada. getInstalledRelatedApps (Chrome/Edge) permite detectarlo igual.
+    if (!enStandalone) {
+      const nav = navigator as unknown as {
+        getInstalledRelatedApps?: () => Promise<unknown[]>
+      }
+      nav.getInstalledRelatedApps?.()
+        .then((apps) => {
+          if (apps.length > 0) setInstalado(true)
+        })
+        .catch(() => null)
+    }
+
     const enIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
     setEsIOS(enIOS)
     if (enIOS) setSinSoportePush(esIOSAntiguo())

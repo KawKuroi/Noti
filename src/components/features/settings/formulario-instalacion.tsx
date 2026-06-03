@@ -24,8 +24,9 @@ export function FormularioInstalacion() {
   if (!soportado) {
     return (
       <p className="text-sm" style={{ color: 'var(--ink-3)' }}>
-        La instalacion no esta disponible en este navegador. En Chrome o Edge puedes instalar Noti
-        desde la barra de direcciones.
+        Si ya instalaste Noti, abrela desde el menu de inicio de tu sistema (se abre en su propia
+        ventana). Si todavia no la instalaste, usa el icono de instalar en la barra de direcciones
+        de Chrome o Edge.
       </p>
     )
   }
