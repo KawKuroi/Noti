@@ -1,5 +1,5 @@
 export { AsistenteProvider, useAsistente } from './asistente-provider'
 export { BarraAsistente } from './barra-asistente'
-export { CommandPalette, BarraInputAsistente, PanelSugerencias } from './command-palette'
+export { CommandPalette, PanelSugerencias } from './command-palette'
 export { CandidatoCard } from './candidato-card'
 export { RecordatorioFormCard } from './recordatorio-form-card'

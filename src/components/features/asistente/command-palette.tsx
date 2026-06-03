@@ -1,11 +1,9 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { Loader2, Mic, Search, Sparkles, Square, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useAsistente } from './asistente-provider'
 import { CandidatoCard } from './candidato-card'
 import { RecordatorioFormCard } from './recordatorio-form-card'
-import { useAudioRecorder } from '@/hooks/use-audio-recorder'
 
 const EJEMPLOS = [
   'Cumpleaños de Marta el 21 de junio',
@@ -14,144 +12,6 @@ const EJEMPLOS = [
   'Nuevo álbum de The Weeknd',
   'Cuándo sale el nuevo Zelda',
 ]
-
-interface BarraInputAsistenteProps {
-  inputRef: React.RefObject<HTMLInputElement | null>
-}
-
-// Header/anchor del asistente: mismo padding y estructura que el boton cerrado de
-// BarraAsistente, pero con input real + acciones (mic, buscar, limpiar, cerrar).
-// Mantiene la misma apariencia para que no haya salto visual al abrir.
-export function BarraInputAsistente({ inputRef }: BarraInputAsistenteProps) {
-  const {
-    cerrar,
-    query,
-    setQuery,
-    estado,
-    extraccion,
-    candidatos,
-    procesar,
-    confirmarCandidato,
-    limpiar,
-  } = useAsistente()
-
-  const alTranscribir = useCallback(
-    (texto: string) => {
-      setQuery(texto)
-    },
-    [setQuery],
-  )
-
-  const { estadoGrabacion, segundosGrabando, errorGrabacion, iniciarGrabacion, detenerGrabacion } =
-    useAudioRecorder(alTranscribir)
-
-  const cargando = estado === 'extrayendo' || estado === 'buscando'
-  const creando = estado === 'creando'
-  const hayResultado = !!extraccion || candidatos.length > 0
-  const puedeBuscar = query.trim().length >= 3 && !cargando && !creando
-  const micDeshabilitado = cargando || creando || estadoGrabacion === 'procesando'
-
-  const ejecutarBusqueda = useCallback(() => {
-    if (query.trim().length < 3) return
-    procesar(query)
-  }, [query, procesar])
-
-  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      cerrar()
-      return
-    }
-    if (e.key === 'Enter') {
-      if (candidatos.length > 0) {
-        e.preventDefault()
-        const c = candidatos[0]
-        if (c && c.fechaLanzamiento && !c.tba) {
-          confirmarCandidato(c, c.fechaLanzamiento, c.fuente)
-        }
-        return
-      }
-      e.preventDefault()
-      ejecutarBusqueda()
-    }
-  }
-
-  return (
-    <>
-      <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--line)] bg-[var(--bg-elev)] shadow-sm">
-        <Sparkles size={18} className="text-purple-600 shrink-0" />
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={onKeyDown}
-          placeholder="¿Qué te recuerdo o agendo?"
-          className="flex-1 text-sm outline-none bg-transparent text-[var(--ink)] placeholder:text-[var(--ink-3)]"
-        />
-
-        {estadoGrabacion === 'grabando' ? (
-          <button
-            type="button"
-            onClick={detenerGrabacion}
-            className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-500 hover:bg-red-100 transition-colors shrink-0"
-            title="Detener grabacion"
-          >
-            <Square size={12} />
-            {segundosGrabando}s
-          </button>
-        ) : estadoGrabacion === 'procesando' ? (
-          <Loader2 size={14} className="text-purple-500 animate-spin shrink-0" />
-        ) : (
-          <button
-            type="button"
-            onClick={iniciarGrabacion}
-            disabled={micDeshabilitado}
-            className="p-1 rounded-md text-[var(--ink-3)] hover:text-[var(--ink)] hover:bg-[var(--bg-soft)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
-            title="Dictado por voz"
-            aria-label="Dictado por voz"
-          >
-            <Mic size={14} />
-          </button>
-        )}
-
-        <button
-          type="button"
-          onClick={ejecutarBusqueda}
-          disabled={!puedeBuscar}
-          className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
-          aria-label="Buscar"
-          title="Buscar (Enter)"
-        >
-          <Search size={12} />
-          Buscar
-        </button>
-        {hayResultado && !cargando && (
-          <button
-            type="button"
-            onClick={limpiar}
-            className="text-xs text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors shrink-0"
-          >
-            Limpiar
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={cerrar}
-          className="text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors shrink-0"
-          aria-label="Cerrar"
-        >
-          <X size={16} />
-        </button>
-      </div>
-
-      {errorGrabacion && (
-        <div className="mt-2 px-3 py-2 rounded-md bg-red-50 border border-red-100">
-          <p className="text-xs text-red-600">{errorGrabacion}</p>
-        </div>
-      )}
-    </>
-  )
-}
 
 // Panel desplegable de sugerencias/resultados. Se renderiza posicionado absoluto
 // debajo de la barra para no empujar el contenido inferior.
