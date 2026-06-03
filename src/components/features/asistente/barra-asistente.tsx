@@ -43,7 +43,11 @@ export function BarraAsistente({ placeholder = '¿Qué te recuerdo o agendo?' }:
     if (!abierto) return
     function alClickFuera(ev: MouseEvent) {
       const objetivo = ev.target as Element | null
+      // Click dentro de un portal de Radix (las opciones del Select): no cerrar nada.
       if (objetivo?.closest?.('[data-radix-popper-content-wrapper]')) return
+      // Cierre secuencial: si hay un Select/popper abierto, este click solo lo descarta
+      // a el (Radix lo cierra). No cerramos el asistente hasta el siguiente click fuera.
+      if (document.querySelector('[data-radix-popper-content-wrapper]')) return
       if (!contenedorRef.current) return
       if (!contenedorRef.current.contains(objetivo as Node)) {
         cerrar()
