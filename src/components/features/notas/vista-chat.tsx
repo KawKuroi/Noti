@@ -330,6 +330,8 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
               style={{ background: 'var(--bg-soft)', border: '1px solid var(--line)' }}
             >
               {previewImagen ? (
+                // Preview local (objectURL blob:) de 40x40 px; next/image no aplica a blob:
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={previewImagen}
                   alt={archivoPendiente.name}

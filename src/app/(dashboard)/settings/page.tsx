@@ -6,6 +6,7 @@ import { getSuscripcionesDelUsuarioActual } from '@/lib/queries/push.queries'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { FormularioAnticipacion } from '@/components/features/settings/formulario-anticipacion'
 import { ListaDispositivos } from '@/components/features/settings/lista-dispositivos'
+import { BotonActivarNotificaciones } from '@/components/features/settings/boton-activar-notificaciones'
 import { BotonEnviarPushPrueba } from '@/components/features/settings/boton-enviar-push-prueba'
 import { FormularioPerfil } from '@/components/features/settings/formulario-perfil'
 import { FormularioResumenDiario } from '@/components/features/settings/formulario-resumen-diario'
@@ -91,8 +92,11 @@ export default async function PaginaSettings() {
         <FormularioAnticipacion anticipacionActual={perfil?.anticipacionNotificacion ?? 15} />
       </ConfigCard>
 
-      <ConfigCard titulo="Dispositivos registrados" descripcion="Dispositivos que recibiran notificaciones push.">
-        <ListaDispositivos suscripciones={suscripciones} />
+      <ConfigCard titulo="Dispositivos y notificaciones" descripcion="Activa las notificaciones push en este dispositivo y administra los registrados.">
+        <BotonActivarNotificaciones />
+        <div className="mt-4">
+          <ListaDispositivos suscripciones={suscripciones} />
+        </div>
         <div className="mt-4">
           <BotonEnviarPushPrueba />
         </div>
