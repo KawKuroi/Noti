@@ -1,12 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Bell, CheckCheck } from 'lucide-react'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import {
   obtenerNotificaciones,
   marcarNotificacionesLeidas,
-} from '@/lib/actions/notificacion.actions'
+} from '@/lib/actions/notification.actions'
 import { formatearMomentoNota } from '@/lib/utils/date.utils'
 import type { NotificacionHistorial } from '@/lib/queries/push.queries'
 
@@ -51,11 +52,18 @@ export function CentroNotificaciones({
   async function marcarTodas() {
     if (marcando || noLeidas === 0) return
     setMarcando(true)
-    // Al marcar como leidas, las notificaciones salen del menu (no quedan como historial).
+    // Optimista: al marcar como leidas salen del menu. Si el servidor falla, revertir.
+    const itemsPrevios = items
+    const noLeidasPrevias = noLeidas
     setItems([])
     setNoLeidas(0)
     try {
-      await marcarNotificacionesLeidas()
+      const resultado = await marcarNotificacionesLeidas()
+      if (!resultado.ok) throw new Error('fallo al marcar')
+    } catch {
+      setItems(itemsPrevios)
+      setNoLeidas(noLeidasPrevias)
+      toast.error('No se pudieron marcar como leidas')
     } finally {
       setMarcando(false)
     }
@@ -183,60 +191,57 @@ export function CentroNotificaciones({
               </div>
             ) : (
               <ul style={{ display: 'flex', flexDirection: 'column' }}>
-                {items.map((n) => {
-                  const noLeida = n.leidoEn === null
-                  return (
-                    <li
-                      key={n.id}
+                {items.map((n) => (
+                  <li
+                    key={n.id}
+                    style={{
+                      display: 'flex',
+                      gap: '12px',
+                      padding: '12px 24px',
+                      borderBottom: '1px solid var(--line)',
+                      background: 'var(--bg-soft)',
+                    }}
+                  >
+                    <span
                       style={{
-                        display: 'flex',
-                        gap: '12px',
-                        padding: '12px 24px',
-                        borderBottom: '1px solid var(--line)',
-                        background: noLeida ? 'var(--bg-soft)' : 'transparent',
+                        marginTop: '6px',
+                        width: '7px',
+                        height: '7px',
+                        borderRadius: '999px',
+                        flexShrink: 0,
+                        background: 'var(--cat-eventos, #DC2626)',
                       }}
-                    >
-                      <span
-                        style={{
-                          marginTop: '6px',
-                          width: '7px',
-                          height: '7px',
-                          borderRadius: '999px',
-                          flexShrink: 0,
-                          background: noLeida ? 'var(--cat-eventos, #DC2626)' : 'transparent',
-                        }}
-                      />
-                      <div style={{ minWidth: 0, flex: 1 }}>
+                    />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <p
+                        className="font-medium"
+                        style={{ fontSize: '13.5px', color: 'var(--ink)', lineHeight: 1.4 }}
+                      >
+                        {n.titulo ?? 'Notificacion'}
+                      </p>
+                      {n.cuerpo && (
                         <p
-                          className="font-medium"
-                          style={{ fontSize: '13.5px', color: 'var(--ink)', lineHeight: 1.4 }}
+                          style={{
+                            fontSize: '12.5px',
+                            color: 'var(--ink-2)',
+                            lineHeight: 1.45,
+                            marginTop: '2px',
+                          }}
                         >
-                          {n.titulo ?? 'Notificacion'}
+                          {n.cuerpo}
                         </p>
-                        {n.cuerpo && (
-                          <p
-                            style={{
-                              fontSize: '12.5px',
-                              color: 'var(--ink-2)',
-                              lineHeight: 1.45,
-                              marginTop: '2px',
-                            }}
-                          >
-                            {n.cuerpo}
-                          </p>
+                      )}
+                      <p
+                        className="mono"
+                        style={{ fontSize: '10.5px', color: 'var(--ink-3)', marginTop: '4px' }}
+                      >
+                        {formatearMomentoNota(
+                          n.enviadoEn instanceof Date ? n.enviadoEn : new Date(n.enviadoEn),
                         )}
-                        <p
-                          className="mono"
-                          style={{ fontSize: '10.5px', color: 'var(--ink-3)', marginTop: '4px' }}
-                        >
-                          {formatearMomentoNota(
-                            n.enviadoEn instanceof Date ? n.enviadoEn : new Date(n.enviadoEn),
-                          )}
-                        </p>
-                      </div>
-                    </li>
-                  )
-                })}
+                      </p>
+                    </div>
+                  </li>
+                ))}
               </ul>
             )}
           </div>

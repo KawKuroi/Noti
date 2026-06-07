@@ -1,15 +1,58 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 import { db } from '@/db'
-import { perfiles, recordatorios } from '@/db/schema'
+import { perfiles, recordatorios, logNotificaciones } from '@/db/schema'
 import { obtenerUsuario } from '@/lib/auth'
 import { esquemaAnticipacion } from '@/lib/validations/push.schemas'
+import {
+  getHistorialNotificaciones,
+  type NotificacionHistorial,
+} from '@/lib/queries/push.queries'
 
 async function obtenerUsuarioId(): Promise<string | null> {
   const user = await obtenerUsuario()
   return user?.id ?? null
+}
+
+export interface EstadoNotificaciones {
+  items: NotificacionHistorial[]
+  noLeidas: number
+}
+
+// Devuelve las notificaciones sin leer para el centro de notificaciones (campana).
+// El badge se deriva de la cantidad de items (el menu solo lista no leidas), por lo que
+// no hace falta un COUNT aparte. Lo usa el componente para refrescar al abrir el menu o
+// al recibir un push (mensaje del SW).
+export async function obtenerNotificaciones(): Promise<EstadoNotificaciones> {
+  const usuario = await obtenerUsuario()
+  if (!usuario) return { items: [], noLeidas: 0 }
+
+  const items = await getHistorialNotificaciones(usuario.id)
+  return { items, noLeidas: items.length }
+}
+
+// Marca todas las notificaciones del usuario como leidas (las saca del menu).
+export async function marcarNotificacionesLeidas(): Promise<{ ok: boolean }> {
+  const usuarioId = await obtenerUsuarioId()
+  if (!usuarioId) return { ok: false }
+
+  try {
+    await db
+      .update(logNotificaciones)
+      .set({ leidoEn: new Date() })
+      .where(
+        and(
+          eq(logNotificaciones.usuarioId, usuarioId),
+          isNull(logNotificaciones.leidoEn),
+        ),
+      )
+    return { ok: true }
+  } catch (e) {
+    console.error('Error al marcar notificaciones leidas:', e)
+    return { ok: false }
+  }
 }
 
 export async function actualizarAnticipacion(

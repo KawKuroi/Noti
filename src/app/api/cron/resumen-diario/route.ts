@@ -1,11 +1,11 @@
 import { getPerfilesConResumenDiario } from '@/lib/queries/user.queries'
 import { enviarResumenDiario } from '@/lib/services/push.service'
+import { verificarCronSecret } from '@/lib/utils/cron-auth'
 
 export const maxDuration = 60
 
 export async function GET(req: Request) {
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!verificarCronSecret(req)) {
     return new Response('No autorizado', { status: 401 })
   }
 

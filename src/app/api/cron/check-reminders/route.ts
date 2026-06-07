@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { procesarRecordatoriosPendientes, procesarCumpleanos } from '@/lib/services/push.service'
+import { verificarCronSecret } from '@/lib/utils/cron-auth'
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  if (!verificarCronSecret(req)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 

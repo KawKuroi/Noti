@@ -1,7 +1,7 @@
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
-import { getHistorialNotificaciones, contarNotificacionesNoLeidas } from '@/lib/queries/push.queries'
+import { getHistorialNotificaciones } from '@/lib/queries/push.queries'
 import { upsertPerfil } from '@/lib/actions/user.actions'
 import { Sidebar } from '@/components/features/sidebar'
 import { BusquedaGlobal } from '@/components/features/busqueda-global'
@@ -14,11 +14,10 @@ interface Props {
 export default async function LayoutDashboard({ children }: Props) {
   const user = await requerirUsuario()
 
-  const [categorias, perfil, notificaciones, noLeidas] = await Promise.all([
+  const [categorias, perfil, notificaciones] = await Promise.all([
     getCategorias(),
     getPerfilDelUsuarioActual(),
     getHistorialNotificaciones(user.id),
-    contarNotificacionesNoLeidas(user.id),
   ])
 
   // Fallback: si el usuario existe en auth pero no tiene perfil creado
@@ -40,7 +39,7 @@ export default async function LayoutDashboard({ children }: Props) {
             usuario={user}
             nombrePerfil={perfil?.nombreMostrado}
             notificacionesIniciales={notificaciones}
-            noLeidasIniciales={noLeidas}
+            noLeidasIniciales={notificaciones.length}
           />
           <main
             className="flex-1 overflow-y-auto"
