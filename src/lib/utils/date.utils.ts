@@ -25,6 +25,7 @@ import { es } from 'date-fns/locale'
 import type { Recordatorio } from '@/types/reminder.types'
 
 export interface GruposRecordatorios {
+  vencidos: Recordatorio[]
   hoy: Recordatorio[]
   manana: Recordatorio[]
   estaSemana: Recordatorio[]
@@ -32,13 +33,19 @@ export interface GruposRecordatorios {
 }
 
 export function agruparPorDia(recordatorios: Recordatorio[]): GruposRecordatorios {
-  const grupos: GruposRecordatorios = { hoy: [], manana: [], estaSemana: [], masAdelante: [] }
+  const grupos: GruposRecordatorios = { vencidos: [], hoy: [], manana: [], estaSemana: [], masAdelante: [] }
+  const inicioHoy = startOfDay(new Date())
 
   for (const rec of recordatorios) {
     if (!rec.fechaVencimiento) continue
-    const fecha = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento)
 
-    if (isToday(fecha)) {
+    // Los recurrentes se agrupan por su proxima ocurrencia y nunca son "vencidos".
+    const fechaBase = rec.fechaVencimiento instanceof Date ? rec.fechaVencimiento : new Date(rec.fechaVencimiento)
+    const fecha = rec.esRecurrente ? obtenerProximaFecha(rec) ?? fechaBase : fechaBase
+
+    if (!rec.esRecurrente && !rec.estaCompletado && isBefore(fecha, inicioHoy)) {
+      grupos.vencidos.push(rec)
+    } else if (isToday(fecha)) {
       grupos.hoy.push(rec)
     } else if (isTomorrow(fecha)) {
       grupos.manana.push(rec)
@@ -206,6 +213,16 @@ export function inicioDiaLocalEnUTC(fecha: Date, zona: string): Date {
   const medianocheComoUTC = Date.UTC(anio, mes - 1, dia, 0, 0, 0)
   // local 00:00 como-si-UTC, menos el offset, da el instante UTC real de esa medianoche local.
   return new Date(medianocheComoUTC - offsetZonaMs(fecha, zona))
+}
+
+// Segundos restantes hasta el fin del dia local (23:59:59) en `zona`. Se usa como TTL
+// de los push: un aviso de hoy sigue siendo entregable hasta el fin del dia local y
+// luego expira en el servicio de push (FCM), evitando el backlog al reabrir el navegador.
+export function segundosHastaFinDiaLocal(zona: string, ahora: Date = new Date()): number {
+  const finDiaLocal = inicioDiaLocalEnUTC(ahora, zona).getTime() + 24 * 60 * 60 * 1000
+  const segundos = Math.floor((finDiaLocal - ahora.getTime()) / 1000)
+  // Margen minimo para no enviar TTL=0 cerca de la medianoche.
+  return Math.max(segundos, 60)
 }
 
 // Dias-calendario locales desde hoy hasta la proxima ocurrencia del mes-dia de un

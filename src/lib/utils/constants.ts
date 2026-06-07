@@ -89,6 +89,18 @@ export const OPCIONES_AUTO_DELETE_TAREAS: { valor: number | null; etiqueta: stri
   { valor: 90, etiqueta: 'A los 90 dias' },
 ]
 
+// Autoeliminacion de recordatorios vencidos (no recurrentes con fecha pasada).
+export const OPCIONES_AUTO_DELETE_VENCIDOS: { valor: number | null; etiqueta: string }[] = [
+  { valor: null, etiqueta: 'Nunca' },
+  { valor: 7, etiqueta: 'A los 7 dias' },
+  { valor: 30, etiqueta: 'A los 30 dias' },
+  { valor: 90, etiqueta: 'A los 90 dias' },
+]
+
+// Tope de notificaciones que conserva el centro de notificaciones (campana) por
+// usuario. El historial mas antiguo se purga en el cron diario.
+export const MAX_HISTORIAL_NOTIFICACIONES = 30
+
 export const OPCIONES_ANTICIPACION: { valor: number; etiqueta: string }[] = [
   { valor: 5, etiqueta: '5 minutos antes' },
   { valor: 15, etiqueta: '15 minutos antes' },

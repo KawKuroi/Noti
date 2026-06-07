@@ -19,6 +19,7 @@ function mapearPerfil(fila: typeof perfiles.$inferSelect): Perfil {
     resumenDiario: fila.resumenDiario,
     horaResumen: fila.horaResumen,
     autoEliminarTareasCompletadasDias: fila.autoEliminarTareasCompletadasDias,
+    autoEliminarVencidosDias: fila.autoEliminarVencidosDias,
     eliminadoEn: fila.eliminadoEn,
     creadoEn: fila.creadoEn,
     actualizadoEn: fila.actualizadoEn,

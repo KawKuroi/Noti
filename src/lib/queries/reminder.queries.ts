@@ -268,6 +268,7 @@ export async function buscarRecordatoriosSimilares(
 
 export interface RecordatorioConAnticipacion extends Recordatorio {
   anticipacionNotificacion: number
+  zonaHoraria: string
 }
 
 // Devuelve recordatorios cuyo notify_at cayo en la ventana [ahora - ventanaMin, ahora]
@@ -327,6 +328,7 @@ export async function getRecordatoriosANotificar(
       creadoEn: recordatorios.creadoEn,
       actualizadoEn: recordatorios.actualizadoEn,
       anticipacionNotificacion: perfiles.anticipacionNotificacion,
+      zonaHoraria: perfiles.zonaHoraria,
     })
     .from(recordatorios)
     .innerJoin(perfiles, eq(recordatorios.usuarioId, perfiles.id))
@@ -344,5 +346,6 @@ export async function getRecordatoriosANotificar(
   return filas.map((fila) => ({
     ...mapearRecordatorio(fila),
     anticipacionNotificacion: fila.anticipacionNotificacion,
+    zonaHoraria: fila.zonaHoraria,
   }))
 }

@@ -1,4 +1,4 @@
-const CACHE_NOMBRE = 'noti-v5'
+const CACHE_NOMBRE = 'noti-v6'
 const URLS_CACHE = ['/']
 const DB_NOMBRE = 'noti-sync'
 const STORE_PENDIENTES = 'operaciones-pendientes'
@@ -185,7 +185,15 @@ self.addEventListener('push', (evento) => {
   }
 
   evento.waitUntil(
-    self.registration.showNotification(datos.title, opciones),
+    self.registration.showNotification(datos.title, opciones).then(() =>
+      // Avisar a las pestanas abiertas para que el centro de notificaciones
+      // (campana) refresque su badge en vivo sin recargar.
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientes) => {
+        for (const cliente of clientes) {
+          cliente.postMessage({ tipo: 'nueva-notificacion' })
+        }
+      }),
+    ),
   )
 })
 

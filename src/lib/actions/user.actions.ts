@@ -36,6 +36,26 @@ export async function actualizarAutoDeleteTareas(
   }
 }
 
+export async function actualizarAutoDeleteVencidos(
+  dias: number | null,
+): Promise<{ ok: boolean; error?: string }> {
+  const usuario = await obtenerUsuario()
+  if (!usuario) return { ok: false, error: 'No autenticado' }
+
+  try {
+    await db
+      .update(perfiles)
+      .set({ autoEliminarVencidosDias: dias, actualizadoEn: new Date() })
+      .where(eq(perfiles.id, usuario.id))
+
+    revalidatePath('/settings')
+    return { ok: true }
+  } catch (e) {
+    console.error('Error en actualizarAutoDeleteVencidos:', e)
+    return { ok: false, error: 'Error al guardar la configuracion' }
+  }
+}
+
 export async function upsertPerfil(
   usuarioId: string,
   nombreMostrado?: string | null,

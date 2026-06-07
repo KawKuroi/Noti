@@ -1,10 +1,10 @@
 import webpush from 'web-push'
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
-import { suscripcionesPush, logNotificaciones, recordatorios } from '@/db/schema'
+import { suscripcionesPush, logNotificaciones, recordatorios, perfiles } from '@/db/schema'
 import { getSuscripcionesPorUsuario, yaSeNotifico } from '@/lib/queries/push.queries'
 import { getRecordatoriosANotificar, getRecordatoriosEnRango, getCumpleanosActivos } from '@/lib/queries/reminder.queries'
-import { calcularProximaOcurrencia, diasHastaCumple, inicioDiaLocalEnUTC, partesEnZona } from '@/lib/utils/date.utils'
+import { calcularProximaOcurrencia, diasHastaCumple, inicioDiaLocalEnUTC, partesEnZona, segundosHastaFinDiaLocal } from '@/lib/utils/date.utils'
 import { ZONA_HORARIA_DEFECTO } from '@/lib/utils/constants'
 
 // Hora local (inclusive) a partir de la cual se envian los avisos de cumpleanos.
@@ -35,9 +35,19 @@ export interface PayloadPush {
   }
 }
 
+// TTL: segundos que el servicio de push (FCM/Mozilla) retiene el aviso si el
+// dispositivo esta desconectado. Sin esto, web-push usa ~4 semanas y los avisos
+// viejos se acumulan y llegan de golpe al reabrir el navegador. urgencia: prioridad
+// de entrega ('high' para avisos con hora, 'normal' para el resumen diario).
+export interface OpcionesPush {
+  ttlSegundos?: number
+  urgencia?: 'high' | 'normal' | 'low'
+}
+
 async function enviarPushASuscripcion(
   suscripcion: { id: string; endpoint: string; p256dh: string; auth: string },
   payload: PayloadPush,
+  opciones?: OpcionesPush,
 ): Promise<{ enviado: boolean; invalida?: boolean }> {
   configurarVapid()
 
@@ -47,7 +57,10 @@ async function enviarPushASuscripcion(
   }
 
   try {
-    await webpush.sendNotification(suscripcionWebPush, JSON.stringify(payload))
+    await webpush.sendNotification(suscripcionWebPush, JSON.stringify(payload), {
+      ...(opciones?.ttlSegundos !== undefined ? { TTL: opciones.ttlSegundos } : {}),
+      ...(opciones?.urgencia ? { urgency: opciones.urgencia } : {}),
+    })
     return { enviado: true }
   } catch (err: unknown) {
     const statusCode = (err as { statusCode?: number })?.statusCode
@@ -63,6 +76,7 @@ export async function enviarPushAUsuario(
   usuarioId: string,
   recordatorioId: string | null,
   payload: PayloadPush,
+  opciones?: OpcionesPush,
 ): Promise<{ enviados: number; fallidos: number }> {
   const suscripciones = await getSuscripcionesPorUsuario(usuarioId)
 
@@ -71,7 +85,7 @@ export async function enviarPushAUsuario(
 
   await Promise.all(
     suscripciones.map(async (sus) => {
-      const resultado = await enviarPushASuscripcion(sus, payload)
+      const resultado = await enviarPushASuscripcion(sus, payload, opciones)
 
       if (resultado.invalida) {
         // Eliminar suscripcion expirada
@@ -87,12 +101,15 @@ export async function enviarPushAUsuario(
     }),
   )
 
-  // Registrar resultado en el log
+  // Registrar resultado en el log (alimenta el centro de notificaciones).
+  // Guardamos titulo/cuerpo para que el historial sobreviva al borrado del recordatorio.
   const estado = enviados > 0 ? 'sent' : 'failed'
   await db.insert(logNotificaciones).values({
     recordatorioId,
     usuarioId,
     estado,
+    titulo: payload.title,
+    cuerpo: payload.body,
     mensajeError: enviados === 0 && fallidos > 0 ? 'No se pudo enviar a ninguna suscripcion' : null,
   })
 
@@ -121,7 +138,18 @@ export async function enviarResumenDiario(usuarioId: string): Promise<void> {
     },
   }
 
-  await enviarPushAUsuario(usuarioId, null, payload)
+  // El resumen solo es relevante durante el dia; expira al terminar el dia local.
+  const [perfil] = await db
+    .select({ zonaHoraria: perfiles.zonaHoraria })
+    .from(perfiles)
+    .where(eq(perfiles.id, usuarioId))
+    .limit(1)
+  const zona = perfil?.zonaHoraria || ZONA_HORARIA_DEFECTO
+
+  await enviarPushAUsuario(usuarioId, null, payload, {
+    ttlSegundos: segundosHastaFinDiaLocal(zona, ahora),
+    urgencia: 'normal',
+  })
 }
 
 export async function procesarRecordatoriosPendientes(): Promise<{ procesados: number }> {
@@ -153,7 +181,13 @@ export async function procesarRecordatoriosPendientes(): Promise<{ procesados: n
       },
     }
 
-    await enviarPushAUsuario(recordatorio.usuarioId, recordatorio.id, payload)
+    // El aviso es relevante solo durante el dia local del usuario; luego expira en
+    // el servicio de push y no se entrega al reabrir el navegador al dia siguiente.
+    const zona = recordatorio.zonaHoraria || ZONA_HORARIA_DEFECTO
+    await enviarPushAUsuario(recordatorio.usuarioId, recordatorio.id, payload, {
+      ttlSegundos: segundosHastaFinDiaLocal(zona, ahora),
+      urgencia: 'high',
+    })
     procesados++
 
     if (recordatorio.esRecurrente && recordatorio.reglaRecurrencia && recordatorio.fechaVencimiento && recordatorio.notificarEn) {
@@ -219,7 +253,10 @@ export async function procesarCumpleanos(): Promise<{ enviados: number }> {
       },
     }
 
-    await enviarPushAUsuario(c.usuarioId, c.id, payload)
+    await enviarPushAUsuario(c.usuarioId, c.id, payload, {
+      ttlSegundos: segundosHastaFinDiaLocal(zona, ahora),
+      urgencia: 'high',
+    })
     enviados++
   }
 

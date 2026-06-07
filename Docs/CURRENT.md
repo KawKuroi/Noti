@@ -36,6 +36,7 @@ Orden de sospecha si una notificacion no llega: (a) job en cron-job.org con resp
 
 ## Pendientes manuales bloqueantes
 
+- [ ] **Migracion 0011 (CRITICO):** aplicar `src/db/migrations/0011_notificaciones_historial_vencidos.sql` en Supabase (o `npm run db:push`). Agrega `notification_log.title/body/read_at` + indice y `profiles.auto_delete_overdue_days`. Sin esto fallan el centro de notificaciones y la autoeliminacion de vencidos.
 - [ ] Agregar `BLOB_READ_WRITE_TOKEN` en Vercel → Settings → Environment Variables (obtenida en Vercel → Storage → Blob).
 - [ ] **Notificaciones (CRITICO):** crear dos jobs en cron-job.org (gratis) porque Vercel Hobby solo permite crons diarios. Sin esto, las notificaciones solo se disparan ~1 vez/dia. Ver `DECISIONS.md`.
   - Job 1 — cada 1 min → `GET https://<APP_URL>/api/cron/check-reminders`, header `Authorization: Bearer <CRON_SECRET>`.

@@ -78,7 +78,9 @@ reminders         -- Campos clave: id, user_id, category_id, title, description,
 
 push_subscriptions -- endpoint, p256dh, auth, device_name. UNIQUE(user_id, endpoint)
 
-notification_log  -- reminder_id, user_id, status ('sent'|'failed'), sent_at
+notification_log  -- reminder_id, user_id, status ('sent'|'failed'), title, body,
+                  --   read_at (nullable — centro de notificaciones), sent_at.
+                  --   Tope MAX_HISTORIAL_NOTIFICACIONES por usuario (purga en cron diario).
 
 note_attachments  -- reminder_id, tipo, url, mime, tamano (Fase 16+)
 
@@ -93,8 +95,11 @@ recovery_tokens   -- id, user_id, tipo ('cuenta'|'recordatorios'), token (uuid u
 Browser → solicita permiso → genera suscripción VAPID → POST /api/push/subscribe
 Vercel cron (cada minuto) → GET /api/cron/check-reminders
   → busca reminders con notify_at en [ahora-1min, ahora]
-  → web-push a todos los endpoints del usuario
+  → web-push a todos los endpoints del usuario, con TTL = fin del día local
+    (evita el backlog que FCM entregaba de golpe al reabrir el navegador) y
+    urgency 'high'. Se registra title/body en notification_log.
 SW → recibe push → showNotification con acciones Ver/Posponer/Completar
+  → postMessage a las pestañas abiertas → la campana refresca su badge en vivo
 SW → notificationclick → POST /api/push/action o abre app
 ```
 
@@ -165,13 +170,20 @@ POST /api/* falla por sin conexión
 → Al volver conexión: reintenta operaciones pendientes → limpia IndexedDB
 ```
 
-### Auto-eliminación de tareas
+### Auto-eliminación de tareas y vencidos
 ```
-Usuario elige 7/30/90 días en /settings
+Usuario elige 7/30/90 días en /settings (dos reglas independientes)
 Cron diario 03:00 UTC → /api/cron/limpiar-tareas
-→ DELETE reminders WHERE category=tasks AND is_completed
-  AND completed_at < NOW() - INTERVAL '$días days'
+→ Tareas: DELETE reminders WHERE category=tasks AND is_completed
+    AND completed_at < NOW() - INTERVAL '$auto_delete_completed_tasks_days days'
+→ Vencidos: DELETE reminders WHERE NOT is_recurring AND NOT is_completed
+    AND due_date < NOW() - INTERVAL '$auto_delete_overdue_days days'
+    (excluye recurrentes como cumpleaños/estudio recurrente)
+→ Purga notification_log más allá de MAX_HISTORIAL_NOTIFICACIONES por usuario
 ```
+
+> En el hub `/inicio`, `agruparPorDia` separa los no completados con fecha pasada en un
+> grupo "Vencidos". Las páginas de categoría ya tienen el pill "Vencidos".
 
 ## Migraciones
 
@@ -191,3 +203,4 @@ Todas las migraciones viven en `src/db/migrations/`. Las marcadas como **manual*
 | 0008_note_entries.sql | Manual |
 | 0009_note_attachments.sql | Manual |
 | 0010_soft_delete_cuenta.sql | Manual |
+| 0011_notificaciones_historial_vencidos.sql | Drizzle (solo agrega columnas/indice) |

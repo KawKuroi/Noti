@@ -108,7 +108,7 @@ export function ListaRecordatorios({
 
   const grupos = agruparPorDia(recordatorios)
   const hayContenido =
-    grupos.hoy.length + grupos.manana.length + grupos.estaSemana.length + grupos.masAdelante.length > 0
+    grupos.vencidos.length + grupos.hoy.length + grupos.manana.length + grupos.estaSemana.length + grupos.masAdelante.length > 0
 
   if (!hayContenido) {
     return (
@@ -127,6 +127,7 @@ export function ListaRecordatorios({
 
   return (
     <div className="space-y-6">
+      <SeccionDia titulo="Vencidos" items={grupos.vencidos} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} destacadoId={destacadoId} />
       <SeccionDia titulo="Hoy" items={grupos.hoy} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} destacadoId={destacadoId} />
       <SeccionDia titulo="Manana" items={grupos.manana} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} destacadoId={destacadoId} />
       <SeccionDia titulo="Esta semana" items={grupos.estaSemana} categorias={categorias} mostrarCategoria={mostrarCategoria} diasAutoEliminar={diasAutoEliminar} destacadoId={destacadoId} />

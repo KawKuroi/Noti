@@ -17,6 +17,8 @@ import type { User } from '@supabase/supabase-js'
 import { cn } from '@/lib/utils/cn'
 import { SLUGS_LANZAMIENTO } from '@/lib/utils/constants'
 import type { Categoria } from '@/types/category.types'
+import { CentroNotificaciones } from '@/components/features/notificaciones/centro-notificaciones'
+import type { NotificacionHistorial } from '@/lib/queries/push.queries'
 
 const SLUGS_HERRAMIENTAS = ['notes'] as const
 
@@ -37,9 +39,17 @@ interface Props {
   categorias: Categoria[]
   usuario: User
   nombrePerfil?: string | null
+  notificacionesIniciales: NotificacionHistorial[]
+  noLeidasIniciales: number
 }
 
-export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
+export function Sidebar({
+  categorias,
+  usuario,
+  nombrePerfil,
+  notificacionesIniciales,
+  noLeidasIniciales,
+}: Props) {
   const ruta = usePathname()
   const t = useTranslations('Sidebar')
   const [drawerAbierto, setDrawerAbierto] = useState(false)
@@ -91,13 +101,20 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
           </div>
           <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--ink)' }}>Noti</span>
         </div>
-        <button
-          onClick={() => setDrawerAbierto(true)}
-          style={{ padding: '6px', color: 'var(--ink-2)', background: 'transparent', border: 'none', cursor: 'pointer' }}
-          aria-label="Abrir menu"
-        >
-          <Menu size={20} />
-        </button>
+        <div className="flex items-center gap-1">
+          <CentroNotificaciones
+            itemsIniciales={notificacionesIniciales}
+            noLeidasIniciales={noLeidasIniciales}
+            variante="compacto"
+          />
+          <button
+            onClick={() => setDrawerAbierto(true)}
+            style={{ padding: '6px', color: 'var(--ink-2)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+            aria-label="Abrir menu"
+          >
+            <Menu size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Overlay backdrop mobile */}
@@ -164,6 +181,11 @@ export function Sidebar({ categorias, usuario, nombrePerfil }: Props) {
               ⌘K
             </kbd>
           </button>
+
+          <CentroNotificaciones
+            itemsIniciales={notificacionesIniciales}
+            noLeidasIniciales={noLeidasIniciales}
+          />
         </div>
 
         {/* 3. Sección Categorías */}

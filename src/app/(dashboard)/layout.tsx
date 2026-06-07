@@ -1,6 +1,7 @@
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
+import { getHistorialNotificaciones, contarNotificacionesNoLeidas } from '@/lib/queries/push.queries'
 import { upsertPerfil } from '@/lib/actions/user.actions'
 import { Sidebar } from '@/components/features/sidebar'
 import { BusquedaGlobal } from '@/components/features/busqueda-global'
@@ -13,7 +14,12 @@ interface Props {
 export default async function LayoutDashboard({ children }: Props) {
   const user = await requerirUsuario()
 
-  const [categorias, perfil] = await Promise.all([getCategorias(), getPerfilDelUsuarioActual()])
+  const [categorias, perfil, notificaciones, noLeidas] = await Promise.all([
+    getCategorias(),
+    getPerfilDelUsuarioActual(),
+    getHistorialNotificaciones(user.id),
+    contarNotificacionesNoLeidas(user.id),
+  ])
 
   // Fallback: si el usuario existe en auth pero no tiene perfil creado
   // (puede ocurrir cuando Supabase tiene confirmacion de email desactivada
@@ -29,7 +35,13 @@ export default async function LayoutDashboard({ children }: Props) {
         style={{ background: 'var(--bg)' }}
       >
         <div className="flex h-full">
-          <Sidebar categorias={categorias} usuario={user} nombrePerfil={perfil?.nombreMostrado} />
+          <Sidebar
+            categorias={categorias}
+            usuario={user}
+            nombrePerfil={perfil?.nombreMostrado}
+            notificacionesIniciales={notificaciones}
+            noLeidasIniciales={noLeidas}
+          />
           <main
             className="flex-1 overflow-y-auto"
             style={{ padding: 'clamp(20px, 3vw, 40px) clamp(22px, 3.5vw, 44px)' }}

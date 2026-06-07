@@ -1,7 +1,8 @@
-import { and, eq, gte } from 'drizzle-orm'
+import { and, eq, gte, desc, isNull, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { suscripcionesPush, logNotificaciones } from '@/db/schema'
 import { requerirUsuario } from '@/lib/auth'
+import { MAX_HISTORIAL_NOTIFICACIONES } from '@/lib/utils/constants'
 
 export interface SuscripcionPush {
   id: string
@@ -60,4 +61,55 @@ export async function yaSeNotifico(recordatorioId: string, desde: Date): Promise
     .limit(1)
 
   return filas.length > 0
+}
+
+export interface NotificacionHistorial {
+  id: string
+  recordatorioId: string | null
+  titulo: string | null
+  cuerpo: string | null
+  enviadoEn: Date
+  leidoEn: Date | null
+}
+
+// Notificaciones pendientes para el centro de notificaciones (campana). Solo envios
+// exitosos y NO leidos, mas reciente primero, acotado al tope. Al marcar como leidas
+// desaparecen del menu (no quedan como historial visible).
+export async function getHistorialNotificaciones(
+  usuarioId: string,
+): Promise<NotificacionHistorial[]> {
+  return db
+    .select({
+      id: logNotificaciones.id,
+      recordatorioId: logNotificaciones.recordatorioId,
+      titulo: logNotificaciones.titulo,
+      cuerpo: logNotificaciones.cuerpo,
+      enviadoEn: logNotificaciones.enviadoEn,
+      leidoEn: logNotificaciones.leidoEn,
+    })
+    .from(logNotificaciones)
+    .where(
+      and(
+        eq(logNotificaciones.usuarioId, usuarioId),
+        eq(logNotificaciones.estado, 'sent'),
+        isNull(logNotificaciones.leidoEn),
+      ),
+    )
+    .orderBy(desc(logNotificaciones.enviadoEn))
+    .limit(MAX_HISTORIAL_NOTIFICACIONES)
+}
+
+export async function contarNotificacionesNoLeidas(usuarioId: string): Promise<number> {
+  const [fila] = await db
+    .select({ total: sql<number>`count(*)::int` })
+    .from(logNotificaciones)
+    .where(
+      and(
+        eq(logNotificaciones.usuarioId, usuarioId),
+        eq(logNotificaciones.estado, 'sent'),
+        isNull(logNotificaciones.leidoEn),
+      ),
+    )
+
+  return fila?.total ?? 0
 }

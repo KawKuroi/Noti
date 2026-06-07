@@ -20,6 +20,7 @@ export const perfiles = pgTable('profiles', {
   resumenDiario: boolean('daily_summary').default(false).notNull(),
   horaResumen: text('summary_hour').default('07:00').notNull(),
   autoEliminarTareasCompletadasDias: integer('auto_delete_completed_tasks_days'),
+  autoEliminarVencidosDias: integer('auto_delete_overdue_days'),
   eliminadoEn: timestamp('deleted_at', { withTimezone: true }),
   creadoEn: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   actualizadoEn: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
@@ -154,6 +155,9 @@ export const logNotificaciones = pgTable('notification_log', {
     .notNull()
     .references(() => perfiles.id, { onDelete: 'cascade' }),
   estado: text('status').notNull(),
+  titulo: text('title'),
+  cuerpo: text('body'),
+  leidoEn: timestamp('read_at', { withTimezone: true }),
   enviadoEn: timestamp('sent_at', { withTimezone: true }).defaultNow().notNull(),
   mensajeError: text('error_message'),
 })

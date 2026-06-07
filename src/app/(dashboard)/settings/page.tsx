@@ -11,6 +11,7 @@ import { BotonEnviarPushPrueba } from '@/components/features/settings/boton-envi
 import { FormularioPerfil } from '@/components/features/settings/formulario-perfil'
 import { FormularioResumenDiario } from '@/components/features/settings/formulario-resumen-diario'
 import { FormularioAutoDeleteTareas } from '@/components/features/settings/formulario-auto-delete-tareas'
+import { FormularioAutoDeleteVencidos } from '@/components/features/settings/formulario-auto-delete-vencidos'
 import { FormularioApariencia } from '@/components/features/settings/formulario-apariencia'
 import { FormularioIdioma } from '@/components/features/settings/formulario-idioma'
 import { FormularioInstalacion } from '@/components/features/settings/formulario-instalacion'
@@ -111,6 +112,10 @@ export default async function PaginaSettings() {
 
       <ConfigCard titulo="Tareas completadas" descripcion="Cuanto tiempo se conservan las tareas marcadas como completadas antes de eliminarse automaticamente.">
         <FormularioAutoDeleteTareas valorActual={perfil?.autoEliminarTareasCompletadasDias ?? null} />
+      </ConfigCard>
+
+      <ConfigCard titulo="Recordatorios vencidos" descripcion="Cuanto tiempo se conservan los recordatorios con fecha fija ya pasada (eventos, pendientes con fecha, etc.) antes de eliminarse automaticamente. No aplica a recurrentes como cumpleanos.">
+        <FormularioAutoDeleteVencidos valorActual={perfil?.autoEliminarVencidosDias ?? null} />
       </ConfigCard>
 
       <ConfigCard titulo="Aplicacion" descripcion="Instala Noti como app nativa para recibir notificaciones aunque el navegador este cerrado.">
