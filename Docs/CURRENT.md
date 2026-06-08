@@ -43,6 +43,12 @@ Orden de sospecha si una notificacion no llega: (a) job en cron-job.org con resp
   - Job 2 — cada 1 h (minuto 0) → `GET https://<APP_URL>/api/cron/resumen-diario`, mismo header.
   - El codigo ya tolera pings retrasados/omitidos: ventana de 5 min + dedup via `notification_log` (`yaSeNotifico`), sin push duplicados.
 
+## Notificaciones — alcance del push (ajuste reciente)
+
+- Los recurrentes no-cumpleanos (clases semanales, etc.) NO generan push por-ocurrencia ni entran al resumen diario; solo se ven en la app. `getRecordatoriosANotificar` filtra `esRecurrente=false` y `enviarResumenDiario` descarta recurrentes. Los cumpleanos siguen por `procesarCumpleanos`.
+- Los recordatorios ya vencidos al crearse/editarse no programan aviso: `calcularNotificarEn` devuelve `null` si la fecha ya paso. Se conserva el caso "vence pronto con anticipacion en el pasado" (la fecha sigue futura -> avisa ahora).
+- En `/inicio` los vencidos ya no salen de primeras: van en `SeccionVencidos`, un apartado plegable colapsado al final.
+
 ## Pruebas manuales pendientes
 
 - [ ] Fase 18 — "Lanzamiento de GTA 6 nov 19" muestra fecha 19 noviembre en la card de candidatos y permite editar todos los campos antes de confirmar.

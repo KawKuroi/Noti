@@ -27,8 +27,10 @@ function revalidarRutas(slug?: string) {
 
 // Deriva notify_at automaticamente desde la anticipacion GLOBAL del perfil (no por
 // recordatorio). Los cumpleanos no usan notify_at: los maneja procesarCumpleanos
-// (3 dias antes + el dia, 6am local). Si el aviso queda en el pasado, se ajusta a
-// "ahora" para que el siguiente tick del cron lo entregue en vez de perderse.
+// (3 dias antes + el dia, 6am local). Si la fecha de vencimiento ya paso al crear/editar
+// (item vencido), no se programa aviso (null): los vencidos no generan push. Si la fecha
+// sigue en el futuro pero el aviso anticipado cae en el pasado, se ajusta a "ahora" para
+// que el siguiente tick del cron lo entregue en vez de perderse.
 async function calcularNotificarEn(
   slug: string,
   fechaVencimiento: Date,
@@ -45,6 +47,7 @@ async function calcularNotificarEn(
 
   const notificar = new Date(fechaVencimiento.getTime() - anticipacionMin * 60 * 1000)
   const ahora = new Date()
+  if (fechaVencimiento.getTime() <= ahora.getTime()) return null // ya vencido: sin aviso
   return notificar.getTime() < ahora.getTime() ? ahora : notificar
 }
 

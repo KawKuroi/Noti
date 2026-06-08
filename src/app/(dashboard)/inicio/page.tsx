@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 import { isToday } from 'date-fns'
 import { requerirUsuario } from '@/lib/auth'
+import { agruparPorDia } from '@/lib/utils/date.utils'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getRecordatoriosProximos, getContadoresPorCategoria } from '@/lib/queries/reminder.queries'
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
@@ -15,6 +16,7 @@ import { SaludoDinamico } from '@/components/features/inicio/saludo-dinamico'
 import { BarraAsistente } from '@/components/features/asistente'
 import { MiniCalendario } from '@/components/features/inicio/mini-calendario'
 import { ChipsCategoriasSidebar } from '@/components/features/inicio/chips-categorias-sidebar'
+import { SeccionVencidos } from '@/components/features/inicio/seccion-vencidos'
 
 export const metadata: Metadata = { title: 'Inicio | Noti' }
 
@@ -76,6 +78,10 @@ export default async function PaginaInicio({ searchParams }: Props) {
     ? todosLosRecordatorios.filter((r) => r.categoriaId === Number(categoriaIdParam))
     : todosLosRecordatorios
 
+  // Los vencidos no aparecen en el listado superior; se muestran en un apartado
+  // plegable al final y solo cuando no hay filtro de categoria.
+  const vencidos = categoriaIdParam ? [] : agruparPorDia(recordatoriosFiltrados).vencidos
+
   return (
     <div className="max-w-5xl mx-auto">
       <InstallPrompt />
@@ -115,6 +121,8 @@ export default async function PaginaInicio({ searchParams }: Props) {
               mensajeVacio="Crea tu primer recordatorio"
             />
           </section>
+
+          <SeccionVencidos vencidos={vencidos} categorias={categorias} />
         </div>
 
         {/* Sidebar derecho */}

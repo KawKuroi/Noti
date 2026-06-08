@@ -338,6 +338,9 @@ export async function getRecordatoriosANotificar(
         lte(recordatorios.notificarEn, ahora),
         gte(recordatorios.notificarEn, limiteInferior),
         eq(recordatorios.estaCompletado, false),
+        // Los recurrentes (ej. clases semanales) no generan push por-ocurrencia: solo
+        // se ven en la app. Los cumpleanos van por procesarCumpleanos (notificarEn null).
+        eq(recordatorios.esRecurrente, false),
         isNull(recordatorios.eliminadoEn),
       ),
     )

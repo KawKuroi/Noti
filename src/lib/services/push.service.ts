@@ -1,10 +1,10 @@
 import webpush from 'web-push'
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { suscripcionesPush, logNotificaciones, recordatorios, perfiles } from '@/db/schema'
+import { suscripcionesPush, logNotificaciones, perfiles } from '@/db/schema'
 import { getSuscripcionesPorUsuario, yaSeNotifico } from '@/lib/queries/push.queries'
 import { getRecordatoriosANotificar, getRecordatoriosEnRango, getCumpleanosActivos } from '@/lib/queries/reminder.queries'
-import { calcularProximaOcurrencia, diasHastaCumple, inicioDiaLocalEnUTC, partesEnZona, segundosHastaFinDiaLocal } from '@/lib/utils/date.utils'
+import { diasHastaCumple, inicioDiaLocalEnUTC, partesEnZona, segundosHastaFinDiaLocal } from '@/lib/utils/date.utils'
 import { ZONA_HORARIA_DEFECTO } from '@/lib/utils/constants'
 
 // Hora local (inclusive) a partir de la cual se envian los avisos de cumpleanos.
@@ -121,7 +121,12 @@ export async function enviarResumenDiario(usuarioId: string): Promise<void> {
   const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0)
   const finHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 59)
 
-  const pendientesHoy = await getRecordatoriosEnRango(usuarioId, inicioHoy, finHoy)
+  // Solo no-recurrentes con fecha de hoy: los recurrentes (clases semanales, etc.) no
+  // entran al resumen ni suman al conteo. getRecordatoriosEnRango devuelve TODOS los
+  // recurrentes (lo necesita el calendario), por eso se filtran aqui y no en la query.
+  const pendientesHoy = (await getRecordatoriosEnRango(usuarioId, inicioHoy, finHoy)).filter(
+    (r) => !r.esRecurrente,
+  )
   if (pendientesHoy.length === 0) return
 
   const cuerpo =
@@ -190,36 +195,9 @@ export async function procesarRecordatoriosPendientes(): Promise<{ procesados: n
     })
     procesados++
 
-    if (recordatorio.esRecurrente && recordatorio.reglaRecurrencia && recordatorio.fechaVencimiento && recordatorio.notificarEn) {
-      // Avanzar a la proxima ocurrencia
-      const ancla = recordatorio.fechaVencimiento instanceof Date
-        ? recordatorio.fechaVencimiento
-        : new Date(recordatorio.fechaVencimiento)
-
-      const proxima = calcularProximaOcurrencia(recordatorio.reglaRecurrencia, ancla, ahora)
-      const diferenciaNot = ancla.getTime() - (
-        recordatorio.notificarEn instanceof Date
-          ? recordatorio.notificarEn
-          : new Date(recordatorio.notificarEn)
-      ).getTime()
-      const proximoNotificarEn = new Date(proxima.getTime() - diferenciaNot)
-
-      await db
-        .update(recordatorios)
-        .set({
-          fechaVencimiento: proxima,
-          notificarEn: proximoNotificarEn,
-          estaCompletado: false,
-          actualizadoEn: new Date(),
-        })
-        .where(
-          and(
-            eq(recordatorios.id, recordatorio.id),
-            eq(recordatorios.usuarioId, recordatorio.usuarioId),
-          ),
-        )
-    }
-    // Si no es recurrente, no se autocompletada — el usuario lo marca desde la notificacion
+    // Solo llegan no-recurrentes (la query excluye esRecurrente). No se autocompletan:
+    // el usuario lo marca desde la notificacion. El avance de recurrentes vive en la app
+    // (alternarCompletado), no en el push.
   }
 
   return { procesados }

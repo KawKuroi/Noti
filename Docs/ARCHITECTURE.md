@@ -183,7 +183,15 @@ Cron diario 03:00 UTC → /api/cron/limpiar-tareas
 ```
 
 > En el hub `/inicio`, `agruparPorDia` separa los no completados con fecha pasada en un
-> grupo "Vencidos". Las páginas de categoría ya tienen el pill "Vencidos".
+> grupo "Vencidos" que NO se muestra en el listado superior: va en un apartado plegable
+> (`SeccionVencidos`) colapsado al final del inicio. Las páginas de categoría ya tienen el
+> pill "Vencidos".
+>
+> Notificaciones: los recurrentes (clases semanales, etc.) no generan push por-ocurrencia
+> ni entran al resumen diario; solo se ven en la app (`getRecordatoriosANotificar` los
+> excluye y `enviarResumenDiario` los filtra). Los cumpleaños conservan su push propio
+> (`procesarCumpleanos`). Los recordatorios ya vencidos al crearse/editarse no programan
+> aviso (`calcularNotificarEn` devuelve null si la fecha ya pasó).
 
 ## Migraciones
 
