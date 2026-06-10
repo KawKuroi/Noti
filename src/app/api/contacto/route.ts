@@ -1,8 +1,6 @@
 import { Resend } from 'resend'
 import { verificarLimite } from '@/lib/utils/rate-limit'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(req: Request) {
   const ip =
     req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'anonimo'
@@ -47,6 +45,11 @@ export async function POST(req: Request) {
     console.error('[contacto] CONTACT_DESTINATION_EMAIL no configurada')
     return new Response('Servicio no configurado', { status: 503 })
   }
+
+  // Instanciar aqui y no a nivel de modulo: el constructor de Resend lanza si
+  // la key falta, lo que rompia el build (CI sin secretos) antes de que el
+  // handler pudiera responder 503.
+  const resend = new Resend(process.env.RESEND_API_KEY)
 
   try {
     const { data, error } = await resend.emails.send({
