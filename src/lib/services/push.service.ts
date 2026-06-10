@@ -56,20 +56,33 @@ async function enviarPushASuscripcion(
     keys: { p256dh: suscripcion.p256dh, auth: suscripcion.auth },
   }
 
-  try {
-    await webpush.sendNotification(suscripcionWebPush, JSON.stringify(payload), {
-      ...(opciones?.ttlSegundos !== undefined ? { TTL: opciones.ttlSegundos } : {}),
-      ...(opciones?.urgencia ? { urgency: opciones.urgencia } : {}),
-    })
-    return { enviado: true }
-  } catch (err: unknown) {
-    const statusCode = (err as { statusCode?: number })?.statusCode
-    if (statusCode === 404 || statusCode === 410) {
-      return { enviado: false, invalida: true }
-    }
-    console.error('Error al enviar push a', suscripcion.endpoint, err)
-    return { enviado: false }
+  const opcionesEnvio = {
+    ...(opciones?.ttlSegundos !== undefined ? { TTL: opciones.ttlSegundos } : {}),
+    ...(opciones?.urgencia ? { urgency: opciones.urgencia } : {}),
   }
+
+  // 1 reintento con backoff corto para fallos transitorios (5xx de FCM/Mozilla
+  // o error de red). 404/410 son definitivos: la suscripcion ya no existe.
+  const MAX_INTENTOS = 2
+  for (let intento = 1; intento <= MAX_INTENTOS; intento++) {
+    try {
+      await webpush.sendNotification(suscripcionWebPush, JSON.stringify(payload), opcionesEnvio)
+      return { enviado: true }
+    } catch (err: unknown) {
+      const statusCode = (err as { statusCode?: number })?.statusCode
+      if (statusCode === 404 || statusCode === 410) {
+        return { enviado: false, invalida: true }
+      }
+      const transitorio = statusCode === undefined || statusCode >= 500
+      if (transitorio && intento < MAX_INTENTOS) {
+        await new Promise((r) => setTimeout(r, 500))
+        continue
+      }
+      console.error('Error al enviar push a', suscripcion.endpoint, err)
+      return { enviado: false }
+    }
+  }
+  return { enviado: false }
 }
 
 export async function enviarPushAUsuario(

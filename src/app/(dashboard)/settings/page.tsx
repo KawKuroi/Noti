@@ -4,6 +4,7 @@ import { requerirUsuario } from '@/lib/auth'
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { getSuscripcionesDelUsuarioActual } from '@/lib/queries/push.queries'
 import { getCategorias } from '@/lib/queries/category.queries'
+import { cronEstaCaido } from '@/lib/services/cron-health.service'
 import { FormularioAnticipacion } from '@/components/features/settings/formulario-anticipacion'
 import { ListaDispositivos } from '@/components/features/settings/lista-dispositivos'
 import { BotonActivarNotificaciones } from '@/components/features/settings/boton-activar-notificaciones'
@@ -63,11 +64,12 @@ function ConfigCard({
 export default async function PaginaSettings() {
   await requerirUsuario()
 
-  const [perfil, suscripciones, localeActual, todasLasCategorias] = await Promise.all([
+  const [perfil, suscripciones, localeActual, todasLasCategorias, cronCaido] = await Promise.all([
     getPerfilDelUsuarioActual(),
     getSuscripcionesDelUsuarioActual(),
     getLocale(),
     getCategorias(),
+    cronEstaCaido(),
   ])
 
   return (
@@ -94,6 +96,24 @@ export default async function PaginaSettings() {
       </ConfigCard>
 
       <ConfigCard titulo="Dispositivos y notificaciones" descripcion="Activa las notificaciones push en este dispositivo y administra los registrados.">
+        {cronCaido === true && (
+          <div
+            role="alert"
+            style={{
+              marginBottom: '14px',
+              padding: '10px 14px',
+              borderRadius: '10px',
+              border: '1px solid #f59e0b55',
+              background: '#f59e0b14',
+              fontSize: '13px',
+              color: 'var(--ink-2)',
+              lineHeight: 1.5,
+            }}
+          >
+            El verificador de recordatorios lleva mas de 10 minutos sin ejecutarse. Las
+            notificaciones pueden estar retrasadas. Revisa los jobs en cron-job.org.
+          </div>
+        )}
         <BotonActivarNotificaciones />
         <div className="mt-4">
           <ListaDispositivos suscripciones={suscripciones} />

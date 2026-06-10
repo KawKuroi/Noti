@@ -1,5 +1,6 @@
 import { Ratelimit } from '@upstash/ratelimit'
-import { Redis } from '@upstash/redis'
+import type { Redis } from '@upstash/redis'
+import { redis } from './redis'
 
 // Rate limiting distribuido con Upstash Redis (sliding window).
 // En Vercel serverless cada instancia tiene su propia memoria, por lo que un
@@ -40,17 +41,6 @@ function verificarLimiteMemoria(
 // ---------------------------------------------------------------------------
 // Upstash Redis (produccion)
 // ---------------------------------------------------------------------------
-
-// Acepta los nombres nativos de Upstash y los que inyecta el Marketplace de
-// Vercel al conectar el store como KV.
-function obtenerRedis(): Redis | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN
-  if (!url || !token) return null
-  return new Redis({ url, token })
-}
-
-const redis = obtenerRedis()
 
 // Un Ratelimit por combinacion max/ventana, cacheado a nivel de modulo para
 // reutilizarlo entre invocaciones de la misma instancia.
