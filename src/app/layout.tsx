@@ -15,17 +15,28 @@ const geist = Geist({
 
 // La imagen OG/Twitter la genera src/app/opengraph-image.tsx (convencion de
 // archivo de Next) — no se declara en images[] para evitar referencias rotas.
+// Description entre 110-160 caracteres: Google corta alrededor de 160.
+const TITULO = 'Noti — Recordatorios con IA y notificaciones que sí llegan'
 const DESCRIPCION =
-  'Agenda recordatorios con IA y recibe notificaciones push reales: estrenos de peliculas, series, videojuegos, musica y libros, cumpleanos, estudio y tareas. Gratis y open source.'
+  'Agenda recordatorios en lenguaje natural y recibe notificaciones push reales: estrenos, cumpleanos, estudio y tareas. Gratis y open source.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: {
-    default: 'Noti — Recordatorios inteligentes con notificaciones push',
+    default: TITULO,
     template: '%s | Noti',
   },
   description: DESCRIPCION,
   manifest: '/manifest.json',
+  icons: {
+    // Google no soporta favicons SVG: el .ico multirresolucion es obligatorio
+    // para que el icono aparezca en los resultados de busqueda.
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icons/icon-192.png', type: 'image/png', sizes: '192x192' },
+    ],
+    apple: '/icons/icon-180.png',
+  },
   keywords: [
     'recordatorios',
     'notificaciones push',
@@ -39,14 +50,15 @@ export const metadata: Metadata = {
   authors: [{ name: 'Noti' }],
   openGraph: {
     type: 'website',
+    url: '/',
     locale: 'es_CO',
     siteName: 'Noti',
-    title: 'Noti — Recordatorios inteligentes con notificaciones push',
+    title: TITULO,
     description: DESCRIPCION,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Noti — Recordatorios inteligentes con notificaciones push',
+    title: TITULO,
     description: 'Recordatorios con IA y push reales. Gratis, para siempre.',
   },
   appleWebApp: {
@@ -75,9 +87,6 @@ export default async function LayoutRaiz({ children }: Props) {
 
   return (
     <html lang={locale} suppressHydrationWarning className={geist.variable}>
-      <head>
-        <link rel="apple-touch-icon" href="/icons/icon-180.png" />
-      </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ProvedorTema>

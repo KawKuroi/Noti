@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og'
 // Reemplaza al /og-image.png estatico que la metadata referenciaba sin existir.
 // Twitter/X usa og:image como fallback cuando no hay twitter:image explicita.
 
-export const alt = 'Noti — Recordatorios inteligentes con notificaciones push reales'
+export const alt = 'Noti — Recordatorios con IA y notificaciones que sí llegan'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -51,7 +51,7 @@ export default function Image() {
             Recuerda lo que importa.
           </div>
           <div style={{ display: 'flex', fontSize: 34, color: '#a3a3a3' }}>
-            Recordatorios con IA y notificaciones push reales. Gratis, para siempre.
+            Recordatorios con IA y notificaciones que si llegan. Gratis, para siempre.
           </div>
         </div>
 

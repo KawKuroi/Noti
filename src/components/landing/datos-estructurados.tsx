@@ -12,7 +12,8 @@ const esquemaApp = {
   name: 'Noti',
   url: APP_URL,
   description:
-    'Recordatorios inteligentes con notificaciones push reales: estrenos de peliculas, series, videojuegos, musica y libros, cumpleanos, estudio y tareas. Asistente IA en espanol, gratis y open source.',
+    'Recordatorios con IA y notificaciones push reales: estrenos de peliculas, series, videojuegos, musica y libros, cumpleanos, estudio y tareas. En espanol, gratis y open source.',
+  downloadUrl: 'https://github.com/KawKuroi/Noti/releases',
   applicationCategory: 'ProductivityApplication',
   operatingSystem: 'Web, Android, Windows',
   inLanguage: 'es',
