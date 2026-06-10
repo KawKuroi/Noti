@@ -23,6 +23,7 @@ export function FAQ() {
           {FAQS.map((item, i) => (
             <FAQItem
               key={item.pregunta}
+              id={`faq-panel-${i}`}
               pregunta={item.pregunta}
               respuesta={item.respuesta}
               abierto={abierto === i}
@@ -36,11 +37,13 @@ export function FAQ() {
 }
 
 function FAQItem({
+  id,
   pregunta,
   respuesta,
   abierto,
   onToggle,
 }: {
+  id: string
   pregunta: string
   respuesta: string
   abierto: boolean
@@ -51,6 +54,8 @@ function FAQItem({
       <button
         type="button"
         onClick={onToggle}
+        aria-expanded={abierto}
+        aria-controls={id}
         style={{
           width: '100%',
           textAlign: 'left',
@@ -85,6 +90,9 @@ function FAQItem({
         </span>
       </button>
       <div
+        id={id}
+        role="region"
+        aria-hidden={!abierto}
         style={{
           overflow: 'hidden',
           maxHeight: abierto ? 240 : 0,

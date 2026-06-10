@@ -13,29 +13,41 @@ const geist = Geist({
   weight: ['300', '400', '500', '600', '700'],
 })
 
+// La imagen OG/Twitter la genera src/app/opengraph-image.tsx (convencion de
+// archivo de Next) — no se declara en images[] para evitar referencias rotas.
+const DESCRIPCION =
+  'Agenda recordatorios con IA y recibe notificaciones push reales: estrenos de peliculas, series, videojuegos, musica y libros, cumpleanos, estudio y tareas. Gratis y open source.'
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: {
-    default: 'Noti - Recordatorios inteligentes',
-    template: '%s',
+    default: 'Noti — Recordatorios inteligentes con notificaciones push',
+    template: '%s | Noti',
   },
-  description: 'Recordatorios inteligentes para todo lo que importa. Notificaciones push reales, chat IA para lanzamientos y calendario en una sola PWA.',
+  description: DESCRIPCION,
   manifest: '/manifest.json',
-  keywords: ['recordatorios', 'notificaciones push', 'PWA', 'calendario', 'chat IA'],
+  keywords: [
+    'recordatorios',
+    'notificaciones push',
+    'recordatorio de cumpleanos',
+    'estrenos de peliculas',
+    'lanzamientos de videojuegos',
+    'asistente IA',
+    'PWA',
+    'calendario',
+  ],
   authors: [{ name: 'Noti' }],
   openGraph: {
     type: 'website',
     locale: 'es_CO',
     siteName: 'Noti',
-    title: 'Noti - Recordatorios inteligentes',
-    description: 'Recordatorios inteligentes para todo lo que importa. Notificaciones push reales, chat IA para lanzamientos y calendario en una sola PWA.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Noti - Recordatorios inteligentes' }],
+    title: 'Noti — Recordatorios inteligentes con notificaciones push',
+    description: DESCRIPCION,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Noti - Recordatorios inteligentes',
-    description: 'Recordatorios inteligentes para todo lo que importa.',
-    images: ['/og-image.png'],
+    title: 'Noti — Recordatorios inteligentes con notificaciones push',
+    description: 'Recordatorios con IA y push reales. Gratis, para siempre.',
   },
   appleWebApp: {
     capable: true,
@@ -45,7 +57,10 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
   width: 'device-width',
   initialScale: 1,
 }

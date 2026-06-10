@@ -36,6 +36,9 @@ export async function middleware(solicitud: NextRequest) {
   const esRutaPublica =
     ruta === '/' ||
     ruta === '/auth/callback' ||
+    // Formulario de sugerencias de la landing: visitantes sin sesion
+    // (la ruta tiene su propio rate limiting)
+    ruta === '/api/contacto' ||
     ruta.startsWith('/api/cron/') ||
     ruta.startsWith('/api/push/')
 
@@ -56,6 +59,6 @@ export async function middleware(solicitud: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|icons|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|icons|manifest.json|sw.js|robots.txt|sitemap.xml|opengraph-image|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
