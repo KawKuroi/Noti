@@ -4,42 +4,52 @@
 
 ```
 src/
+├── proxy.ts                 Intercepta requests (Next 16; antes middleware.ts). Auth + rutas publicas
 ├── app/
-│   ├── (auth)/              login, register
+│   ├── (auth)/              login, register (cada uno con layout.tsx propio para metadata SEO)
 │   ├── (dashboard)/
 │   │   ├── inicio/          Dashboard principal (rediseñado en Fase 17)
 │   │   ├── calendar/        Vistas mes/semana — agrupado bajo "Herramientas" en el sidebar (Fase 15)
 │   │   ├── lanzamientos/    Hub con tabs por tipo (movies/tv/games/music/books) + tab "Todos" (Fase 16)
 │   │   ├── notes/           Grid de tarjetas + [id] vista detalle — agrupado bajo "Herramientas" en el sidebar (Fase 15)
-│   │   └── settings/        Perfil, notificaciones, resumen diario, auto-eliminación, cerrar sesión
+│   │   └── settings/        Perfil, notificaciones (+aviso de cron caido), resumen diario, auto-eliminación, cerrar sesión
+│   ├── robots.ts            SEO: indexa solo rutas publicas
+│   ├── sitemap.ts           SEO: /, /login, /register
+│   ├── opengraph-image.tsx  OG image dinamica via ImageResponse (next/og)
 │   └── api/
 │       ├── push/            subscribe, action
-│       ├── chat/            streamText + tools (lanzamientos)
-│       ├── ai/              recordatorio (generateObject), transcribir (Whisper)
+│       ├── asistente/       extraer (generateObject), candidatos (release-search)
+│       ├── ai/              transcribir (Whisper)
 │       ├── search/          Búsqueda global
-│       ├── cron/            check-reminders (1min), resumen-diario (1h), limpiar-tareas (diario), limpiar-eliminados (04:00 UTC)
+│       ├── contacto/        Formulario de sugerencias (publico, rate limited)
+│       ├── cron/            check-reminders (1min + ping watchdog), resumen-diario (1h), limpiar-tareas (diario), limpiar-eliminados (04:00 UTC)
 │       └── auth/            recuperar (GET ?token= — restaura soft delete)
 ├── components/
 │   ├── ui/                  shadcn primitives
+│   ├── landing/             hero, features, faq, datos-estructurados (JSON-LD), data.ts
 │   └── features/            Componentes por dominio
 │       ├── reminders/       tarjeta, formulario, lista, filtro
-│       ├── asistente/       asistente-ia.tsx (separado en Fase 12)
+│       ├── asistente/       provider, barra, command-palette (muestra fuentesFallidas + reintento)
 │       ├── calendar/        vista-mes, vista-semana, dialog-dia, filtro
-│       ├── lanzamientos/    chat, tarjeta-confirmacion, formulario-manual
+│       ├── lanzamientos/    hub, tarjeta-confirmacion, formulario-manual
 │       ├── notas/           editor-nota, tarjeta-nota
 │       └── settings/        formularios de configuración
 ├── lib/
 │   ├── actions/             Server Actions (mutaciones)
 │   ├── queries/             Queries de solo lectura
-│   ├── services/            tmdb, rawg, musicbrainz, google-books, release-search, push
-│   ├── ai/                  tools.ts, prompt.ts, extractor.ts
-│   ├── utils/               date, cn, constants, formato-fecha, rate-limit, parsear-fecha-natural (Fase 18)
+│   ├── services/            tmdb, rawg, musicbrainz, google-books, release-search, push, cron-health
+│   ├── ai/                  extractor.ts (generateObject + schema Zod del asistente)
+│   ├── utils/               date, cn, constants, formato-fecha, rate-limit (Upstash), redis (cliente compartido), fetch-con-timeout, coincidencia-titulo, parsear-fecha-natural
 │   ├── supabase/            client.ts, server.ts
 │   └── validations/         schemas Zod
-└── db/
-    ├── schema.ts            Fuente de verdad del modelo de datos
-    ├── seed.ts              Categorías iniciales
-    └── migrations/          SQL aplicados vía Drizzle o manualmente en Supabase
+├── db/
+│   ├── schema.ts            Fuente de verdad del modelo de datos
+│   ├── seed.ts              Categorías iniciales
+│   └── migrations/          SQL aplicados vía Drizzle o manualmente en Supabase
+tests/
+├── unit/                    Vitest (npm run test)
+└── e2e/                     Playwright (npm run test:e2e)
+src-tauri/                   App nativa Tauri v2 (Fases 30/31 — Windows y Android)
 ```
 
 ## Sidebar (estructura visual desde Fase 15)
@@ -93,11 +103,14 @@ recovery_tokens   -- id, user_id, tipo ('cuenta'|'recordatorios'), token (uuid u
 ### Push notifications
 ```
 Browser → solicita permiso → genera suscripción VAPID → POST /api/push/subscribe
-Vercel cron (cada minuto) → GET /api/cron/check-reminders
-  → busca reminders con notify_at en [ahora-1min, ahora]
+cron-job.org (cada minuto) → GET /api/cron/check-reminders
+  → busca reminders con notify_at en ventana de 5 min (tolera pings perdidos)
   → web-push a todos los endpoints del usuario, con TTL = fin del día local
     (evita el backlog que FCM entregaba de golpe al reabrir el navegador) y
-    urgency 'high'. Se registra title/body en notification_log.
+    urgency 'high'. Reintento 1x con backoff ante 5xx transitorio; 404/410
+    invalida y elimina la suscripción. Se registra title/body en notification_log.
+  → al terminar OK registra el ping en Redis (cron-health): /settings muestra
+    aviso si el cron lleva >10 min sin ejecutarse.
 SW → recibe push → showNotification con acciones Ver/Posponer/Completar
   → postMessage a las pestañas abiertas → la campana refresca su badge en vivo
 SW → notificationclick → POST /api/push/action o abre app
@@ -134,15 +147,22 @@ Usuario abre palette y escribe texto libre
   [lanzamiento_especifico] / [lanzamiento_generico]
     Ej: "Lanzamiento de GTA 6", "Nuevo album de The Weeknd"
     → POST /api/asistente/candidatos con la extraccion
-    → release-search.obtenerCandidatos():
+    → release-search.obtenerCandidatosDetallado():
         - Si tipo conocido: candidatos<X>() solo de esa fuente.
-        - Si tipo desconocido (null): TODAS las fuentes en paralelo (Promise.all).
+        - Si tipo desconocido (null): TODAS las fuentes con Promise.allSettled —
+          una fuente caida (key ausente, timeout, 5xx) NO tumba la busqueda;
+          queda reportada en fuentesFallidas y el palette muestra
+          "No pude consultar X" con boton Reintentar.
+        - Los servicios usan fetch-con-timeout (6s + 1 reintento) y cache
+          revalidate 3600. MusicBrainz con throttle de 1 req/s (cola).
+          TMDB: fallback de idioma (es-ES → sin language si 0 resultados).
         - Para generico: proximo<X>() por tipo (futuros del artista/franquicia).
         - Cada servicio devuelve hasta 5 candidatos (no 1).
         - Deduplica por id.
         - Re-rankea por score: +3 fecha confirmada, +2 fecha futura,
-          +1 coincide-titulo exacto, +0.5 tipo coincide.
-        - Devuelve top 5.
+          +0..1 coincidencia de titulo (exacta o fuzzy Dice), +0.5 tipo
+          coincide, +0..1 popularidad normalizada (TMDB popularity, RAWG added).
+        - Devuelve top 5 + fuentesFallidas.
     → palette renderiza CandidatoCard[] (poster, titulo, metadatos por tipo, fecha).
       Las portadas se muestran aqui (UX visual) pero NO se persisten al guardar (Fase 16).
     → usuario navega con ↑/↓, Enter selecciona
@@ -192,6 +212,31 @@ Cron diario 03:00 UTC → /api/cron/limpiar-tareas
 > excluye y `enviarResumenDiario` los filtra). Los cumpleaños conservan su push propio
 > (`procesarCumpleanos`). Los recordatorios ya vencidos al crearse/editarse no programan
 > aviso (`calcularNotificarEn` devuelve null si la fecha ya pasó).
+
+## Apps nativas (Tauri v2 — Fases 30/31)
+
+Arquitectura wrapper: la app Tauri carga la web de produccion en un webview
+(cero duplicacion de UI) y agrega una capa nativa de notificaciones locales
+que elimina la dependencia de cron-job.org en dispositivos con la app.
+
+```
+App Tauri (Windows .msi / Android .apk)
+  → webview a NEXT_PUBLIC_APP_URL (sesion Supabase normal, cookies propias)
+  → script de inicializacion (solo si window.__TAURI__):
+      cada 15 min y al recuperar foco:
+        GET /api/recordatorios/proximos (same-origin, sesion del webview)
+        → Windows: reconcilia timers JS + notificacion nativa via plugin
+          (la app vive en la bandeja del sistema; cerrar = ocultar)
+        → Android: reconcilia notificaciones programadas con
+          tauri-plugin-notification schedule({ at }) — AlarmManager:
+          disparan a la hora exacta con la app CERRADA y Doze activo
+  → el Web Push existente sigue funcionando como respaldo en navegadores
+    (sin dedup cross-sistema en v1; se recomienda desactivar la suscripcion
+    del navegador en dispositivos con la app instalada)
+```
+
+Distribucion sin tiendas: GitHub Actions (tauri-action) genera .msi/.exe y
+.apk self-signed adjuntos a los Releases.
 
 ## Migraciones
 
