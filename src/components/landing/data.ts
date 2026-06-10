@@ -341,7 +341,7 @@ export const FAQS: PreguntaFAQ[] = [
   {
     pregunta: 'Necesito instalar algo desde una tienda de apps?',
     respuesta:
-      'No. Es una PWA: entras desde el navegador y si quieres la instalas con un click. Aparece como app con su propio icono y shortcuts directos. Funciona offline gracias al Service Worker.',
+      'No. Es una PWA: entras desde el navegador y si quieres la instalas con un click. Y si prefieres una app nativa, hay instalador para Windows y APK para Android (descarga directa desde GitHub Releases, sin tiendas) con notificaciones exactas aunque la app este cerrada.',
   },
   {
     pregunta: 'Que pasa si el chat IA no encuentra la fecha de un lanzamiento?',

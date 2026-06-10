@@ -7,7 +7,8 @@ import { EJEMPLOS_HERO, REPO_URL } from './data'
 import { useTypewriter } from './hooks'
 
 const HEADLINE = ['Recuerda lo que importa.', 'Sin apps. Sin ruido.']
-const SUB = 'PWA minimalista con push reales, chat IA y categorias. Gratis, para siempre.'
+const SUB =
+  'Recordatorios con push reales y chat IA. Gratis, para siempre — en la web, Windows y Android.'
 
 export function Hero() {
   return (

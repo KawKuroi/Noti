@@ -5,6 +5,7 @@ import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
 import { getSuscripcionesDelUsuarioActual } from '@/lib/queries/push.queries'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { cronEstaCaido } from '@/lib/services/cron-health.service'
+import { obtenerEnlacesDescarga } from '@/lib/services/github-releases.service'
 import { FormularioAnticipacion } from '@/components/features/settings/formulario-anticipacion'
 import { ListaDispositivos } from '@/components/features/settings/lista-dispositivos'
 import { BotonActivarNotificaciones } from '@/components/features/settings/boton-activar-notificaciones'
@@ -64,13 +65,15 @@ function ConfigCard({
 export default async function PaginaSettings() {
   await requerirUsuario()
 
-  const [perfil, suscripciones, localeActual, todasLasCategorias, cronCaido] = await Promise.all([
-    getPerfilDelUsuarioActual(),
-    getSuscripcionesDelUsuarioActual(),
-    getLocale(),
-    getCategorias(),
-    cronEstaCaido(),
-  ])
+  const [perfil, suscripciones, localeActual, todasLasCategorias, cronCaido, enlacesDescarga] =
+    await Promise.all([
+      getPerfilDelUsuarioActual(),
+      getSuscripcionesDelUsuarioActual(),
+      getLocale(),
+      getCategorias(),
+      cronEstaCaido(),
+      obtenerEnlacesDescarga(),
+    ])
 
   return (
     <div className="max-w-2xl mx-auto" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -138,8 +141,8 @@ export default async function PaginaSettings() {
         <FormularioAutoDeleteVencidos valorActual={perfil?.autoEliminarVencidosDias ?? null} />
       </ConfigCard>
 
-      <ConfigCard titulo="Aplicacion" descripcion="Instala Noti como app nativa para recibir notificaciones aunque el navegador este cerrado. Si usas la app de escritorio o el APK de Android (que programan las notificaciones localmente), conviene desactivar las notificaciones del navegador en ese dispositivo para no recibirlas duplicadas.">
-        <FormularioInstalacion />
+      <ConfigCard titulo="Aplicacion" descripcion="La PWA se instala al instante desde el navegador. Las apps nativas de Windows y Android programan las notificaciones en el sistema, asi que llegan a la hora exacta aunque la app este cerrada; si instalas una, conviene desactivar las notificaciones del navegador en ese dispositivo para no recibirlas duplicadas.">
+        <FormularioInstalacion enlaces={enlacesDescarga} />
       </ConfigCard>
 
       <ConfigCard titulo="Idioma" descripcion="Elige el idioma de la interfaz.">
