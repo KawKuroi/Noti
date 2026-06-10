@@ -156,7 +156,11 @@ Fases 0–29.6 completadas. Fase 25 solo con verificacion manual 25.6 pendiente;
 
 ---
 
-## Fase 30 — App Tauri v2: nucleo + Windows [planificada]
+## Fase 30 — App Tauri v2: nucleo + Windows [implementada — pendiente primer release]
+
+> Codigo en `src-tauri/` + endpoint `/api/recordatorios/proximos` (commit adb502d).
+> Falta solo: taggear `app-v0.1.0` (el CI compila y publica el .msi/.exe) y la
+> prueba manual de notificacion nativa con la ventana oculta en bandeja.
 
 **Objetivo:** App de escritorio que envuelve la web de produccion (webview, cero duplicacion de UI) y programa notificaciones locales — elimina la dependencia de cron-job.org en el PC. Reemplaza la decision "sin app nativa" (ver DECISIONS.md). Ver tambien "Apps nativas (Tauri v2)" en ARCHITECTURE.md.
 
@@ -172,7 +176,13 @@ Fases 0–29.6 completadas. Fase 25 solo con verificacion manual 25.6 pendiente;
 
 ---
 
-## Fase 31 — App Tauri v2: Android [planificada]
+## Fase 31 — App Tauri v2: Android [implementada — pendiente keystore + primer release]
+
+> Mismo crate que Windows; la rama Android del scheduler (init/programador.js)
+> usa `schedule()` → AlarmManager. El workflow `tauri-android-release.yml` genera
+> el proyecto Gradle en CI (`tauri android init`), compila, firma y publica el APK.
+> Falta solo: keystore + secrets en GitHub, taggear `android-v0.1.0` (ver
+> pendientes en CURRENT.md) y la prueba en dispositivo.
 
 **Objetivo:** Recordatorios que suenan a la hora EXACTA con la app cerrada y Doze activo — lo que Web Push en Android no garantiza. Mismo `src-tauri/` que Windows.
 

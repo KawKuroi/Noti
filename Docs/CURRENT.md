@@ -25,6 +25,7 @@
 4. [ ] **Upstash Redis (Fase 26.3):** Vercel Marketplace → Upstash (free tier). Sin `UPSTASH_REDIS_REST_URL/TOKEN` el rate limiting cae al fallback en memoria y el watchdog del cron queda deshabilitado.
 5. [ ] **Rotacion de secretos (Fase 26.1):** regenerar `RESEND_API_KEY` y `CRON_SECRET` (aparecieron en una transcripcion de auditoria — precaucion). Actualizar `.env.local`, Vercel y el header de cron-job.org.
 6. [ ] **Env vars de push en Vercel:** `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `NEXT_PUBLIC_APP_URL`, `BLOB_READ_WRITE_TOKEN`.
+7. [ ] **Apps Tauri (Fases 30/31):** (a) para el primer release de Windows: `git tag app-v0.1.0 && git push origin app-v0.1.0` — el workflow compila y publica el .msi/.exe; (b) para Android: crear el keystore self-signed (`keytool -genkeypair -v -keystore noti.keystore -alias noti -keyalg RSA -keysize 2048 -validity 10000`), guardarlo como secrets `ANDROID_KEYSTORE_B64` (base64) y `ANDROID_KEYSTORE_PASSWORD` en GitHub, y taggear `android-v0.1.0`; (c) opcional para compilar local: `winget install Rustlang.Rustup` (Windows) y Android Studio + NDK (Android).
 
 ## Verificacion Fase 25 (25.6) — checklist manual
 

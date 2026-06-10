@@ -138,7 +138,7 @@ export default async function PaginaSettings() {
         <FormularioAutoDeleteVencidos valorActual={perfil?.autoEliminarVencidosDias ?? null} />
       </ConfigCard>
 
-      <ConfigCard titulo="Aplicacion" descripcion="Instala Noti como app nativa para recibir notificaciones aunque el navegador este cerrado.">
+      <ConfigCard titulo="Aplicacion" descripcion="Instala Noti como app nativa para recibir notificaciones aunque el navegador este cerrado. Si usas la app de escritorio o el APK de Android (que programan las notificaciones localmente), conviene desactivar las notificaciones del navegador en ese dispositivo para no recibirlas duplicadas.">
         <FormularioInstalacion />
       </ConfigCard>
 

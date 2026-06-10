@@ -1,0 +1,90 @@
+# Compila el APK de Android (Fase 31) y lo adjunta al Release de GitHub.
+# Se dispara al taggear android-v* (ej: android-v0.1.0).
+#
+# El proyecto Gradle (src-tauri/gen/android) se genera aqui mismo con
+# `tauri android init`: no vive en el repo. Los permisos de notificaciones
+# (POST_NOTIFICATIONS, SCHEDULE_EXACT_ALARM, RECEIVE_BOOT_COMPLETED) los
+# aporta tauri-plugin-notification via manifest merger de Gradle.
+#
+# Secrets requeridos (crear una sola vez):
+#   ANDROID_KEYSTORE_B64      → base64 del keystore self-signed:
+#       keytool -genkeypair -v -keystore noti.keystore -alias noti \
+#         -keyalg RSA -keysize 2048 -validity 10000
+#       base64 -w 0 noti.keystore   (en PowerShell: [Convert]::ToBase64String((Get-Content noti.keystore -AsByteStream -Raw)))
+#   ANDROID_KEYSTORE_PASSWORD → password del keystore/alias
+name: Release app Tauri (Android)
+
+on:
+  push:
+    tags:
+      - 'android-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Instalar NDK
+        run: sdkmanager "ndk;27.2.12479018" "build-tools;34.0.0"
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Generar proyecto Android
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
+        run: npx --yes @tauri-apps/cli android init --ci
+
+      - name: Aplicar iconos de la app al proyecto generado
+        run: cp -r src-tauri/icons/android/* src-tauri/gen/android/app/src/main/res/
+
+      - name: Compilar APK (release, sin firmar)
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
+        run: npx --yes @tauri-apps/cli android build --apk --target aarch64 --target armv7
+
+      - name: Firmar APK (self-signed, sideload)
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > noti.keystore
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/34.0.0"
+          APK_DIR="src-tauri/gen/android/app/build/outputs/apk/universal/release"
+          APK_SIN_FIRMAR="$APK_DIR/app-universal-release-unsigned.apk"
+          APK_ALINEADO="$APK_DIR/noti-alineado.apk"
+          APK_FINAL="noti-android.apk"
+          "$BUILD_TOOLS/zipalign" -p 4 "$APK_SIN_FIRMAR" "$APK_ALINEADO"
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks noti.keystore \
+            --ks-pass "pass:$KEYSTORE_PASSWORD" \
+            --out "$APK_FINAL" \
+            "$APK_ALINEADO"
+          "$BUILD_TOOLS/apksigner" verify "$APK_FINAL"
+
+      - name: Adjuntar APK al Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: 'Noti ${{ github.ref_name }} (Android)'
+          body: 'APK self-signed para sideload. Las notificaciones se programan con AlarmManager: llegan a la hora exacta con la app cerrada. Instalar permitiendo "origenes desconocidos".'
+          files: noti-android.apk
