@@ -18,12 +18,14 @@
 | Hosting | Vercel Hobby (gratis) |
 | Validación | Zod |
 | Storage | Vercel Blob (Fase 16+) |
+| Rate limiting | Upstash Redis via `@upstash/ratelimit` (Fase 26+; fallback en memoria en dev) |
+| Apps nativas | Tauri v2 — wrapper de la web + notificaciones locales (Windows Fase 30, Android Fase 31) |
 
 ## Restricciones no negociables
 
 - **Tier gratuito always:** toda decisión técnica debe funcionar sin costo
 - **Español primero:** toda la UI en español; inglés es iteración futura con i18n
-- **PWA-first:** no hay app nativa, no se propone Flutter/React Native
+- **PWA-first + wrapper Tauri:** la web es la fuente de verdad de la UI; las apps de Windows/Android (Fases 30/31) son wrappers Tauri v2 con notificaciones locales. No se propone Flutter/React Native (reescritura)
 - **Categorías fijas:** no se pueden crear categorías custom (Fase futura)
 - **Sin dependencias de mensajería:** sin Slack, WhatsApp, Telegram, email
 
@@ -74,4 +76,6 @@ GROQ_API_KEY
 NEXT_PUBLIC_APP_URL
 CRON_SECRET
 BLOB_READ_WRITE_TOKEN      ← solo Fase 16+
+UPSTASH_REDIS_REST_URL     ← Fase 26+ (rate limiting; opcional en dev — fallback a memoria)
+UPSTASH_REDIS_REST_TOKEN   ← Fase 26+
 ```

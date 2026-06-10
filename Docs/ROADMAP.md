@@ -2,7 +2,8 @@
 
 ## Estado actual
 
-Fases 0–24 completadas. En progreso: **Fase 25 — Instalacion PWA nativa**.
+Fases 0–24 completadas. En progreso: **Fase 25 — Instalacion PWA nativa** (solo falta verificacion manual 25.6).
+Planificadas (en orden de ejecucion): **Fases 26–31** — producto de la revision integral de junio 2026 (seguridad, busqueda IA, notificaciones robustas, upgrades, apps Tauri).
 
 > El detalle granular de fases ya entregadas vive en `CURRENT.md` (sesiones recientes) y en `git log` (sesiones antiguas). Este archivo solo lista el titulo y el outcome para mantener bajo el coste de contexto.
 
@@ -132,3 +133,110 @@ Fases 0–24 completadas. En progreso: **Fase 25 — Instalacion PWA nativa**.
 **Done when:** El usuario instala Noti desde el banner o desde /settings, cierra el navegador, y recibe la notificacion push del recordatorio en el centro de notificaciones del SO con el icono PNG.
 
 **Fuera de alcance:** generar `.apk` / `.msix` / `.ipa`, subir a tiendas, soportar iOS < 16.4.
+
+---
+
+## Fase 26 — Seguridad [planificada]
+
+**Objetivo:** Endurecer la capa HTTP y el rate limiting tras la auditoria de junio 2026.
+
+### 26.1 — Rotacion de secretos (manual)
+- Regenerar `RESEND_API_KEY` (dashboard Resend) y `CRON_SECRET` (`openssl rand -base64 32`)
+- Actualizar `.env.local`, Vercel env vars y el header de los 2 jobs de cron-job.org
+
+### 26.2 — Headers de seguridad en `next.config.ts`
+- HSTS, X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy (microfono `self` por Whisper)
+- CSP en modo Report-Only inicialmente; enforce en commit posterior si no hay violaciones
+
+### 26.3 — Rate limiting distribuido
+- `@upstash/ratelimit` + `@upstash/redis` (Vercel Marketplace, free tier)
+- Reescribir `src/lib/utils/rate-limit.ts` conservando la firma `verificarLimite()`; fallback a memoria sin env vars (dev local)
+
+### 26.4 — Verificar pertenencia en `/api/push/action`
+- Confirmar que posponer/completar validan que el reminder pertenece al usuario
+
+**Done when:** Headers visibles en produccion, 429 real bajo rafaga desde multiples instancias, secretos rotados.
+
+---
+
+## Fase 27 — Busqueda IA robusta [planificada]
+
+**Objetivo:** Que la busqueda de candidatos deje de fallar en silencio y el usuario no tenga que recurrir al formulario manual.
+
+### 27.1 — Tolerancia a fallos
+- `Promise.allSettled` en `obtenerCandidatos()` (una fuente caida no tumba la busqueda)
+- `fetchConTimeout()` en `src/lib/utils/`: AbortSignal 6s + 1 reintento para 5xx/red, usado por los 4 servicios
+
+### 27.2 — Cumplir limites de las APIs
+- Throttle MusicBrainz a 1 req/s (cola secuencial a nivel de modulo)
+- Reducir N+1: fechas/creditos/portadas solo para candidatos finalistas
+- Cache consistente: `next: { revalidate: 3600 }` en TMDB/RAWG/MusicBrainz (como Google Books)
+
+### 27.3 — Matching y ranking
+- Fuzzy matching (coeficiente Dice de bigramas, umbral ~0.75) como segundo criterio en `coincidencia-titulo.ts`
+- Scoring con popularidad normalizada (TMDB `popularity`, RAWG `added`) y bonus proporcional por tokens
+- TMDB: reintento sin `language` si es-ES devuelve 0 resultados
+
+### 27.4 — Feedback al usuario
+- `/api/asistente/candidatos` devuelve `{ candidatos, fuentesFallidas }`
+- El palette distingue "sin resultados" de "fuente caida" y ofrece reintento
+
+### 27.5 — Prompt del extractor
+- Pasar dia de la semana actual, fijar convencion DD/MM, validar `reglaRecurrencia` con regex en el schema
+
+**Done when:** Las 6 busquedas de prueba (GTA 6, The Weeknd, Dune 3, Sanderson, typo, fuente caida) devuelven candidatos o aviso claro.
+
+---
+
+## Fase 28 — Notificaciones PWA robustas [planificada]
+
+### 28.1 — Reintento en push
+- 1 reintento con backoff para 5xx transitorios en `push.service.ts`; 404/410 siguen invalidando
+
+### 28.2 — Watchdog del cron
+- Timestamp del ultimo ping OK de check-reminders (Redis de Upstash)
+- Aviso en `/settings` si lleva >10 min sin ejecutarse
+
+### 28.3 — Cierre de Fase 25 (manual)
+- Migracion 0011, jobs cron-job.org, env vars Vercel, E2E Windows/Android, Lighthouse
+
+**Done when:** Un 5xx transitorio de FCM no pierde la notificacion y el usuario ve en settings si el cron esta caido.
+
+---
+
+## Fase 29 — Upgrades mayores [planificada]
+
+Un commit por upgrade, con `build + lint + test:e2e` tras cada uno. Orden:
+
+1. date-fns 3→4 y `@types/node` 20→24 (seguros)
+2. Zod 3→4 (schemas en `src/lib/validations/` y `src/lib/ai/`)
+3. Next 15→16 + eslint 8→9 flat config (codemod oficial; `next lint` se retira)
+4. Tailwind 3→4 (codemod `@tailwindcss/upgrade`; verificar shadcn/ui pantalla por pantalla)
+5. Drizzle 0.45→1.x + drizzle-kit (revisar changelog; `db:generate` sin drift)
+
+**Done when:** Stack en majors actuales sin regresiones E2E.
+
+---
+
+## Fase 30 — App Tauri v2: Windows [planificada]
+
+**Objetivo:** App de escritorio que envuelve la web de produccion y programa notificaciones locales — elimina la dependencia de cron-job.org en el PC. Reemplaza la decision "sin app nativa" (ver DECISIONS.md).
+
+- 30.1 Scaffold `src-tauri/` (webview a `NEXT_PUBLIC_APP_URL`)
+- 30.2 Plugins: notification, autostart, system tray (cerrar = minimizar, proceso vivo)
+- 30.3 Endpoint `GET /api/recordatorios/proximos` (auth, rate limited, ventana 24-48h)
+- 30.4 Scheduler local: timers desde la bandeja, refresh cada ~15 min, dedup por `reminderId`
+- 30.5 CI: GitHub Actions + `tauri-action` para `.msi`/`.exe` en releases
+
+**Done when:** Con el navegador cerrado y sin cron externo, la notificacion nativa llega desde la app en bandeja.
+
+---
+
+## Fase 31 — App Tauri v2: Android [planificada]
+
+- 31.1 `tauri android init` sobre el mismo `src-tauri/`
+- 31.2 `tauri-plugin-notification` con scheduling (AlarmManager) — notificaciones exactas con la app cerrada
+- 31.3 Mismo sync con `/api/recordatorios/proximos`; reprogramacion al abrir
+- 31.4 APK self-signed en GitHub Releases (sin Play Store)
+
+**Done when:** El recordatorio suena en Android a la hora exacta con la app cerrada y modo Doze activo.

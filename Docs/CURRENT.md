@@ -5,10 +5,16 @@
 
 ## Fase activa
 
-**En progreso:** Fase 25 (Instalacion PWA nativa).
-**Estado:** Fases 0-24 completadas. Fase 25 implementada (hook, banner, settings, iconos PNG y screenshots presentes; commit fb2ab97); pendiente solo la verificacion 25.6 (Lighthouse "Installable" + `test:e2e`).
+**En progreso:** Fase 26 (Seguridad) — primera fase de la revision integral de junio 2026.
+**Estado:** Fases 0-24 completadas. Fase 25 implementada; pendiente solo la verificacion manual 25.6 (puede cerrarse en paralelo). Fases 26-31 planificadas en `Docs/ROADMAP.md`.
 
-El detalle de sub-fases de 25 vive en `Docs/ROADMAP.md`.
+## Revision integral (junio 2026) — resumen
+
+Auditoria completa de seguridad, busqueda IA, notificaciones y dependencias. Conclusiones:
+
+**Fuerte:** RLS completo + `eq(userId)` en todas las queries, middleware de auth correcto, `CRON_SECRET` timing-safe, validacion Zod, sin XSS/SSRF, arquitectura limpia, pipeline anti-alucinacion del asistente, SW maduro. `.env.local` NO esta en git (verificado).
+
+**Flojo (ataca cada fase):** busqueda de candidatos fragil (Promise.all sin tolerancia, sin timeouts, MusicBrainz viola 1 req/s, matching sin fuzzy, fallos silenciosos) → Fase 27; rate limiting en memoria inefectivo en serverless y sin headers HTTP de seguridad → Fase 26; notificaciones limitadas estructuralmente por la PWA (cron externo, Windows con navegador cerrado, Doze) → Fases 28/30/31; majors pendientes (Next 16, Tailwind 4, Zod 4, Drizzle 1.x) → Fase 29.
 
 ## Fase 25 — notas de implementacion
 
@@ -36,6 +42,8 @@ Orden de sospecha si una notificacion no llega: (a) job en cron-job.org con resp
 
 ## Pendientes manuales bloqueantes
 
+- [ ] **Rotacion de secretos (Fase 26.1):** regenerar `RESEND_API_KEY` y `CRON_SECRET` (sus valores aparecieron en la transcripcion de una auditoria automatizada — precaucion, no compromiso confirmado). Actualizar `.env.local`, Vercel y el header de los jobs de cron-job.org.
+- [ ] **Provisionar Upstash Redis (Fase 26.3):** Vercel Marketplace → Upstash → free tier; agrega `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` (o `KV_REST_API_*`) a las env vars.
 - [ ] **Migracion 0011 (CRITICO):** aplicar `src/db/migrations/0011_notificaciones_historial_vencidos.sql` en Supabase (o `npm run db:push`). Agrega `notification_log.title/body/read_at` + indice y `profiles.auto_delete_overdue_days`. Sin esto fallan el centro de notificaciones y la autoeliminacion de vencidos.
 - [ ] Agregar `BLOB_READ_WRITE_TOKEN` en Vercel → Settings → Environment Variables (obtenida en Vercel → Storage → Blob).
 - [ ] **Notificaciones (CRITICO):** crear dos jobs en cron-job.org (gratis) porque Vercel Hobby solo permite crons diarios. Sin esto, las notificaciones solo se disparan ~1 vez/dia. Ver `DECISIONS.md`.

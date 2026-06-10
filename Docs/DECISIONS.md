@@ -63,13 +63,17 @@ _Razón:_ La barra ocupaba espacio vertical en el área más valiosa del dashboa
 _Alternativa:_ usar el mismo color (gris/negro) para todos los lanzamientos, o usar fondos coloridos completos
 _Razón:_ En la pestaña "Todos" la diferenciación visual ayuda al escaneo rápido. Color como acento (borde izquierdo, badge, dot) preserva el minimalismo. Paleta elegida: Películas `#0A0A0A`, Series `#2563EB`, Juegos `#16A34A`, Música `#DC2626`, Libros `#7C3AED`.
 
-**PWA-first, sin app nativa**
+**PWA-first, sin app nativa** _(SUPERADA en revision junio 2026 — ver "PWA + apps Tauri v2")_
 _Alternativa:_ Flutter o React Native
 _Razón:_ La PWA cubre los casos de uso (push notifications reales en Android y Windows), es deployable en Vercel gratis y no requiere cuentas de developer store.
 
-**Mejorar instalación PWA antes que generar instaladores nativos** _(Fase 25)_
+**Mejorar instalación PWA antes que generar instaladores nativos** _(Fase 25; SUPERADA PARCIALMENTE — ver "PWA + apps Tauri v2")_
 _Alternativa:_ PWABuilder (.msix Windows + .apk Android TWA), Tauri 2.0, o Electron
 _Razón:_ El usuario quiere notificaciones nativas sin browser abierto. Una vez instalada, la PWA cubre ese caso en Android y desktop con cero overhead. PWABuilder/Tauri agregan binarios para mantener (regenerar al cambiar manifest, builds CI, hosting de archivos) sin mejorar el runtime — la app instalada y un .msix de PWABuilder corren el mismo bundle. Electron descartado por peso (~100 MB vs ~2 KB de hook). iOS sin instalador descartado por costo (Apple Dev USD 99/año); queda vía "Agregar a inicio" con instrucciones in-app.
+
+**PWA + apps Tauri v2 (Windows y Android)** _(revision junio 2026 — Fases 30/31)_
+_Alternativa:_ mantener solo PWA (decision previa) / Flutter / React Native / Electron / Capacitor
+_Razón:_ La PWA instalada sigue siendo el camino principal, pero tiene limites estructurales que ningun ajuste de codigo resuelve: en Windows no llega nada con el navegador completamente cerrado salvo que el SO mantenga el proceso del browser; en Android, Doze puede retrasar Web Push 15-60 min; y todo el sistema depende de un cron externo (cron-job.org). Tauri v2 permite, con UNA base de codigo y costo cero: envolver la web de produccion (cero duplicacion de UI), bandeja del sistema + autoarranque en Windows, y scheduling local de notificaciones (AlarmManager en Android) que dispara a la hora exacta sin cron ni red. Flutter/RN descartados (reescritura completa, prohibidos en PROJECT.md); Electron por peso; Capacitor porque no cubre desktop sin Electron. La app Tauri consume el endpoint `GET /api/recordatorios/proximos` y programa notificaciones locales; el push web sigue funcionando como respaldo (dedup por `reminderId`).
 
 ---
 
@@ -103,3 +107,11 @@ _Razón:_ El Pomodoro se aleja del objetivo del producto (gestión de recordator
 _Alternativa:_ cambiar la interfaz y dejar que tsc encuentre los errores después
 _Razón:_ En Fase 9 el cambio de `Date` a `Date | null` generó una cascada de
 12 errores TS2769 en 4 archivos que no estaban en el plan inicial.
+
+**Upstash Redis para rate limiting** _(revision junio 2026 — Fase 26)_
+_Alternativa:_ mantener el Map en memoria de `rate-limit.ts`
+_Razón:_ En Vercel serverless cada instancia tiene su propio Map: la proteccion solo aplica dentro de una instancia y se pierde entre cold starts. Upstash (via Vercel Marketplace) tiene free tier (500K comandos/mes, sobra para la escala actual) y `@upstash/ratelimit` implementa sliding window distribuido. Se conserva la firma `verificarLimite()` y un fallback en memoria cuando faltan las env vars (desarrollo local sin Redis), asi ninguna ruta cambia.
+
+**Upgrades mayores en commits dedicados** _(revision junio 2026 — Fase 29)_
+_Alternativa:_ actualizar todas las dependencias en un solo commit junto con fixes funcionales
+_Razón:_ Next 16, Tailwind 4, Zod 4 y Drizzle 1.x tienen breaking changes independientes. Un commit por upgrade con verificacion completa (`build + lint + test:e2e`) permite hacer bisect y revertir sin arrastrar fixes funcionales. Orden por riesgo creciente: date-fns/@types → Zod → Next+eslint → Tailwind → Drizzle.
