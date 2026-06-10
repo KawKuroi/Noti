@@ -2,8 +2,8 @@
 
 ## Estado actual
 
-Fases 0–31 completadas (CI verde en GitHub). Fase 25 solo con verificacion manual 25.6 pendiente.
-**Siguientes:** primeros releases de las apps Tauri (Windows: tag `app-v0.1.0` ya publicado; Android: secrets del keystore + tag) y pruebas en dispositivo.
+Fases 0–32 completadas. Releases publicados en GitHub: Windows (`app-v0.1.0`, .msi/.exe) y Android (`android-v0.1.0`, APK firmado). Fase 25 solo con verificacion manual 25.6 pendiente.
+**Siguientes:** pruebas de las apps en dispositivos reales (notificacion exacta con la app cerrada).
 
 > El detalle granular de fases ya entregadas vive en `CURRENT.md` (sesiones recientes) y en `git log` (sesiones antiguas). Este archivo solo lista el titulo y el outcome para mantener bajo el coste de contexto.
 
@@ -42,6 +42,7 @@ Fases 0–31 completadas (CI verde en GitHub). Fase 25 solo con verificacion man
 - **Fase 29** — Upgrades: date-fns 4, Zod 4, Next 16 + eslint 9 flat (middleware→proxy.ts), Tailwind 4 CSS-first, drizzle-kit 0.31.10 (Drizzle 1.0 en RC, no adoptado).
 - **Fase 29.5** — Limpieza: exports muertos eliminados, warnings react-hooks 20→7, migracion 0012 housekeeping.
 - **Fase 29.6** — Testing profundo: Vitest (223 unit tests en 10 suites), 2 E2E nuevos (settings, asistente), CI en GitHub Actions; bugfix en `calcularProximaOcurrencia` (offset 7 semanal) hallado por los tests.
+- **Fase 32** — Descargas de las apps nativas en landing (seccion nueva) y settings (card Aplicacion), servicio github-releases (API de GitHub, cache 1 h); SEO: titulo nuevo, og:url, favicon.ico multirresolucion, descriptions ≤160.
 
 ---
 
@@ -156,7 +157,7 @@ Fases 0–31 completadas (CI verde en GitHub). Fase 25 solo con verificacion man
 
 ---
 
-## Fase 30 — App Tauri v2: nucleo + Windows [implementada — pendiente primer release]
+## Fase 30 — App Tauri v2: nucleo + Windows [completada — release app-v0.1.0 publicado]
 
 > Codigo en `src-tauri/` + endpoint `/api/recordatorios/proximos` (commit adb502d).
 > Falta solo: taggear `app-v0.1.0` (el CI compila y publica el .msi/.exe) y la
@@ -176,13 +177,12 @@ Fases 0–31 completadas (CI verde en GitHub). Fase 25 solo con verificacion man
 
 ---
 
-## Fase 31 — App Tauri v2: Android [implementada — pendiente keystore + primer release]
+## Fase 31 — App Tauri v2: Android [completada — release android-v0.1.0 publicado]
 
 > Mismo crate que Windows; la rama Android del scheduler (init/programador.js)
 > usa `schedule()` → AlarmManager. El workflow `tauri-android-release.yml` genera
 > el proyecto Gradle en CI (`tauri android init`), compila, firma y publica el APK.
-> Falta solo: keystore + secrets en GitHub, taggear `android-v0.1.0` (ver
-> pendientes en CURRENT.md) y la prueba en dispositivo.
+> Falta solo la prueba en dispositivo (recordatorio a +3 min con la app cerrada).
 
 **Objetivo:** Recordatorios que suenan a la hora EXACTA con la app cerrada y Doze activo — lo que Web Push en Android no garantiza. Mismo `src-tauri/` que Windows.
 

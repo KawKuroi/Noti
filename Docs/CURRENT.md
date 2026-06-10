@@ -5,8 +5,8 @@
 
 ## Fase activa
 
-**Siguiente:** primeros releases de las apps Tauri (Windows en CI con el tag `app-v0.1.0`; Android espera los secrets del keystore) y verificacion manual en dispositivos.
-**Estado:** Fases 0-31 completadas y en produccion. Revision integral de junio 2026 entregada: SEO+landing, seguridad (headers + Upstash), busqueda IA robusta, PWA robusta (retry push + watchdog cron), upgrades (date-fns 4, Zod 4, Next 16 + eslint 9 flat, Tailwind 4, drizzle-kit 0.31.10 — Drizzle 1.0 sigue en RC), limpieza post-upgrades, testing profundo (Fase 29.6) y apps nativas Tauri v2 (Fases 30/31).
+**Siguiente:** verificacion manual de las apps en dispositivos (Windows y Android ya publicadas en GitHub Releases).
+**Estado:** Fases 0-32 completadas y en produccion. Fase 32 (jun 10): seccion de descargas de las apps nativas en landing y settings (servicio github-releases con cache de 1 h) + ajustes SEO del reporte OG (titulo nuevo, og:url, favicon.ico, descriptions ≤160). Revision integral de junio 2026 entregada: SEO+landing, seguridad (headers + Upstash), busqueda IA robusta, PWA robusta (retry push + watchdog cron), upgrades (date-fns 4, Zod 4, Next 16 + eslint 9 flat, Tailwind 4, drizzle-kit 0.31.10 — Drizzle 1.0 sigue en RC), limpieza post-upgrades, testing profundo (Fase 29.6) y apps nativas Tauri v2 (Fases 30/31).
 **Verificado en produccion (jun 10):** landing/robots/sitemap/og-image en 200, headers de seguridad activos (HSTS, CSP report-only, X-Frame-Options), crons protegidos con 401, migraciones 0011 y 0012 aplicadas en Supabase (columnas y indice confirmados por SQL).
 
 ## Fase 29.6 — notas de implementacion (esta sesion)
@@ -26,7 +26,7 @@
 4. [x] **Upstash Redis (Fase 26.3):** provisionado via Vercel Marketplace (`upstash-kv-amethyst-canvas`); credenciales en `.env.local`. Confirmar que el store quedo conectado al proyecto en Vercel (las vars `KV_REST_API_URL/TOKEN` deben aparecer en Environment Variables) — `redis.ts` soporta esos nombres.
 5. [ ] **Rotacion de secretos (Fase 26.1) — riesgo aceptado por ahora:** el usuario no puede regenerar `RESEND_API_KEY` ni `CRON_SECRET` por el momento. Riesgo bajo (transcripcion local); retomar cuando sea posible.
 6. [ ] **Env vars de push en Vercel (verificar):** `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `NEXT_PUBLIC_APP_URL`, `BLOB_READ_WRITE_TOKEN`. Si el push ya funcionaba en produccion, ya estan — solo confirmar en el dashboard.
-7. [ ] **Releases Tauri (Fases 30/31):** (a) Windows: tag `app-v0.1.0` publicado (jun 10), run de CI en curso — verificar que el Release tenga el .msi/.exe e instalarlo; (b) Android: keystore ya generado en `C:\Users\kevin\noti-android-keys\` (noti.keystore, noti.keystore.b64 y password.txt — NO subir al repo). Falta crear los secrets en GitHub → Settings → Secrets → Actions: `ANDROID_KEYSTORE_B64` (contenido de noti.keystore.b64) y `ANDROID_KEYSTORE_PASSWORD` (contenido de password.txt), y luego `git tag android-v0.1.0 && git push origin android-v0.1.0`; (c) opcional para compilar local: `winget install Rustlang.Rustup` (Windows) y Android Studio + NDK (Android).
+7. [x] **Releases Tauri (Fases 30/31):** publicados (jun 10) — Windows `app-v0.1.0` (.exe/.msi) y Android `android-v0.1.0` (APK firmado; el primer run fallo por falta de `npm ci` + script `tauri`, corregido en `d749e0f`). Keystore en `C:\Users\kevin\noti-android-keys\` (hacer backup; NO subir al repo). Pendiente solo la prueba en dispositivo: recordatorio a +3 min con la app cerrada.
 
 ## Verificacion Fase 25 (25.6) — checklist manual
 
