@@ -1,11 +1,24 @@
-const ventanas = new Map<string, number[]>()
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+// Rate limiting distribuido con Upstash Redis (sliding window).
+// En Vercel serverless cada instancia tiene su propia memoria, por lo que un
+// Map local solo protege dentro de la instancia; Redis comparte el contador
+// entre todas. Si faltan las env vars (desarrollo local sin Redis) se usa el
+// fallback en memoria con la misma semantica.
 
 interface ResultadoLimite {
   ok: boolean
   retryAfter?: number
 }
 
-export function verificarLimite(
+// ---------------------------------------------------------------------------
+// Fallback en memoria (dev local / Redis no provisionado)
+// ---------------------------------------------------------------------------
+
+const ventanas = new Map<string, number[]>()
+
+function verificarLimiteMemoria(
   clave: string,
   max: number,
   ventanaMs: number,
@@ -22,4 +35,60 @@ export function verificarLimite(
   previas.push(ahora)
   ventanas.set(clave, previas)
   return { ok: true }
+}
+
+// ---------------------------------------------------------------------------
+// Upstash Redis (produccion)
+// ---------------------------------------------------------------------------
+
+// Acepta los nombres nativos de Upstash y los que inyecta el Marketplace de
+// Vercel al conectar el store como KV.
+function obtenerRedis(): Redis | null {
+  const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN
+  if (!url || !token) return null
+  return new Redis({ url, token })
+}
+
+const redis = obtenerRedis()
+
+// Un Ratelimit por combinacion max/ventana, cacheado a nivel de modulo para
+// reutilizarlo entre invocaciones de la misma instancia.
+const limitadores = new Map<string, Ratelimit>()
+
+function obtenerLimitador(max: number, ventanaMs: number): Ratelimit {
+  const claveConfig = `${max}:${ventanaMs}`
+  let limitador = limitadores.get(claveConfig)
+  if (!limitador) {
+    limitador = new Ratelimit({
+      redis: redis as Redis,
+      limiter: Ratelimit.slidingWindow(max, `${ventanaMs} ms`),
+      prefix: 'noti-rl',
+    })
+    limitadores.set(claveConfig, limitador)
+  }
+  return limitador
+}
+
+// ---------------------------------------------------------------------------
+// API publica — misma firma que la version en memoria, ahora async
+// ---------------------------------------------------------------------------
+
+export async function verificarLimite(
+  clave: string,
+  max: number,
+  ventanaMs: number,
+): Promise<ResultadoLimite> {
+  if (!redis) return verificarLimiteMemoria(clave, max, ventanaMs)
+
+  try {
+    const resultado = await obtenerLimitador(max, ventanaMs).limit(clave)
+    if (resultado.success) return { ok: true }
+    const retryAfter = Math.max(1, Math.ceil((resultado.reset - Date.now()) / 1000))
+    return { ok: false, retryAfter }
+  } catch (e) {
+    // Redis caido no debe tumbar la ruta: degradar al fallback en memoria.
+    console.error('[rate-limit] Error de Redis, usando fallback en memoria:', e)
+    return verificarLimiteMemoria(clave, max, ventanaMs)
+  }
 }

@@ -6,7 +6,7 @@ import { verificarLimite } from '@/lib/utils/rate-limit'
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-    const limite = verificarLimite(`push-action:${ip}`, 30, 60_000)
+    const limite = await verificarLimite(`push-action:${ip}`, 30, 60_000)
     if (!limite.ok) {
       return NextResponse.json({ error: 'Demasiadas peticiones' }, {
         status: 429,

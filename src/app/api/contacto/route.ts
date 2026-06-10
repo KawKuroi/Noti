@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   const ip =
     req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'anonimo'
 
-  const limite = verificarLimite(`contacto:${ip}`, 5, 3_600_000)
+  const limite = await verificarLimite(`contacto:${ip}`, 5, 3_600_000)
   if (!limite.ok) {
     return new Response('Demasiadas peticiones', {
       status: 429,

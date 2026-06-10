@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const usuario = await obtenerUsuario()
   if (!usuario) return new Response('No autenticado', { status: 401 })
 
-  const limite = verificarLimite(`asistente-extraer:${usuario.id}`, 20, 60_000)
+  const limite = await verificarLimite(`asistente-extraer:${usuario.id}`, 20, 60_000)
   if (!limite.ok) {
     return new Response('Demasiadas peticiones', {
       status: 429,

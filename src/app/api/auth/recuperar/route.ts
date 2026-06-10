@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const ip =
     req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'anonimo'
 
-  const limite = verificarLimite(`recuperar:${ip}`, 10, 3_600_000)
+  const limite = await verificarLimite(`recuperar:${ip}`, 10, 3_600_000)
   if (!limite.ok) {
     return NextResponse.redirect(`${origen(req)}/?error=demasiadas-peticiones`)
   }

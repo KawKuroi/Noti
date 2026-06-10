@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   const usuario = await obtenerUsuario()
   if (!usuario) return new Response('No autenticado', { status: 401 })
 
-  const limite = verificarLimite(`search:${usuario.id}`, 30, 60_000)
+  const limite = await verificarLimite(`search:${usuario.id}`, 30, 60_000)
   if (!limite.ok) {
     return new Response('Demasiadas peticiones', {
       status: 429,

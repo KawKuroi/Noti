@@ -14,7 +14,7 @@ function detectarDispositivo(userAgent: string): string {
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-    const limite = verificarLimite(`push-subscribe:${ip}`, 10, 60_000)
+    const limite = await verificarLimite(`push-subscribe:${ip}`, 10, 60_000)
     if (!limite.ok) {
       return NextResponse.json({ error: 'Demasiadas peticiones' }, {
         status: 429,
