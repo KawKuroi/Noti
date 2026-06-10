@@ -1,10 +1,16 @@
 import type { ResultadoLanzamiento } from '@/types/release.types'
 import {
-  coincideTitulo,
+  coincideTituloAproximado,
   tieneNumeralCoincidente,
   arabeARomano,
   romanoAArabe,
 } from '@/lib/utils/coincidencia-titulo'
+import { fetchConTimeout } from '@/lib/utils/fetch-con-timeout'
+
+// RAWG added es el numero de usuarios que agregaron el juego (~0 a 20000+).
+function normalizarPopularidad(added?: number): number {
+  return Math.min((added ?? 0) / 10000, 1)
+}
 
 interface RawgGame {
   id: number
@@ -68,24 +74,20 @@ function obtenerApiKey(): string {
   return apiKey
 }
 
-async function llamarRawg<T>(ruta: string, params: Record<string, string> = {}): Promise<T | null> {
-  try {
-    const apiKey = obtenerApiKey()
-    const url = new URL(`https://api.rawg.io/api${ruta}`)
-    url.searchParams.set('key', apiKey)
-    for (const [key, valor] of Object.entries(params)) {
-      url.searchParams.set(key, valor)
-    }
-    const respuesta = await fetch(url.toString(), { cache: 'no-store' })
-    if (!respuesta.ok) {
-      console.error('RAWG error:', respuesta.status, await respuesta.text())
-      return null
-    }
-    return (await respuesta.json()) as T
-  } catch (e) {
-    console.error('RAWG fetch fallo:', e)
-    return null
+// Lanza Error ante key ausente, HTTP !ok o fallo de red (tras reintento):
+// el orquestador captura por fuente y reporta la fuente caida al usuario.
+async function llamarRawg<T>(ruta: string, params: Record<string, string> = {}): Promise<T> {
+  const apiKey = obtenerApiKey()
+  const url = new URL(`https://api.rawg.io/api${ruta}`)
+  url.searchParams.set('key', apiKey)
+  for (const [key, valor] of Object.entries(params)) {
+    url.searchParams.set(key, valor)
   }
+  const respuesta = await fetchConTimeout(url.toString(), { next: { revalidate: 3600 } })
+  if (!respuesta.ok) {
+    throw new Error(`RAWG respondio ${respuesta.status}`)
+  }
+  return (await respuesta.json()) as T
 }
 
 async function buscarTermino(termino: string): Promise<RawgGame[] | null> {
@@ -94,17 +96,24 @@ async function buscarTermino(termino: string): Promise<RawgGame[] | null> {
     page_size: '15',
     search_precise: 'true',
   })
-  if (precisa && precisa.results.length > 0) return precisa.results
+  if (precisa.results.length > 0) return precisa.results
 
   const relajada = await llamarRawg<RawgSearchResponse>('/games', {
     search: termino,
     page_size: '15',
   })
-  return relajada && relajada.results.length > 0 ? relajada.results : null
+  return relajada.results.length > 0 ? relajada.results : null
 }
 
 async function juegoAResultado(base: RawgGame, esTba: boolean): Promise<ResultadoLanzamiento> {
-  const detalle = await llamarRawg<RawgGameDetail>(`/games/${base.id}`)
+  // El detalle aporta descripcion y plataformas; si falla, degradar a los
+  // datos base de la busqueda en lugar de perder el candidato.
+  let detalle: RawgGameDetail | null = null
+  try {
+    detalle = await llamarRawg<RawgGameDetail>(`/games/${base.id}`)
+  } catch (e) {
+    console.error('RAWG detalle fallo:', e)
+  }
   const descripcionBase = detalle?.description_raw?.slice(0, 500)
   const plataformasArray = detalle?.platforms?.map((p) => p.platform.name) ?? []
   const plataforma =
@@ -125,6 +134,7 @@ async function juegoAResultado(base: RawgGame, esTba: boolean): Promise<Resultad
       ? `(Fecha sin confirmar)${descripcionBase ? ` ${descripcionBase}` : ''}`
       : descripcionBase,
     plataforma,
+    popularidad: normalizarPopularidad(base.added),
   }
 }
 
@@ -150,7 +160,7 @@ export async function candidatosJuego(titulo: string, limite = 5): Promise<Resul
 
   const todos = Array.from(recolectados.values())
   const coincidentes = todos.filter(
-    (j) => coincideTitulo(expandido, j.name) && tieneNumeralCoincidente(expandido, j.name),
+    (j) => coincideTituloAproximado(expandido, j.name) && tieneNumeralCoincidente(expandido, j.name),
   )
   const pool = coincidentes.length > 0 ? coincidentes : todos
 
@@ -191,7 +201,7 @@ export async function proximoJuego(franquicia: string, limite = 5): Promise<Resu
   })
 
   const coincidentes =
-    conFiltro?.results.filter((j) => coincideTitulo(expandido, j.name)) ?? []
+    conFiltro.results.filter((j) => coincideTituloAproximado(expandido, j.name))
 
   const futuros = coincidentes
     .filter((j) => j.released && j.released >= hoy && !j.tba)
@@ -207,7 +217,7 @@ export async function proximoJuego(franquicia: string, limite = 5): Promise<Resu
   })
 
   const candidatos =
-    sinFiltro?.results.filter((j) => coincideTitulo(expandido, j.name)) ?? []
+    sinFiltro.results.filter((j) => coincideTituloAproximado(expandido, j.name))
   const tba = candidatos
     .filter((j) => j.tba || !j.released)
     .sort((a, b) => (b.added ?? 0) - (a.added ?? 0))

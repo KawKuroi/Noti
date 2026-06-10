@@ -22,6 +22,7 @@ export function PanelSugerencias() {
     estado,
     extraccion,
     candidatos,
+    fuentesFallidas,
     error,
     procesar,
     confirmarCandidato,
@@ -104,10 +105,29 @@ export function PanelSugerencias() {
           </div>
         )}
 
+        {/* Fuente caida: distinto de "sin resultados" — avisa que el resultado
+            puede estar incompleto y ofrece reintentar la busqueda. */}
+        {!cargando && esLanzamiento && fuentesFallidas.length > 0 && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 flex items-center justify-between gap-3">
+            <span>
+              No pude consultar {fuentesFallidas.join(', ')}. El resultado puede estar
+              incompleto.
+            </span>
+            <button
+              type="button"
+              onClick={() => procesar(query)}
+              className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-md border border-amber-300 hover:bg-amber-100 transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+
         {!cargando && mostrarFormFallbackLanzamiento && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-            No encontré candidatos en las fuentes. Puedes crearlo manualmente con la info
-            que tengamos hasta ahora.
+            {fuentesFallidas.length > 0
+              ? 'Las fuentes que respondieron no tienen candidatos. Reintenta o crealo manualmente.'
+              : 'No encontré candidatos en las fuentes. Puedes crearlo manualmente con la info que tengamos hasta ahora.'}
           </div>
         )}
 

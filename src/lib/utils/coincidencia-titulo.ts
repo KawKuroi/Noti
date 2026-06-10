@@ -44,6 +44,47 @@ export function coincideTitulo(buscado: string, encontrado: string): boolean {
   return tokensBuscado.every((token) => tokensEncontrado.has(token))
 }
 
+// Coeficiente de Dice sobre bigramas de caracteres (sin espacios): tolera
+// typos y variantes de separacion ("Spidermman" vs "Spider-Man" = ~0.94).
+export function similitudDice(a: string, b: string): number {
+  const limpiaA = normalizarTexto(a).replace(/\s/g, '')
+  const limpiaB = normalizarTexto(b).replace(/\s/g, '')
+  if (limpiaA.length < 2 || limpiaB.length < 2) {
+    return limpiaA === limpiaB ? 1 : 0
+  }
+
+  const bigramas = (texto: string): Map<string, number> => {
+    const mapa = new Map<string, number>()
+    for (let i = 0; i < texto.length - 1; i++) {
+      const bg = texto.slice(i, i + 2)
+      mapa.set(bg, (mapa.get(bg) ?? 0) + 1)
+    }
+    return mapa
+  }
+
+  const bgA = bigramas(limpiaA)
+  const bgB = bigramas(limpiaB)
+  let interseccion = 0
+  for (const [bg, cuentaA] of bgA) {
+    const cuentaB = bgB.get(bg) ?? 0
+    interseccion += Math.min(cuentaA, cuentaB)
+  }
+
+  return (2 * interseccion) / (limpiaA.length - 1 + limpiaB.length - 1)
+}
+
+// Matching en dos niveles: primero el token-matching exacto (subset estricto);
+// si falla, fuzzy con Dice para tolerar errores de tipeo. El umbral 0.75
+// descarta titulos realmente distintos sin perder typos comunes.
+export function coincideTituloAproximado(
+  buscado: string,
+  encontrado: string,
+  umbral = 0.75,
+): boolean {
+  if (coincideTitulo(buscado, encontrado)) return true
+  return similitudDice(buscado, encontrado) >= umbral
+}
+
 export function tieneNumeralCoincidente(buscado: string, encontrado: string): boolean {
   const numeralBuscado = tokenizarConNumerales(buscado).find((t) => /^\d+$/.test(t))
   if (!numeralBuscado) return true

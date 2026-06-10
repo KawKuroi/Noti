@@ -40,6 +40,9 @@ interface AsistenteContextValue {
   estado: Estado
   extraccion: Extraccion | null
   candidatos: ResultadoLanzamiento[]
+  // Fuentes externas que fallaron en la ultima busqueda (para avisar al
+  // usuario que el resultado puede estar incompleto y ofrecer reintento).
+  fuentesFallidas: string[]
   error: string | null
 
   procesar: (texto: string) => Promise<void>
@@ -152,6 +155,7 @@ export function AsistenteProvider({ children }: Props) {
   const [estado, setEstado] = useState<Estado>('idle')
   const [extraccion, setExtraccion] = useState<Extraccion | null>(null)
   const [candidatos, setCandidatos] = useState<ResultadoLanzamiento[]>([])
+  const [fuentesFallidas, setFuentesFallidas] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const hidratadoRef = useRef(false)
 
@@ -215,6 +219,7 @@ export function AsistenteProvider({ children }: Props) {
     setQueryRaw('')
     setExtraccion(null)
     setCandidatos([])
+    setFuentesFallidas([])
     setError(null)
     setEstado('idle')
     try {
@@ -236,6 +241,7 @@ export function AsistenteProvider({ children }: Props) {
     setError(null)
     setExtraccion(null)
     setCandidatos([])
+    setFuentesFallidas([])
 
     try {
       const hoy = new Date()
@@ -311,9 +317,11 @@ export function AsistenteProvider({ children }: Props) {
         return
       }
 
-      const { candidatos: nuevos } = (await resCand.json()) as {
+      const { candidatos: nuevos, fuentesFallidas: fallidas } = (await resCand.json()) as {
         candidatos: ResultadoLanzamiento[]
+        fuentesFallidas?: string[]
       }
+      setFuentesFallidas(fallidas ?? [])
 
       // Propagar fechaTentativa a candidatos cuya fuente no confirmo la fecha,
       // para que la CandidatoCard pre-rellene el datepicker.
@@ -477,6 +485,7 @@ export function AsistenteProvider({ children }: Props) {
       estado,
       extraccion,
       candidatos,
+      fuentesFallidas,
       error,
       procesar,
       confirmarCandidato,
@@ -495,6 +504,7 @@ export function AsistenteProvider({ children }: Props) {
       estado,
       extraccion,
       candidatos,
+      fuentesFallidas,
       error,
       procesar,
       confirmarCandidato,

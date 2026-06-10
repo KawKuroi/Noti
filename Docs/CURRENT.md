@@ -42,6 +42,7 @@ Orden de sospecha si una notificacion no llega: (a) job en cron-job.org con resp
 
 ## Pendientes manuales bloqueantes
 
+- [ ] **API keys de busqueda (CRITICO — Fase 27):** `.env.local` NO tiene `TMDB_API_KEY`, `RAWG_API_KEY` ni `GROQ_API_KEY`. Verificar que existan y sean validas en Vercel → Settings → Environment Variables (sin TMDB/RAWG, las busquedas de peliculas/series/juegos fallan; ahora el palette avisa "No pude consultar X" en vez de callar). Obtenerlas: TMDB themoviedb.org/settings/api, RAWG rawg.io/apidocs, Groq console.groq.com.
 - [ ] **Rotacion de secretos (Fase 26.1):** regenerar `RESEND_API_KEY` y `CRON_SECRET` (sus valores aparecieron en la transcripcion de una auditoria automatizada — precaucion, no compromiso confirmado). Actualizar `.env.local`, Vercel y el header de los jobs de cron-job.org.
 - [ ] **Provisionar Upstash Redis (Fase 26.3):** Vercel Marketplace → Upstash → free tier; agrega `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` (o `KV_REST_API_*`) a las env vars.
 - [ ] **Migracion 0011 (CRITICO):** aplicar `src/db/migrations/0011_notificaciones_historial_vencidos.sql` en Supabase (o `npm run db:push`). Agrega `notification_log.title/body/read_at` + indice y `profiles.auto_delete_overdue_days`. Sin esto fallan el centro de notificaciones y la autoeliminacion de vencidos.

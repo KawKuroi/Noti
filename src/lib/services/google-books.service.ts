@@ -1,5 +1,6 @@
 import type { ResultadoLanzamiento } from '@/types/release.types'
-import { coincideTitulo } from '@/lib/utils/coincidencia-titulo'
+import { coincideTituloAproximado } from '@/lib/utils/coincidencia-titulo'
+import { fetchConTimeout } from '@/lib/utils/fetch-con-timeout'
 
 interface GoogleBooksVolume {
   id: string
@@ -44,6 +45,8 @@ function aResultado(
   }
 }
 
+// Lanza Error ante HTTP !ok o fallo de red (tras reintento): el orquestador
+// captura por fuente y reporta la fuente caida al usuario.
 async function consultar(query: string, params: Record<string, string> = {}): Promise<GoogleBooksVolume[]> {
   const url = new URL('https://www.googleapis.com/books/v1/volumes')
   url.searchParams.set('q', query)
@@ -51,14 +54,12 @@ async function consultar(query: string, params: Record<string, string> = {}): Pr
   for (const [k, v] of Object.entries(params)) {
     url.searchParams.set(k, v)
   }
-  try {
-    const res = await fetch(url.toString(), { next: { revalidate: 3600 } })
-    if (!res.ok) return []
-    const datos = (await res.json()) as GoogleBooksResponse
-    return datos.items ?? []
-  } catch {
-    return []
+  const res = await fetchConTimeout(url.toString(), { next: { revalidate: 3600 } })
+  if (!res.ok) {
+    throw new Error(`Google Books respondio ${res.status}`)
   }
+  const datos = (await res.json()) as GoogleBooksResponse
+  return datos.items ?? []
 }
 
 export async function candidatosLibro(
@@ -73,7 +74,7 @@ export async function candidatosLibro(
   const items = await consultar(query, { orderBy: 'relevance' })
   if (items.length === 0) return []
 
-  const coincidentes = items.filter((it) => coincideTitulo(titulo, it.volumeInfo.title))
+  const coincidentes = items.filter((it) => coincideTituloAproximado(titulo, it.volumeInfo.title))
   const pool = coincidentes.length > 0 ? coincidentes : items
 
   const candidatos: ResultadoLanzamiento[] = []

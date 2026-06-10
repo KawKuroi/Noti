@@ -1,6 +1,6 @@
 import { obtenerUsuario } from '@/lib/auth'
 import { verificarLimite } from '@/lib/utils/rate-limit'
-import { obtenerCandidatos } from '@/lib/services/release-search.service'
+import { obtenerCandidatosDetallado } from '@/lib/services/release-search.service'
 import { esquemaExtraccion } from '@/lib/ai/extractor'
 
 export const maxDuration = 30
@@ -23,6 +23,6 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Extraccion invalida' }, { status: 400 })
   }
 
-  const candidatos = await obtenerCandidatos(parse.data)
-  return Response.json({ candidatos })
+  const { candidatos, fuentesFallidas } = await obtenerCandidatosDetallado(parse.data)
+  return Response.json({ candidatos, fuentesFallidas })
 }

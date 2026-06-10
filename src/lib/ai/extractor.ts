@@ -23,7 +23,11 @@ export const esquemaExtraccion = z.object({
         .regex(/^\d{2}:\d{2}$/)
         .nullable(),
       esRecurrente: z.boolean(),
-      reglaRecurrencia: z.string().nullable(),
+      // Formatos validos: "yearly:DD-MM" o "weekly:1,3" (dias ISO 1-7)
+      reglaRecurrencia: z
+        .string()
+        .regex(/^(yearly:\d{2}-\d{2}|weekly:[1-7](,[1-7])*)$/)
+        .nullable(),
       descripcion: z.string().nullable(),
     })
     .nullable(),
@@ -50,8 +54,9 @@ Las cuatro intenciones posibles:
 
 1) recordatorio_personal — el usuario quiere agendar algo personal (cumpleanos, clases, tareas, eventos, citas, notas). Llena el campo "recordatorio".
    - categoriaSlug debe ser uno de: birthdays | study | tasks | events | notes
-   - Si la fecha es relativa ("manana", "el viernes", "la proxima semana"), calculala a partir de la fecha actual.
+   - Si la fecha es relativa ("manana", "el viernes", "la proxima semana"), calculala a partir de la fecha actual Y el dia de la semana actual que se te indica. Ejemplo: si hoy es martes y dicen "el viernes", suma 3 dias.
    - Si la fecha viene en formato natural corto ("nov 19", "20/06", "3 mar", "19 de noviembre", "viernes 21"), conviertela a YYYY-MM-DD. Si el dia ya paso este ano, usa el proximo ano disponible.
+   - CONVENCION NUMERICA: los formatos con barras son SIEMPRE DD/MM (espanol). "20/06" = 20 de junio, "05/11" = 5 de noviembre. NUNCA interpretes MM/DD.
    - HORA (horaVencimiento): si el texto contiene una hora explicita, conviertela a formato 24h "HH:mm". Ejemplos:
        "5am" → "05:00"
        "5:30 am" → "05:30"
@@ -92,17 +97,30 @@ interface OpcionesExtraccion {
   fechaHoy: string
 }
 
+// Dia de la semana en espanol para que el LLM resuelva fechas relativas
+// ("el viernes") sin adivinar que dia es hoy.
+function diaSemanaDe(fechaIso: string): string {
+  try {
+    return new Intl.DateTimeFormat('es-CO', { weekday: 'long' }).format(
+      new Date(`${fechaIso}T12:00:00`),
+    )
+  } catch {
+    return ''
+  }
+}
+
 export async function extraerIntencion({ texto, fechaHoy }: OpcionesExtraccion): Promise<
   | { ok: true; extraccion: Extraccion }
   | { ok: false; error: string }
 > {
   try {
+    const diaSemana = diaSemanaDe(fechaHoy)
     const { object } = await generateObject({
       model: groq('openai/gpt-oss-120b'),
       schema: esquemaExtraccion,
       prompt: `${PROMPT}
 
-Fecha actual: ${fechaHoy}
+Fecha actual: ${fechaHoy}${diaSemana ? ` (${diaSemana})` : ''}
 Texto del usuario: ${texto.trim()}`,
     })
 

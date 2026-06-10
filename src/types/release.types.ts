@@ -21,6 +21,9 @@ export interface ResultadoLanzamiento {
   director?: string
   temporada?: number
   fechaTentativa?: string
+  // Popularidad normalizada a [0, 1] segun la fuente (TMDB popularity,
+  // RAWG added). Usada como desempate en el ranking de candidatos.
+  popularidad?: number
 }
 
 export interface MetadatosLanzamiento {

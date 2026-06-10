@@ -1,7 +1,13 @@
 import type { ResultadoLanzamiento } from '@/types/release.types'
-import { coincideTitulo } from '@/lib/utils/coincidencia-titulo'
+import { coincideTituloAproximado } from '@/lib/utils/coincidencia-titulo'
+import { fetchConTimeout } from '@/lib/utils/fetch-con-timeout'
 
 const POSTER_BASE = 'https://image.tmdb.org/t/p/w500'
+
+// TMDB popularity es un valor abierto (~0 a 1000+); 100 ya es muy popular.
+function normalizarPopularidad(popularity?: number): number {
+  return Math.min((popularity ?? 0) / 100, 1)
+}
 
 interface TmdbSearchResult {
   id: number
@@ -24,6 +30,7 @@ interface TmdbMovieDetalle {
   credits?: {
     crew: Array<{ job: string; name: string }>
   }
+  release_dates?: TmdbReleaseDates
 }
 
 interface TmdbReleaseDates {
@@ -54,31 +61,41 @@ function obtenerConfig() {
   return { apiKey, baseUrl }
 }
 
-async function llamarTmdb<T>(ruta: string, params: Record<string, string> = {}): Promise<T | null> {
-  try {
-    const { apiKey, baseUrl } = obtenerConfig()
-    const url = new URL(`${baseUrl}${ruta}`)
-    url.searchParams.set('api_key', apiKey)
-    url.searchParams.set('language', 'es-ES')
-    for (const [key, valor] of Object.entries(params)) {
-      url.searchParams.set(key, valor)
-    }
-    const respuesta = await fetch(url.toString(), { cache: 'no-store' })
-    if (!respuesta.ok) {
-      console.error('TMDB error:', respuesta.status, await respuesta.text())
-      return null
-    }
-    return (await respuesta.json()) as T
-  } catch (e) {
-    console.error('TMDB fetch fallo:', e)
-    return null
+// Lanza Error ante key ausente, HTTP !ok o fallo de red (tras reintento):
+// el orquestador (release-search) captura por fuente con allSettled y reporta
+// la fuente caida en lugar de devolver una lista vacia silenciosa.
+async function llamarTmdb<T>(
+  ruta: string,
+  params: Record<string, string> = {},
+  opciones: { sinIdioma?: boolean } = {},
+): Promise<T> {
+  const { apiKey, baseUrl } = obtenerConfig()
+  const url = new URL(`${baseUrl}${ruta}`)
+  url.searchParams.set('api_key', apiKey)
+  if (!opciones.sinIdioma) url.searchParams.set('language', 'es-ES')
+  for (const [key, valor] of Object.entries(params)) {
+    url.searchParams.set(key, valor)
   }
+  const respuesta = await fetchConTimeout(url.toString(), { next: { revalidate: 3600 } })
+  if (!respuesta.ok) {
+    throw new Error(`TMDB respondio ${respuesta.status}`)
+  }
+  return (await respuesta.json()) as T
 }
 
-async function obtenerFechaPeliculaLocalizada(tmdbId: number): Promise<string | null> {
-  const datos = await llamarTmdb<TmdbReleaseDates>(`/movie/${tmdbId}/release_dates`)
-  if (!datos) return null
+// Busqueda con fallback de idioma: es-ES primero (metadata localizada) y, si
+// no hay resultados, sin language (TMDB usa en-US y amplia el matching).
+async function buscarConFallbackIdioma(
+  ruta: '/search/movie' | '/search/tv',
+  params: Record<string, string>,
+): Promise<TmdbSearchResponse> {
+  const localizada = await llamarTmdb<TmdbSearchResponse>(ruta, params)
+  if (localizada.results.length > 0) return localizada
+  return llamarTmdb<TmdbSearchResponse>(ruta, params, { sinIdioma: true })
+}
 
+function fechaPeliculaLocalizada(datos: TmdbReleaseDates | undefined): string | null {
+  if (!datos) return null
   for (const pais of ['CO', 'US']) {
     const entrada = datos.results.find((r) => r.iso_3166_1 === pais)
     const teatral = entrada?.release_dates.find((rd) => rd.type === 3)
@@ -86,18 +103,25 @@ async function obtenerFechaPeliculaLocalizada(tmdbId: number): Promise<string | 
     const fecha = (teatral ?? cualquiera)?.release_date
     if (fecha) return fecha.slice(0, 10)
   }
-
   return null
 }
 
 async function peliculaAResultado(r: TmdbSearchResult): Promise<ResultadoLanzamiento | null> {
-  const fechaLocalizada = await obtenerFechaPeliculaLocalizada(r.id)
-  const fecha = fechaLocalizada ?? r.release_date
+  // Una sola llamada de detalle con credits + release_dates (antes eran dos).
+  // Si el detalle falla, degradar a los datos del resultado de busqueda en
+  // lugar de descartar el candidato.
+  let detalle: TmdbMovieDetalle | null = null
+  try {
+    detalle = await llamarTmdb<TmdbMovieDetalle>(`/movie/${r.id}`, {
+      append_to_response: 'credits,release_dates',
+    })
+  } catch (e) {
+    console.error('TMDB detalle de pelicula fallo:', e)
+  }
+
+  const fecha = fechaPeliculaLocalizada(detalle?.release_dates) ?? r.release_date
   if (!fecha) return null
 
-  const detalle = await llamarTmdb<TmdbMovieDetalle>(`/movie/${r.id}`, {
-    append_to_response: 'credits',
-  })
   const director = detalle?.credits?.crew?.find((c) => c.job === 'Director')?.name
 
   return {
@@ -109,11 +133,18 @@ async function peliculaAResultado(r: TmdbSearchResult): Promise<ResultadoLanzami
     posterUrl: r.poster_path ? `${POSTER_BASE}${r.poster_path}` : undefined,
     descripcion: r.overview || undefined,
     director,
+    popularidad: normalizarPopularidad(r.popularity),
   }
 }
 
 async function serieAResultado(r: TmdbSearchResult): Promise<ResultadoLanzamiento | null> {
-  const detalle = await llamarTmdb<TmdbSerieDetalle>(`/tv/${r.id}`)
+  let detalle: TmdbSerieDetalle | null = null
+  try {
+    detalle = await llamarTmdb<TmdbSerieDetalle>(`/tv/${r.id}`)
+  } catch (e) {
+    console.error('TMDB detalle de serie fallo:', e)
+  }
+
   const fechaProximoEp = detalle?.next_episode_to_air?.air_date
   const fechaPrimera = r.first_air_date ?? detalle?.first_air_date
   const fecha = fechaProximoEp ?? fechaPrimera
@@ -130,6 +161,7 @@ async function serieAResultado(r: TmdbSearchResult): Promise<ResultadoLanzamient
     posterUrl: r.poster_path ? `${POSTER_BASE}${r.poster_path}` : undefined,
     descripcion: r.overview || undefined,
     temporada,
+    popularidad: normalizarPopularidad(r.popularity),
   }
 }
 
@@ -152,11 +184,11 @@ function ordenarPorRelevancia(
 }
 
 export async function candidatosPelicula(titulo: string, limite = 5): Promise<ResultadoLanzamiento[]> {
-  const busqueda = await llamarTmdb<TmdbSearchResponse>('/search/movie', { query: titulo })
-  if (!busqueda || busqueda.results.length === 0) return []
+  const busqueda = await buscarConFallbackIdioma('/search/movie', { query: titulo })
+  if (busqueda.results.length === 0) return []
 
   const coincidentes = busqueda.results.filter((r) =>
-    coincideTitulo(titulo, r.title ?? r.original_title ?? ''),
+    coincideTituloAproximado(titulo, r.title ?? r.original_title ?? ''),
   )
   const pool = coincidentes.length > 0 ? coincidentes : busqueda.results
   const ordenados = ordenarPorRelevancia(pool, 'release_date').slice(0, limite)
@@ -168,11 +200,11 @@ export async function candidatosPelicula(titulo: string, limite = 5): Promise<Re
 }
 
 export async function candidatosSerie(titulo: string, limite = 5): Promise<ResultadoLanzamiento[]> {
-  const busqueda = await llamarTmdb<TmdbSearchResponse>('/search/tv', { query: titulo })
-  if (!busqueda || busqueda.results.length === 0) return []
+  const busqueda = await buscarConFallbackIdioma('/search/tv', { query: titulo })
+  if (busqueda.results.length === 0) return []
 
   const coincidentes = busqueda.results.filter((r) =>
-    coincideTitulo(titulo, r.name ?? r.original_name ?? ''),
+    coincideTituloAproximado(titulo, r.name ?? r.original_name ?? ''),
   )
   const pool = coincidentes.length > 0 ? coincidentes : busqueda.results
   const ordenados = ordenarPorRelevancia(pool, 'first_air_date').slice(0, limite)
@@ -195,14 +227,14 @@ export async function buscarSerie(titulo: string): Promise<ResultadoLanzamiento 
 
 export async function proximaPelicula(franquicia: string, limite = 5): Promise<ResultadoLanzamiento[]> {
   const hoy = new Date().toISOString().slice(0, 10)
-  const busqueda = await llamarTmdb<TmdbSearchResponse>('/search/movie', {
+  const busqueda = await buscarConFallbackIdioma('/search/movie', {
     query: franquicia,
     include_adult: 'false',
   })
-  if (!busqueda || busqueda.results.length === 0) return []
+  if (busqueda.results.length === 0) return []
 
   const coincidentes = busqueda.results.filter((r) =>
-    coincideTitulo(franquicia, r.title ?? r.original_title ?? ''),
+    coincideTituloAproximado(franquicia, r.title ?? r.original_title ?? ''),
   )
   const pool = coincidentes.length > 0 ? coincidentes : busqueda.results
 
@@ -216,19 +248,26 @@ export async function proximaPelicula(franquicia: string, limite = 5): Promise<R
 }
 
 export async function proximaSerie(franquicia: string, limite = 5): Promise<ResultadoLanzamiento[]> {
-  const busqueda = await llamarTmdb<TmdbSearchResponse>('/search/tv', { query: franquicia })
-  if (!busqueda || busqueda.results.length === 0) return []
+  const busqueda = await buscarConFallbackIdioma('/search/tv', { query: franquicia })
+  if (busqueda.results.length === 0) return []
 
   const coincidentes = busqueda.results.filter((r) =>
-    coincideTitulo(franquicia, r.name ?? r.original_name ?? ''),
+    coincideTituloAproximado(franquicia, r.name ?? r.original_name ?? ''),
   )
   const pool = coincidentes.length > 0 ? coincidentes : busqueda.results
   const ordenados = [...pool].sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0))
 
   const candidatos: ResultadoLanzamiento[] = []
-  for (const candidato of ordenados) {
+  // Acotar las llamadas de detalle (N+1) a los primeros 8 mas populares.
+  for (const candidato of ordenados.slice(0, 8)) {
     if (candidatos.length >= limite) break
-    const detalle = await llamarTmdb<TmdbSerieDetalle>(`/tv/${candidato.id}`)
+    let detalle: TmdbSerieDetalle | null = null
+    try {
+      detalle = await llamarTmdb<TmdbSerieDetalle>(`/tv/${candidato.id}`)
+    } catch (e) {
+      console.error('TMDB detalle de serie fallo:', e)
+      continue
+    }
     const fechaProximoEp = detalle?.next_episode_to_air?.air_date
     if (!fechaProximoEp) continue
     candidatos.push({
@@ -240,6 +279,7 @@ export async function proximaSerie(franquicia: string, limite = 5): Promise<Resu
       posterUrl: candidato.poster_path ? `${POSTER_BASE}${candidato.poster_path}` : undefined,
       descripcion: candidato.overview || undefined,
       temporada: detalle?.next_episode_to_air?.season_number,
+      popularidad: normalizarPopularidad(candidato.popularity),
     })
   }
   return candidatos

@@ -9,9 +9,25 @@ import {
 import { buscarJuego, candidatosJuego, proximoJuego } from './rawg.service'
 import { buscarAlbum, candidatosAlbum, proximoAlbum } from './musicbrainz.service'
 import { buscarLibro, candidatosLibro, proximoLibro } from './google-books.service'
-import { coincideTitulo } from '@/lib/utils/coincidencia-titulo'
+import { coincideTitulo, similitudDice } from '@/lib/utils/coincidencia-titulo'
 import type { ResultadoLanzamiento, TipoLanzamiento } from '@/types/release.types'
 import type { Extraccion } from '@/lib/ai/extractor'
+
+// Etiquetas visibles al usuario cuando una fuente falla ("No pude consultar X").
+const ETIQUETA_FUENTE: Record<TipoLanzamiento, string> = {
+  movie: 'peliculas',
+  tv: 'series',
+  game: 'videojuegos',
+  album: 'musica',
+  book: 'libros',
+}
+
+export interface ResultadoBusquedaCandidatos {
+  candidatos: ResultadoLanzamiento[]
+  // Fuentes que lanzaron error (API caida, key ausente, timeout). Distinto de
+  // "sin resultados": permite avisar al usuario en lugar de callar.
+  fuentesFallidas: string[]
+}
 
 const PREFIJOS_INTERROGATIVOS = [
   /^cuando sale\s+/i,
@@ -64,8 +80,14 @@ export async function buscarLanzamiento(
   const fuentes = FUENTES_POR_TIPO[tipo] ?? []
 
   for (const fn of fuentes) {
-    const resultado = await fn(tituloLimpio, artista)
-    if (resultado) return resultado
+    // Los servicios lanzan ante fallo de API; aqui una fuente caida no debe
+    // impedir probar la siguiente.
+    try {
+      const resultado = await fn(tituloLimpio, artista)
+      if (resultado) return resultado
+    } catch (e) {
+      console.error('[release-search/buscarLanzamiento] fuente fallo:', e)
+    }
   }
   return null
 }
@@ -80,12 +102,20 @@ function calcularScore(
   if (candidato.fechaLanzamiento && candidato.fechaLanzamiento >= new Date().toISOString().slice(0, 10)) {
     score += 2
   }
-  if (tituloBuscado && coincideTitulo(tituloBuscado, candidato.titulo)) {
-    score += 1
+  // Coincidencia de titulo en dos niveles: exacta por tokens (+1) o
+  // aproximada por similitud de bigramas (proporcional, max +1).
+  if (tituloBuscado) {
+    if (coincideTitulo(tituloBuscado, candidato.titulo)) {
+      score += 1
+    } else {
+      score += Math.max(0, similitudDice(tituloBuscado, candidato.titulo) - 0.5)
+    }
   }
   if (tipoPreferido && candidato.tipo === tipoPreferido) {
     score += 0.5
   }
+  // Popularidad normalizada [0,1] como desempate entre matches equivalentes.
+  score += candidato.popularidad ?? 0
   return score
 }
 
@@ -148,56 +178,81 @@ async function obtenerProximosPorTipo(
   }
 }
 
-export async function obtenerCandidatos(extraccion: Extraccion): Promise<ResultadoLanzamiento[]> {
+// Ejecuta las busquedas etiquetadas por fuente con allSettled: una fuente
+// caida (API key ausente, timeout, 5xx) no tumba la busqueda completa y queda
+// reportada en fuentesFallidas.
+async function recolectarFuentes(
+  consultas: Array<{ tipo: TipoLanzamiento; promesa: Promise<ResultadoLanzamiento[]> }>,
+): Promise<ResultadoBusquedaCandidatos> {
+  const resultados = await Promise.allSettled(consultas.map((c) => c.promesa))
+  const candidatos: ResultadoLanzamiento[] = []
+  const fuentesFallidas: string[] = []
+
+  resultados.forEach((resultado, i) => {
+    if (resultado.status === 'fulfilled') {
+      candidatos.push(...resultado.value)
+    } else {
+      fuentesFallidas.push(ETIQUETA_FUENTE[consultas[i].tipo])
+      console.error(
+        `[release-search] fuente "${consultas[i].tipo}" fallo:`,
+        resultado.reason,
+      )
+    }
+  })
+
+  return { candidatos, fuentesFallidas }
+}
+
+export async function obtenerCandidatosDetallado(
+  extraccion: Extraccion,
+): Promise<ResultadoBusquedaCandidatos> {
+  const vacio: ResultadoBusquedaCandidatos = { candidatos: [], fuentesFallidas: [] }
+
   if (extraccion.intencion === 'recordatorio_personal' || extraccion.intencion === 'desconocido') {
-    return []
+    return vacio
   }
-  if (!extraccion.lanzamiento) return []
+  if (!extraccion.lanzamiento) return vacio
 
   const { tipo, titulo, contexto, artista } = extraccion.lanzamiento
   const limitePorFuente = 5
   const limiteFinal = 5
 
-  let candidatos: ResultadoLanzamiento[] = []
+  const esGenerico = extraccion.intencion === 'lanzamiento_generico'
+  const consulta = esGenerico ? (contexto ?? titulo ?? '') : (titulo ?? contexto ?? '')
+  if (!consulta.trim()) return vacio
+  const consultaLimpia = limpiarTitulo(consulta)
 
-  if (extraccion.intencion === 'lanzamiento_generico') {
-    const consulta = contexto ?? titulo ?? ''
-    if (!consulta.trim()) return []
-    const consultaLimpia = limpiarTitulo(consulta)
+  let recolectado: ResultadoBusquedaCandidatos
 
-    if (tipo) {
-      candidatos = await obtenerProximosPorTipo(tipo, consultaLimpia, limitePorFuente)
-    } else {
-      const todos = await Promise.all([
-        proximaPelicula(consultaLimpia, 3),
-        proximaSerie(consultaLimpia, 3),
-        proximoJuego(consultaLimpia, 3),
-        proximoAlbum(consultaLimpia, 3),
-        proximoLibro(consultaLimpia, 3),
-      ])
-      candidatos = todos.flat()
-    }
+  if (tipo) {
+    recolectado = await recolectarFuentes([
+      {
+        tipo,
+        promesa: esGenerico
+          ? obtenerProximosPorTipo(tipo, consultaLimpia, limitePorFuente)
+          : obtenerCandidatosPorTipo(tipo, consultaLimpia, artista, limitePorFuente),
+      },
+    ])
+  } else if (esGenerico) {
+    recolectado = await recolectarFuentes([
+      { tipo: 'movie', promesa: proximaPelicula(consultaLimpia, 3) },
+      { tipo: 'tv', promesa: proximaSerie(consultaLimpia, 3) },
+      { tipo: 'game', promesa: proximoJuego(consultaLimpia, 3) },
+      { tipo: 'album', promesa: proximoAlbum(consultaLimpia, 3) },
+      { tipo: 'book', promesa: proximoLibro(consultaLimpia, 3) },
+    ])
   } else {
-    const consulta = titulo ?? contexto ?? ''
-    if (!consulta.trim()) return []
-    const consultaLimpia = limpiarTitulo(consulta)
-
-    if (tipo) {
-      candidatos = await obtenerCandidatosPorTipo(tipo, consultaLimpia, artista, limitePorFuente)
-    } else {
-      const todos = await Promise.all([
-        candidatosPelicula(consultaLimpia, 3),
-        candidatosSerie(consultaLimpia, 3),
-        candidatosJuego(consultaLimpia, 3),
-        candidatosAlbum(consultaLimpia, artista ?? undefined, 3),
-        candidatosLibro(consultaLimpia, artista ?? undefined, 3),
-      ])
-      candidatos = todos.flat()
-    }
+    recolectado = await recolectarFuentes([
+      { tipo: 'movie', promesa: candidatosPelicula(consultaLimpia, 3) },
+      { tipo: 'tv', promesa: candidatosSerie(consultaLimpia, 3) },
+      { tipo: 'game', promesa: candidatosJuego(consultaLimpia, 3) },
+      { tipo: 'album', promesa: candidatosAlbum(consultaLimpia, artista ?? undefined, 3) },
+      { tipo: 'book', promesa: candidatosLibro(consultaLimpia, artista ?? undefined, 3) },
+    ])
   }
 
   const tituloRanking = titulo ?? contexto ?? ''
-  const unicos = deduplicar(candidatos)
+  const unicos = deduplicar(recolectado.candidatos)
   const rankeados = unicos
     .map((c) => ({ c, score: calcularScore(c, tituloRanking, tipo) }))
     .sort((a, b) => b.score - a.score)
@@ -210,10 +265,16 @@ export async function obtenerCandidatos(extraccion: Extraccion): Promise<Resulta
       tipo,
       devueltos: rankeados.length,
       totalUnicos: unicos.length,
+      fuentesFallidas: recolectado.fuentesFallidas,
     })
   }
 
-  return rankeados
+  return { candidatos: rankeados, fuentesFallidas: recolectado.fuentesFallidas }
+}
+
+export async function obtenerCandidatos(extraccion: Extraccion): Promise<ResultadoLanzamiento[]> {
+  const { candidatos } = await obtenerCandidatosDetallado(extraccion)
+  return candidatos
 }
 
 export async function buscarProximoLanzamiento(
@@ -222,6 +283,11 @@ export async function buscarProximoLanzamiento(
 ): Promise<ResultadoLanzamiento | null> {
   const limpio = limpiarTitulo(contexto)
   if (!limpio) return null
-  const candidatos = await obtenerProximosPorTipo(tipo, limpio, 1)
-  return candidatos[0] ?? null
+  try {
+    const candidatos = await obtenerProximosPorTipo(tipo, limpio, 1)
+    return candidatos[0] ?? null
+  } catch (e) {
+    console.error('[release-search/buscarProximoLanzamiento] fuente fallo:', e)
+    return null
+  }
 }
