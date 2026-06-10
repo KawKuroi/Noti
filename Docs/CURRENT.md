@@ -5,8 +5,9 @@
 
 ## Fase activa
 
-**Siguiente:** Fases 30/31 (apps Tauri v2 Windows/Android).
-**Estado:** Fases 0-29.6 completadas y en produccion. Revision integral de junio 2026 entregada: SEO+landing, seguridad (headers + Upstash), busqueda IA robusta, PWA robusta (retry push + watchdog cron), upgrades (date-fns 4, Zod 4, Next 16 + eslint 9 flat, Tailwind 4, drizzle-kit 0.31.10 — Drizzle 1.0 sigue en RC), limpieza post-upgrades y testing profundo (Fase 29.6).
+**Siguiente:** primeros releases de las apps Tauri (Windows en CI con el tag `app-v0.1.0`; Android espera los secrets del keystore) y verificacion manual en dispositivos.
+**Estado:** Fases 0-31 completadas y en produccion. Revision integral de junio 2026 entregada: SEO+landing, seguridad (headers + Upstash), busqueda IA robusta, PWA robusta (retry push + watchdog cron), upgrades (date-fns 4, Zod 4, Next 16 + eslint 9 flat, Tailwind 4, drizzle-kit 0.31.10 — Drizzle 1.0 sigue en RC), limpieza post-upgrades, testing profundo (Fase 29.6) y apps nativas Tauri v2 (Fases 30/31).
+**Verificado en produccion (jun 10):** landing/robots/sitemap/og-image en 200, headers de seguridad activos (HSTS, CSP report-only, X-Frame-Options), crons protegidos con 401, migraciones 0011 y 0012 aplicadas en Supabase (columnas y indice confirmados por SQL).
 
 ## Fase 29.6 — notas de implementacion (esta sesion)
 
@@ -15,17 +16,17 @@
 - 29.6.3: E2E nuevos `settings.spec.ts` y `asistente.spec.ts` (patron skip-sin-credenciales; no disparan IA real).
 - 29.6.4: `.github/workflows/ci.yml` (lint + test + build en push/PR a main, Node 24, env dummies para el build). Convencion documentada en `PROJECT.md`.
 - **Bugfix hallado por los tests:** `calcularProximaOcurrencia` (date.utils) no alcanzaba el offset 7 en reglas semanales de un solo dia con la hora de hoy ya pasada; el fallback `addWeeks(ancla, 1)` devolvia una fecha relativa al ancla (en el pasado). Afectaba a `obtenerProximaFecha` y al avance de recurrentes en `alternarCompletado`. Corregido: el bucle ahora cubre offsets 0-7.
-- Pendiente unico de la fase: ver el primer run de CI verde en GitHub tras el push.
+- CI verde en GitHub (run del commit `d60a901`). En el primer run el build fallo por `new Resend(env)` a nivel de modulo en `/api/contacto` (lanza sin key; CI no tiene secretos): corregido instanciando dentro del handler. Fase cerrada.
 
 ## Pendientes manuales bloqueantes (por criticidad)
 
-1. [ ] **API keys de busqueda (CRITICO — Fase 27):** verificar `TMDB_API_KEY`, `RAWG_API_KEY` y `GROQ_API_KEY` en Vercel → Settings → Environment Variables (`.env.local` local NO las tiene). Sin TMDB/RAWG las busquedas de peliculas/series/juegos fallan; el palette ahora avisa "No pude consultar X". Obtener: themoviedb.org/settings/api · rawg.io/apidocs · console.groq.com.
-2. [ ] **Migraciones en Supabase (CRITICO):** `0011_notificaciones_historial_vencidos.sql` (centro de notificaciones + auto-eliminacion de vencidos dependen de ella) y `0012_housekeeping_columnas.sql` (DROP de columnas huerfanas).
+1. [x] **API keys de busqueda (Fase 27):** `TMDB_API_KEY`, `RAWG_API_KEY` y `GROQ_API_KEY` configuradas en Vercel (jun 10). Verificacion funcional pendiente: probar una busqueda real en el palette ("avisame cuando salga X pelicula").
+2. [x] **Migraciones en Supabase:** 0011 y 0012 aplicadas y verificadas por SQL (jun 10).
 3. [ ] **Jobs de cron-job.org (CRITICO):** Vercel Hobby solo permite crons diarios. Job 1: cada 1 min → `GET /api/cron/check-reminders`; Job 2: cada 1 h → `GET /api/cron/resumen-diario`; ambos con header `Authorization: Bearer <CRON_SECRET>`. Validar HTTP 200 (401 = header mal puesto). El codigo tolera pings retrasados (ventana 5 min + dedup).
 4. [ ] **Upstash Redis (Fase 26.3):** Vercel Marketplace → Upstash (free tier). Sin `UPSTASH_REDIS_REST_URL/TOKEN` el rate limiting cae al fallback en memoria y el watchdog del cron queda deshabilitado.
 5. [ ] **Rotacion de secretos (Fase 26.1):** regenerar `RESEND_API_KEY` y `CRON_SECRET` (aparecieron en una transcripcion de auditoria — precaucion). Actualizar `.env.local`, Vercel y el header de cron-job.org.
-6. [ ] **Env vars de push en Vercel:** `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `NEXT_PUBLIC_APP_URL`, `BLOB_READ_WRITE_TOKEN`.
-7. [ ] **Apps Tauri (Fases 30/31):** (a) para el primer release de Windows: `git tag app-v0.1.0 && git push origin app-v0.1.0` — el workflow compila y publica el .msi/.exe; (b) para Android: crear el keystore self-signed (`keytool -genkeypair -v -keystore noti.keystore -alias noti -keyalg RSA -keysize 2048 -validity 10000`), guardarlo como secrets `ANDROID_KEYSTORE_B64` (base64) y `ANDROID_KEYSTORE_PASSWORD` en GitHub, y taggear `android-v0.1.0`; (c) opcional para compilar local: `winget install Rustlang.Rustup` (Windows) y Android Studio + NDK (Android).
+6. [ ] **Env vars de push en Vercel (verificar):** `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `NEXT_PUBLIC_APP_URL`, `BLOB_READ_WRITE_TOKEN`. Si el push ya funcionaba en produccion, ya estan — solo confirmar en el dashboard.
+7. [ ] **Releases Tauri (Fases 30/31):** (a) Windows: tag `app-v0.1.0` publicado (jun 10), run de CI en curso — verificar que el Release tenga el .msi/.exe e instalarlo; (b) Android: keystore ya generado en `C:\Users\kevin\noti-android-keys\` (noti.keystore, noti.keystore.b64 y password.txt — NO subir al repo). Falta crear los secrets en GitHub → Settings → Secrets → Actions: `ANDROID_KEYSTORE_B64` (contenido de noti.keystore.b64) y `ANDROID_KEYSTORE_PASSWORD` (contenido de password.txt), y luego `git tag android-v0.1.0 && git push origin android-v0.1.0`; (c) opcional para compilar local: `winget install Rustlang.Rustup` (Windows) y Android Studio + NDK (Android).
 
 ## Verificacion Fase 25 (25.6) — checklist manual
 

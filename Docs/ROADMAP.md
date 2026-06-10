@@ -2,8 +2,8 @@
 
 ## Estado actual
 
-Fases 0–29.6 completadas. Fase 25 solo con verificacion manual 25.6 pendiente; de 29.6 falta solo ver el primer run verde de CI en GitHub tras el push.
-**Siguientes:** Fases 30/31 (apps Tauri v2 Windows/Android).
+Fases 0–31 completadas (CI verde en GitHub). Fase 25 solo con verificacion manual 25.6 pendiente.
+**Siguientes:** primeros releases de las apps Tauri (Windows: tag `app-v0.1.0` ya publicado; Android: secrets del keystore + tag) y pruebas en dispositivo.
 
 > El detalle granular de fases ya entregadas vive en `CURRENT.md` (sesiones recientes) y en `git log` (sesiones antiguas). Este archivo solo lista el titulo y el outcome para mantener bajo el coste de contexto.
 
