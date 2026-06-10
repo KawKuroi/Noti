@@ -33,7 +33,7 @@ export const esquemaPerfil = z.object({
     .nullable()
     .optional(),
   zonaHoraria: z.enum(ZONAS_HORARIAS_LATAM as [string, ...string[]], {
-    errorMap: () => ({ message: 'Zona horaria invalida' }),
+    error: 'Zona horaria invalida',
   }),
 })
 

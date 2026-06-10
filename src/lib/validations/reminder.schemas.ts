@@ -121,7 +121,7 @@ export const esquemaRecordatorioBaseNotas = esquemaRecordatorioBase.extend({
 })
 
 export function obtenerEsquemaMetadatos(slug: string) {
-  return esquemasMetadatosPorSlug[slug as SlugConSchema] ?? z.object({}).passthrough()
+  return esquemasMetadatosPorSlug[slug as SlugConSchema] ?? z.looseObject({})
 }
 
 export function validarRecordatorio(slug: string, datos: FormData | Record<string, unknown>) {
