@@ -1,7 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(solicitud: NextRequest) {
+// Next 16: proxy.ts reemplaza a middleware.ts (misma semantica de intercepcion).
+export async function proxy(solicitud: NextRequest) {
   let respuesta = NextResponse.next({
     request: solicitud,
   })
