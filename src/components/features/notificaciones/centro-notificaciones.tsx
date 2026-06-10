@@ -96,10 +96,10 @@ export function CentroNotificaciones({
     variante === 'sidebar' ? (
       <button
         onClick={() => void manejarApertura(true)}
-        className="w-full text-left flex items-center justify-between gap-3 px-3 py-2 rounded-[10px] text-[13px] font-normal transition-all duration-150 border border-transparent text-[var(--ink-2)] hover:bg-[var(--bg-soft)] hover:text-[var(--ink)]"
+        className="w-full text-left flex items-center justify-between gap-3 px-3 py-2 rounded-[10px] text-[13px] font-normal transition-all duration-150 border border-transparent text-(--ink-2) hover:bg-(--bg-soft) hover:text-(--ink)"
       >
         <div className="flex items-center gap-3">
-          <Bell size={16} className="text-[var(--ink-2)]" />
+          <Bell size={16} className="text-(--ink-2)" />
           <span>Notificaciones</span>
         </div>
         {insignia}

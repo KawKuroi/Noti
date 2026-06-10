@@ -101,12 +101,12 @@ export function BarraAsistente({ placeholder = '¿Qué te recuerdo o agendo?' }:
         onClick={() => inputRef.current?.focus()}
         className={`flex items-center rounded-[12px] px-[14px] py-[12px] border transition-[background-color,border-color,box-shadow] duration-150 ${
           abierto
-            ? 'bg-[var(--bg-elev)] border-[var(--line)] shadow-sm'
-            : 'bg-[var(--bg)] border-[var(--line-2)] hover:border-[var(--ink-4)] cursor-text'
+            ? 'bg-(--bg-elev) border-(--line) shadow-xs'
+            : 'bg-(--bg) border-(--line-2) hover:border-(--ink-4) cursor-text'
         }`}
       >
         <div className="w-[32px] h-[32px] rounded-[8px] bg-[color-mix(in_oklab,var(--cat-series)_14%,transparent)] flex items-center justify-center shrink-0">
-          <Sparkles size={16} className="text-[var(--cat-series)]" />
+          <Sparkles size={16} className="text-(--cat-series)" />
         </div>
 
         <input
@@ -116,11 +116,11 @@ export function BarraAsistente({ placeholder = '¿Qué te recuerdo o agendo?' }:
           onKeyDown={onKeyDown}
           onFocus={abrir}
           placeholder={placeholder}
-          className="flex-1 ml-3 text-[14px] outline-none bg-transparent text-[var(--ink)] placeholder:text-[var(--ink-3)]"
+          className="flex-1 ml-3 text-[14px] outline-hidden bg-transparent text-(--ink) placeholder:text-(--ink-3)"
         />
 
         {!abierto ? (
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10.5px] font-mono font-medium text-[var(--ink-3)] border border-[var(--line-2)] bg-[var(--bg-soft)] rounded-[6px] px-1.5 py-0.5 shrink-0">
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10.5px] font-mono font-medium text-(--ink-3) border border-(--line-2) bg-(--bg-soft) rounded-[6px] px-1.5 py-0.5 shrink-0">
             Ctrl+I
           </kbd>
         ) : (
@@ -142,7 +142,7 @@ export function BarraAsistente({ placeholder = '¿Qué te recuerdo o agendo?' }:
                 type="button"
                 onClick={iniciarGrabacion}
                 disabled={micDeshabilitado}
-                className="p-1 rounded-md text-[var(--ink-3)] hover:text-[var(--ink)] hover:bg-[var(--bg-soft)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+                className="p-1 rounded-md text-(--ink-3) hover:text-(--ink) hover:bg-(--bg-soft) disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
                 title="Dictado por voz"
                 aria-label="Dictado por voz"
               >
@@ -166,7 +166,7 @@ export function BarraAsistente({ placeholder = '¿Qué te recuerdo o agendo?' }:
               <button
                 type="button"
                 onClick={limpiar}
-                className="text-xs text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors shrink-0"
+                className="text-xs text-(--ink-3) hover:text-(--ink) transition-colors shrink-0"
               >
                 Limpiar
               </button>
@@ -175,7 +175,7 @@ export function BarraAsistente({ placeholder = '¿Qué te recuerdo o agendo?' }:
             <button
               type="button"
               onClick={cerrar}
-              className="text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors shrink-0"
+              className="text-(--ink-3) hover:text-(--ink) transition-colors shrink-0"
               aria-label="Cerrar"
             >
               <X size={16} />

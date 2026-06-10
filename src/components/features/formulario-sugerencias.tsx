@@ -51,8 +51,8 @@ export function FormularioSugerencias({ onEnviado }: Props = {}) {
   if (enviado) {
     return (
       <div className="text-center py-8">
-        <p className="text-lg font-medium text-[var(--ink)] mb-2">Gracias por tu sugerencia.</p>
-        <p className="text-sm text-[var(--ink-3)]">La lei con atencion y me ayuda a mejorar Noti.</p>
+        <p className="text-lg font-medium text-(--ink) mb-2">Gracias por tu sugerencia.</p>
+        <p className="text-sm text-(--ink-3)">La lei con atencion y me ayuda a mejorar Noti.</p>
       </div>
     )
   }
@@ -61,8 +61,8 @@ export function FormularioSugerencias({ onEnviado }: Props = {}) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="nombre" className="mono block text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink-3)] mb-1.5">
-            Nombre <span className="text-[var(--ink-3)] font-normal normal-case tracking-normal">(opcional)</span>
+          <label htmlFor="nombre" className="mono block text-[11px] font-medium uppercase tracking-[0.08em] text-(--ink-3) mb-1.5">
+            Nombre <span className="text-(--ink-3) font-normal normal-case tracking-normal">(opcional)</span>
           </label>
           <input
             id="nombre"
@@ -70,12 +70,12 @@ export function FormularioSugerencias({ onEnviado }: Props = {}) {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             placeholder="Tu nombre"
-            className="w-full px-4 py-2.5 text-sm bg-[var(--bg-soft)] border border-[var(--line-2)] rounded-[10px] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)] transition-colors"
+            className="w-full px-4 py-2.5 text-sm bg-(--bg-soft) border border-(--line-2) rounded-[10px] text-(--ink) placeholder:text-(--ink-3) focus:outline-hidden focus:border-(--ink) transition-colors"
           />
         </div>
         <div>
-          <label htmlFor="email" className="mono block text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink-3)] mb-1.5">
-            Email <span className="text-[var(--ink-3)] font-normal normal-case tracking-normal">(opcional)</span>
+          <label htmlFor="email" className="mono block text-[11px] font-medium uppercase tracking-[0.08em] text-(--ink-3) mb-1.5">
+            Email <span className="text-(--ink-3) font-normal normal-case tracking-normal">(opcional)</span>
           </label>
           <input
             id="email"
@@ -83,13 +83,13 @@ export function FormularioSugerencias({ onEnviado }: Props = {}) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Para que pueda responderte"
-            className="w-full px-4 py-2.5 text-sm bg-[var(--bg-soft)] border border-[var(--line-2)] rounded-[10px] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)] transition-colors"
+            className="w-full px-4 py-2.5 text-sm bg-(--bg-soft) border border-(--line-2) rounded-[10px] text-(--ink) placeholder:text-(--ink-3) focus:outline-hidden focus:border-(--ink) transition-colors"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="mensaje" className="mono block text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink-3)] mb-1.5">
+        <label htmlFor="mensaje" className="mono block text-[11px] font-medium uppercase tracking-[0.08em] text-(--ink-3) mb-1.5">
           Sugerencia
         </label>
         <textarea
@@ -98,18 +98,18 @@ export function FormularioSugerencias({ onEnviado }: Props = {}) {
           value={mensaje}
           onChange={(e) => setMensaje(e.target.value)}
           placeholder="Que mejorarias o agregarias a Noti?"
-          className="w-full px-4 py-2.5 text-sm bg-[var(--bg-soft)] border border-[var(--line-2)] rounded-[10px] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)] transition-colors resize-none"
+          className="w-full px-4 py-2.5 text-sm bg-(--bg-soft) border border-(--line-2) rounded-[10px] text-(--ink) placeholder:text-(--ink-3) focus:outline-hidden focus:border-(--ink) transition-colors resize-none"
         />
       </div>
 
       {error && (
-        <p className="text-sm text-[var(--danger)]">{error}</p>
+        <p className="text-sm text-(--danger)">{error}</p>
       )}
 
       <button
         type="submit"
         disabled={enviando}
-        className="w-full sm:w-auto px-6 py-2.5 bg-[var(--ink)] text-[var(--bg)] text-sm font-medium rounded-[10px] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full sm:w-auto px-6 py-2.5 bg-(--ink) text-(--bg) text-sm font-medium rounded-[10px] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {enviando ? 'Enviando...' : 'Enviar sugerencia'}
       </button>

@@ -45,7 +45,7 @@ export function TarjetaNota({ nota, categorias }: Props) {
 
   return (
     <>
-      <div className="group relative bg-white rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all flex flex-col">
+      <div className="group relative bg-white rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-xs transition-all flex flex-col">
         <Link href={`/notes/${nota.id}`} className="flex-1 p-4 block">
           <p className="text-sm font-semibold text-gray-900 truncate">
             {nota.titulo || 'Sin titulo'}

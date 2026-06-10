@@ -248,14 +248,14 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
         )}
         {/* Cabecera */}
         <div
-          className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
+          className="flex items-center gap-3 px-4 py-3 shrink-0"
           style={{ borderBottom: '1px solid var(--line)', background: 'var(--bg)' }}
         >
           <Button
             variante="fantasma"
             tamano="sm"
             onClick={() => router.push('/notes')}
-            className="gap-1.5 flex-shrink-0"
+            className="gap-1.5 shrink-0"
             style={{ color: 'var(--ink-3)' }}
           >
             <ArrowLeft size={15} />
@@ -269,7 +269,7 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
             {tituloCuaderno}
           </h1>
 
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <Button
               variante="fantasma"
               tamano="icono"
@@ -322,7 +322,7 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
         {/* Chip-preview del archivo pendiente (estilo LLM) */}
         {archivoPendiente && (
           <div
-            className="px-4 pt-3 pb-1 flex-shrink-0"
+            className="px-4 pt-3 pb-1 shrink-0"
             style={{ borderTop: '1px solid var(--line)', background: 'var(--bg)' }}
           >
             <div
@@ -335,11 +335,11 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
                 <img
                   src={previewImagen}
                   alt={archivoPendiente.name}
-                  className="w-10 h-10 rounded-md object-cover flex-shrink-0"
+                  className="w-10 h-10 rounded-md object-cover shrink-0"
                 />
               ) : (
                 <div
-                  className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
+                  className="w-10 h-10 rounded-md flex items-center justify-center shrink-0"
                   style={{ background: 'var(--bg-elev)', border: '1px solid var(--line)', color: 'var(--ink-3)' }}
                 >
                   <IconoArchivo mime={archivoPendiente.type} />
@@ -356,7 +356,7 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
               <button
                 type="button"
                 onClick={quitarArchivoPendiente}
-                className="ml-1 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                className="ml-1 shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
                 style={{ background: 'var(--ink-4)', color: 'var(--bg)' }}
                 title="Quitar archivo"
                 aria-label="Quitar archivo"
@@ -369,7 +369,7 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
 
         {/* Zona de entrada */}
         <div
-          className="px-4 py-3 flex items-center gap-2 flex-shrink-0"
+          className="px-4 py-3 flex items-center gap-2 shrink-0"
           style={{ borderTop: '1px solid var(--line)', background: 'var(--bg)' }}
         >
           <SubirAdjunto
@@ -393,7 +393,7 @@ export function VistaChatNotas({ cuaderno, entradasIniciales, adjuntosIniciales 
           <Button
             onClick={() => void manejarEnviar()}
             disabled={!puedeEnviar}
-            className="flex-shrink-0 h-10 w-10 p-0"
+            className="shrink-0 h-10 w-10 p-0"
             title="Enviar"
           >
             <Send size={16} />

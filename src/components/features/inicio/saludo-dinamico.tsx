@@ -18,10 +18,10 @@ export function SaludoDinamico({ nombre, resumen }: Props) {
 
   return (
     <div>
-      <h1 className="text-[30px] font-medium tracking-[-0.025em] text-[var(--ink)] leading-tight">
+      <h1 className="text-[30px] font-medium tracking-tight text-(--ink) leading-tight">
         {saludo}, {nombre}
       </h1>
-      <p className="text-[14.5px] text-[var(--ink-2)] mt-0.5 leading-normal select-none">
+      <p className="text-[14.5px] text-(--ink-2) mt-0.5 leading-normal select-none">
         {resumen}
       </p>
     </div>

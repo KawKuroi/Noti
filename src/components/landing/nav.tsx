@@ -23,7 +23,7 @@ export function Nav() {
 
   return (
     <nav
-      className={'nav-glass fixed left-0 right-0 top-0 z-[100] py-[0.875rem]' + (scrolled ? ' scrolled' : '')}
+      className={'nav-glass fixed left-0 right-0 top-0 z-100 py-3.5' + (scrolled ? ' scrolled' : '')}
     >
       <div className="wrap flex items-center justify-between">
         <Link href="/" className="flex items-center gap-[10px]">

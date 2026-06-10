@@ -31,9 +31,9 @@ export function FiltroCalendario({ categorias, seleccionadas, onChange }: Props)
   const activaTodo = seleccionadas.length === 0
 
   const activeClass =
-    'flex items-center gap-1.5 px-3 py-1 rounded-[999px] text-[12.5px] font-medium transition-colors text-left bg-[var(--ink)] text-[var(--bg)] border border-[var(--ink)] focus:outline-none'
+    'flex items-center gap-1.5 px-3 py-1 rounded-[999px] text-[12.5px] font-medium transition-colors text-left bg-(--ink) text-(--bg) border border-(--ink) focus:outline-hidden'
   const inactiveClass =
-    'flex items-center gap-1.5 px-3 py-1 rounded-[999px] text-[12.5px] font-normal transition-colors text-left bg-transparent text-[var(--ink-2)] hover:bg-[var(--bg-soft)] hover:text-[var(--ink)] border border-[var(--line-2)] hover:border-[var(--ink-4)] focus:outline-none'
+    'flex items-center gap-1.5 px-3 py-1 rounded-[999px] text-[12.5px] font-normal transition-colors text-left bg-transparent text-(--ink-2) hover:bg-(--bg-soft) hover:text-(--ink) border border-(--line-2) hover:border-(--ink-4) focus:outline-hidden'
 
   return (
     <div className="flex flex-wrap gap-1.5 mb-2 items-center select-none">
@@ -43,7 +43,7 @@ export function FiltroCalendario({ categorias, seleccionadas, onChange }: Props)
       >
         <span
           className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-            activaTodo ? 'bg-[var(--bg)]' : 'bg-[var(--ink-3)]'
+            activaTodo ? 'bg-(--bg)' : 'bg-(--ink-3)'
           }`}
         />
         <span>Todas</span>

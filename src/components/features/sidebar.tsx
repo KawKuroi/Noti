@@ -78,9 +78,9 @@ export function Sidebar({
   }
 
   const linkActivoClase =
-    'flex items-center gap-3 px-3 py-2 rounded-[10px] text-[13px] font-medium transition-all duration-150 border border-[var(--line)] bg-[var(--bg-soft)] text-[var(--ink)]'
+    'flex items-center gap-3 px-3 py-2 rounded-[10px] text-[13px] font-medium transition-all duration-150 border border-(--line) bg-(--bg-soft) text-(--ink)'
   const linkInactivoClase =
-    'flex items-center gap-3 px-3 py-2 rounded-[10px] text-[13px] font-normal transition-all duration-150 border border-transparent text-[var(--ink-2)] hover:bg-[var(--bg-soft)] hover:text-[var(--ink)]'
+    'flex items-center gap-3 px-3 py-2 rounded-[10px] text-[13px] font-normal transition-all duration-150 border border-transparent text-(--ink-2) hover:bg-(--bg-soft) hover:text-(--ink)'
 
   return (
     <>
@@ -129,7 +129,7 @@ export function Sidebar({
       {/* Aside — fijo en mobile como drawer, estático en desktop */}
       <aside
         className={cn(
-          'h-screen bg-[var(--bg)] border-r border-[var(--line)] flex flex-col',
+          'h-screen bg-(--bg) border-r border-(--line) flex flex-col',
           // Desktop: estático en el grid
           'md:w-[230px] md:sticky md:top-0 md:translate-x-0 md:z-auto',
           // Mobile: drawer fijo con transición
@@ -147,11 +147,11 @@ export function Sidebar({
           <X size={16} />
         </button>
       {/* 1. Logo Noti */}
-      <div className="px-6 py-5 border-b border-[var(--line)] flex items-center gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-[var(--ink)] flex items-center justify-center text-[var(--bg)] font-bold text-base select-none">
+      <div className="px-6 py-5 border-b border-(--line) flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-(--ink) flex items-center justify-center text-(--bg) font-bold text-base select-none">
           N
         </div>
-        <span className="text-base font-semibold tracking-tight text-[var(--ink)]">Noti</span>
+        <span className="text-base font-semibold tracking-tight text-(--ink)">Noti</span>
       </div>
 
       {/* Navegación Principal */}
@@ -162,7 +162,7 @@ export function Sidebar({
             href="/inicio"
             className={ruta === '/inicio' ? linkActivoClase : linkInactivoClase}
           >
-            <LayoutDashboard size={16} className="text-[var(--ink-2)]" />
+            <LayoutDashboard size={16} className="text-(--ink-2)" />
             <span>{t('inicio')}</span>
           </Link>
 
@@ -174,10 +174,10 @@ export function Sidebar({
             )}
           >
             <div className="flex items-center gap-3">
-              <Search size={16} className="text-[var(--ink-2)]" />
+              <Search size={16} className="text-(--ink-2)" />
               <span>{t('buscar')}</span>
             </div>
-            <kbd className="px-1.5 py-0.5 rounded border border-[var(--line-2)] bg-[var(--bg-soft)] font-mono text-[10px] font-medium text-[var(--ink-3)]">
+            <kbd className="px-1.5 py-0.5 rounded border border-(--line-2) bg-(--bg-soft) font-mono text-[10px] font-medium text-(--ink-3)">
               ⌘K
             </kbd>
           </button>
@@ -191,7 +191,7 @@ export function Sidebar({
         {/* 3. Sección Categorías */}
         <div className="space-y-0.5">
           <div className="pt-2 pb-1.5 px-3">
-            <span className="font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]">
+            <span className="font-mono text-[10px] font-medium text-(--ink-3) uppercase tracking-[0.09em]">
               {t('categorias')}
             </span>
           </div>
@@ -201,7 +201,7 @@ export function Sidebar({
             href="/lanzamientos"
             className={ruta === '/lanzamientos' ? linkActivoClase : linkInactivoClase}
           >
-            <span className="w-2 h-2 rounded-full shrink-0 bg-[var(--cat-series)]" />
+            <span className="w-2 h-2 rounded-full shrink-0 bg-(--cat-series)" />
             <span>{t('lanzamientos')}</span>
           </Link>
 
@@ -228,7 +228,7 @@ export function Sidebar({
         {/* 4. Sección Herramientas */}
         <div className="space-y-0.5">
           <div className="pt-2 pb-1.5 px-3">
-            <span className="font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]">
+            <span className="font-mono text-[10px] font-medium text-(--ink-3) uppercase tracking-[0.09em]">
               {t('herramientas')}
             </span>
           </div>
@@ -238,7 +238,7 @@ export function Sidebar({
               href="/calendar"
               className={ruta === '/calendar' ? linkActivoClase : linkInactivoClase}
             >
-              <CalendarDays size={16} className="text-[var(--ink-2)]" />
+              <CalendarDays size={16} className="text-(--ink-2)" />
               <span>{t('calendario')}</span>
             </Link>
 
@@ -248,7 +248,7 @@ export function Sidebar({
                 ruta === '/notes' || ruta.startsWith('/notes/') ? linkActivoClase : linkInactivoClase
               )}
             >
-              <NotebookText size={16} className="text-[var(--ink-2)]" />
+              <NotebookText size={16} className="text-(--ink-2)" />
               <span>{t('notas')}</span>
             </Link>
           </div>
@@ -256,11 +256,11 @@ export function Sidebar({
       </nav>
 
       {/* 5. Footer user */}
-      <div className="p-3 border-t border-[var(--line)] flex items-center gap-3 shrink-0 bg-[var(--bg)]">
-        <div className="w-8 h-8 rounded-full bg-[var(--bg-soft)] border border-[var(--line-2)] flex items-center justify-center text-[12px] font-mono font-medium text-[var(--ink-2)] select-none shrink-0">
+      <div className="p-3 border-t border-(--line) flex items-center gap-3 shrink-0 bg-(--bg)">
+        <div className="w-8 h-8 rounded-full bg-(--bg-soft) border border-(--line-2) flex items-center justify-center text-[12px] font-mono font-medium text-(--ink-2) select-none shrink-0">
           {nombre.charAt(0).toUpperCase()}
         </div>
-        <span className="flex-1 text-[13px] font-medium text-[var(--ink)] truncate select-none">
+        <span className="flex-1 text-[13px] font-medium text-(--ink) truncate select-none">
           {nombre}
         </span>
         <Link
@@ -268,8 +268,8 @@ export function Sidebar({
           className={cn(
             'p-2 rounded-lg transition-colors shrink-0',
             ruta === '/settings'
-              ? 'bg-[var(--bg-soft)] border border-[var(--line)] text-[var(--ink)]'
-              : 'text-[var(--ink-3)] hover:text-[var(--ink)] hover:bg-[var(--bg-soft)]',
+              ? 'bg-(--bg-soft) border border-(--line) text-(--ink)'
+              : 'text-(--ink-3) hover:text-(--ink) hover:bg-(--bg-soft)',
           )}
           aria-label={t('configuracion')}
         >

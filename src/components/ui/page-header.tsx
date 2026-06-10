@@ -32,11 +32,11 @@ export function PageHeader({
           </div>
         )}
         <div>
-          <h1 className="text-[30px] font-medium tracking-[-0.025em] text-[var(--ink)] leading-tight">
+          <h1 className="text-[30px] font-medium tracking-tight text-(--ink) leading-tight">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-[14.5px] text-[var(--ink-2)] mt-0.5 leading-normal">
+            <p className="text-[14.5px] text-(--ink-2) mt-0.5 leading-normal">
               {subtitle}
             </p>
           )}

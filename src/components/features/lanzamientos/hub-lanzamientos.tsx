@@ -90,15 +90,15 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
   )
 
   const activeTabClass =
-    'flex items-center px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium text-[var(--ink)] bg-[var(--bg)] shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-[var(--line-2)] focus:outline-none transition-all'
+    'flex items-center px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium text-(--ink) bg-(--bg) shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-(--line-2) focus:outline-hidden transition-all'
   const inactiveTabClass =
-    'flex items-center px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-normal text-[var(--ink-2)] hover:text-[var(--ink)] border border-transparent focus:outline-none transition-all'
+    'flex items-center px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-normal text-(--ink-2) hover:text-(--ink) border border-transparent focus:outline-hidden transition-all'
 
   return (
     <div className="space-y-5">
       {/* Eyebrow + ordenamiento + manual trigger */}
       <div className="flex items-center justify-between gap-4 pt-2">
-        <span className="font-mono text-[10.5px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]">
+        <span className="font-mono text-[10.5px] font-medium text-(--ink-3) uppercase tracking-[0.09em]">
           Mis lanzamientos seguidos
         </span>
         <div className="flex items-center gap-2">
@@ -120,12 +120,12 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
       </div>
 
       {/* Segmented Tab pills */}
-      <div className="flex flex-wrap items-center gap-1 p-[3px] bg-[var(--bg-soft)] border border-[var(--line)] rounded-[999px] max-w-max select-none">
+      <div className="flex flex-wrap items-center gap-1 p-[3px] bg-(--bg-soft) border border-(--line) rounded-[999px] max-w-max select-none">
         <button
           onClick={() => setTabActiva('todos')}
           className={tabActiva === 'todos' ? activeTabClass : inactiveTabClass}
         >
-          <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-[var(--ink-3)] mr-1.5" />
+          <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-(--ink-3) mr-1.5" />
           <span>Todos</span>
         </button>
         {datosOrdenados.map(({ cat }) => {

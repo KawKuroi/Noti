@@ -69,24 +69,24 @@ export function PanelSugerencias() {
   // Cuando esta cerrado el query y no hay resultados ni carga, muestra solo ejemplos.
   // Aunque el query sea breve, seguimos mostrando ejemplos para guiar al usuario.
   return (
-    <div className="flex flex-col max-h-[85vh] bg-[var(--bg-elev)] rounded-xl shadow-2xl border border-[var(--line)] overflow-hidden">
+    <div className="flex flex-col max-h-[85vh] bg-(--bg-elev) rounded-xl shadow-2xl border border-(--line) overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {!hayResultado && !cargando && (
           <div className="py-2">
-            <p className="text-xs text-[var(--ink-3)] uppercase tracking-wider mb-2">Ejemplos</p>
+            <p className="text-xs text-(--ink-3) uppercase tracking-wider mb-2">Ejemplos</p>
             <div className="flex flex-wrap gap-1.5">
               {EJEMPLOS.map((ej) => (
                 <button
                   key={ej}
                   type="button"
                   onClick={() => usarEjemplo(ej)}
-                  className="text-xs px-2 py-1 rounded-full bg-[var(--bg-soft)] text-[var(--ink-3)] hover:bg-[var(--bg-soft)]/80 transition-colors"
+                  className="text-xs px-2 py-1 rounded-full bg-(--bg-soft) text-(--ink-3) hover:bg-(--bg-soft)/80 transition-colors"
                 >
                   {ej}
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-[var(--ink-3)] mt-3">
+            <p className="text-[11px] text-(--ink-3) mt-3">
               Atajo: Ctrl+I para abrir/cerrar · Enter o botón Buscar para procesar
             </p>
           </div>
@@ -94,8 +94,8 @@ export function PanelSugerencias() {
 
         {cargando && (
           <div className="space-y-2 py-2">
-            <div className="h-20 bg-[var(--bg-soft)] rounded-lg animate-pulse" />
-            <div className="h-20 bg-[var(--bg-soft)] rounded-lg animate-pulse" />
+            <div className="h-20 bg-(--bg-soft) rounded-lg animate-pulse" />
+            <div className="h-20 bg-(--bg-soft) rounded-lg animate-pulse" />
           </div>
         )}
 
@@ -143,7 +143,7 @@ export function PanelSugerencias() {
 
         {!cargando && esLanzamiento && candidatos.length > 0 && !mostrarFormManual && (
           <>
-            <p className="text-xs text-[var(--ink-3)] uppercase tracking-wider">
+            <p className="text-xs text-(--ink-3) uppercase tracking-wider">
               {candidatos.length} {candidatos.length === 1 ? 'candidato' : 'candidatos'} · elige
               el correcto
             </p>
@@ -162,7 +162,7 @@ export function PanelSugerencias() {
             <button
               type="button"
               onClick={() => setMostrarFormManual(true)}
-              className="w-full text-xs text-[var(--ink-3)] hover:text-[var(--ink)] underline underline-offset-2 py-2 transition-colors"
+              className="w-full text-xs text-(--ink-3) hover:text-(--ink) underline underline-offset-2 py-2 transition-colors"
             >
               ¿No es ninguno? Crear manualmente
             </button>
@@ -177,7 +177,7 @@ export function PanelSugerencias() {
       </div>
 
       {hayResultado && (
-        <footer className="border-t border-[var(--line)] px-4 py-2 text-[11px] text-[var(--ink-3)]">
+        <footer className="border-t border-(--line) px-4 py-2 text-[11px] text-(--ink-3)">
           {mostrarForm ? (
             <span>Esc cancela · completa los campos y guarda</span>
           ) : esLanzamiento && candidatos.length > 0 ? (

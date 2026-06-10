@@ -23,7 +23,7 @@ export function BotonEnviarPushPrueba() {
     <button
       onClick={manejarEnviar}
       disabled={pending}
-      className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-[10px] border border-[var(--line-2)] bg-[var(--bg)] text-[var(--ink)] transition-colors hover:border-[var(--ink)] disabled:opacity-50"
+      className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-[10px] border border-(--line-2) bg-(--bg) text-(--ink) transition-colors hover:border-(--ink) disabled:opacity-50"
     >
       <Bell size={15} />
       {pending ? 'Enviando...' : 'Enviar notificacion de prueba'}

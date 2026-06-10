@@ -38,7 +38,7 @@ export function ItemCuaderno({ cuaderno, onRenombrar, onEliminar }: Props) {
       onClick={() => router.push(`/notes/${cuaderno.id}`)}
     >
       <div
-        className="w-[38px] h-[38px] rounded-full flex items-center justify-center flex-shrink-0 select-none"
+        className="w-[38px] h-[38px] rounded-full flex items-center justify-center shrink-0 select-none"
         style={{
           background: 'color-mix(in oklab, var(--cat-notas) 14%, transparent)',
         }}
@@ -84,7 +84,7 @@ export function ItemCuaderno({ cuaderno, onRenombrar, onEliminar }: Props) {
         </p>
       </div>
 
-      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+      <div className="flex flex-col items-end gap-1 shrink-0">
         <span className="mono" style={{ fontSize: '11px', color: 'var(--ink-3)', fontWeight: 500 }}>
           {tiempoRelativo}
         </span>

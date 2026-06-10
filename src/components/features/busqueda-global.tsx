@@ -199,7 +199,7 @@ export function BusquedaGlobal() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar recordatorios, notas, lanzamientos..."
-            className="flex-1 outline-none bg-transparent"
+            className="flex-1 outline-hidden bg-transparent"
             style={{ fontSize: '14px', color: 'var(--ink)' }}
           />
 

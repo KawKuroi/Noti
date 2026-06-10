@@ -71,13 +71,13 @@ export function CandidatoCard({ candidato, seleccionado, creando, onSeleccionar,
       className={cn(
         'rounded-lg border bg-white p-3 cursor-pointer transition-all',
         seleccionado
-          ? 'border-gray-900 ring-1 ring-gray-900 shadow-sm'
+          ? 'border-gray-900 ring-1 ring-gray-900 shadow-xs'
           : 'border-gray-200 hover:border-gray-300',
       )}
     >
       <div className="flex gap-3">
         {candidato.posterUrl ? (
-          <div className="relative w-14 h-20 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
+          <div className="relative w-14 h-20 shrink-0 rounded-md overflow-hidden bg-gray-100">
             <Image
               src={candidato.posterUrl}
               alt={candidato.titulo}
@@ -88,7 +88,7 @@ export function CandidatoCard({ candidato, seleccionado, creando, onSeleccionar,
             />
           </div>
         ) : (
-          <div className="w-14 h-20 flex-shrink-0 rounded-md bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center text-purple-600">
+          <div className="w-14 h-20 shrink-0 rounded-md bg-linear-to-br from-purple-100 to-purple-200 flex items-center justify-center text-purple-600">
             ?
           </div>
         )}

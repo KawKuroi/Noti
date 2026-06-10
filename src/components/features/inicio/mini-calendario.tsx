@@ -35,14 +35,14 @@ export function MiniCalendario({ diasConRecordatorios }: Props) {
 
 
   return (
-    <div className="bg-[var(--bg)] rounded-[14px] border border-[var(--line)] p-4 select-none">
-      <p className="font-mono text-[11px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em] mb-4">
+    <div className="bg-(--bg) rounded-[14px] border border-(--line) p-4 select-none">
+      <p className="font-mono text-[11px] font-medium text-(--ink-3) uppercase tracking-[0.09em] mb-4">
         {MESES[mesActual]} {anioActual}
       </p>
 
       <div className="grid grid-cols-7 gap-1 mb-2">
         {DIAS_SEMANA.map((d) => (
-          <span key={d} className="text-center font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase">
+          <span key={d} className="text-center font-mono text-[10px] font-medium text-(--ink-3) uppercase">
             {d}
           </span>
         ))}
@@ -62,8 +62,8 @@ export function MiniCalendario({ diasConRecordatorios }: Props) {
                 className={cn(
                   'w-7 h-7 flex items-center justify-center rounded-full text-[12.5px] transition-colors',
                   esHoy
-                    ? 'bg-[var(--ink)] text-[var(--bg)] font-semibold shadow-sm'
-                    : 'text-[var(--ink-2)] hover:bg-[var(--bg-soft)] font-normal cursor-pointer',
+                    ? 'bg-(--ink) text-(--bg) font-semibold shadow-xs'
+                    : 'text-(--ink-2) hover:bg-(--bg-soft) font-normal cursor-pointer',
                 )}
               >
                 {dia}

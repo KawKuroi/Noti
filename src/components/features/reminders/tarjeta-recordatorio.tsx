@@ -155,7 +155,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
       <div
         ref={tarjetaRef}
         className={cn(
-          'group flex items-start gap-4 p-[10px_14px] min-h-[56px] bg-transparent hover:bg-[var(--bg-soft)] rounded-[14px] border border-transparent hover:border-[var(--line)] transition-all duration-150 relative min-w-0 w-full',
+          'group flex items-start gap-4 p-[10px_14px] min-h-[56px] bg-transparent hover:bg-(--bg-soft) rounded-[14px] border border-transparent hover:border-(--line) transition-all duration-150 relative min-w-0 w-full',
           estaCompletado ? 'opacity-60' : '',
           mostrarRing ? 'ring-2 ring-purple-400 ring-offset-2' : ''
         )}
@@ -167,8 +167,8 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
             disabled={pending}
             title="Marcar como completado"
             className={cn(
-              'w-[20px] h-[20px] rounded-[6px] border-[1.5px] flex items-center justify-center shrink-0 mt-[3px] cursor-pointer transition-all duration-150 focus:outline-none',
-              estaCompletado ? 'border-transparent text-white' : 'border-[var(--line-2)] hover:border-[var(--ink-4)] bg-transparent'
+              'w-[20px] h-[20px] rounded-[6px] border-[1.5px] flex items-center justify-center shrink-0 mt-[3px] cursor-pointer transition-all duration-150 focus:outline-hidden',
+              estaCompletado ? 'border-transparent text-white' : 'border-(--line-2) hover:border-(--ink-4) bg-transparent'
             )}
             style={estaCompletado ? { backgroundColor: colorCat } : undefined}
           >
@@ -195,21 +195,21 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
             <div className="min-w-0 flex-1">
               <p
                 className={cn(
-                  'text-[14.5px] font-normal text-[var(--ink)] leading-tight select-none',
-                  estaCompletado ? 'line-through text-[var(--ink-3)] opacity-55 font-normal' : 'font-medium'
+                  'text-[14.5px] font-normal text-(--ink) leading-tight select-none',
+                  estaCompletado ? 'line-through text-(--ink-3) opacity-55 font-normal' : 'font-medium'
                 )}
               >
                 {recordatorio.titulo}
               </p>
 
               {recordatorio.descripcion && (
-                <p className="text-[12.5px] text-[var(--ink-2)] mt-0.5 leading-normal truncate select-none">
+                <p className="text-[12.5px] text-(--ink-2) mt-0.5 leading-normal truncate select-none">
                   {recordatorio.descripcion}
                 </p>
               )}
 
               {(director || artista || plataforma || temporada) && (
-                <p className="text-[12.5px] text-[var(--ink-3)] mt-0.5 leading-normal truncate select-none font-mono text-[10px] tracking-wide uppercase">
+                <p className="text-[12.5px] text-(--ink-3) mt-0.5 leading-normal truncate select-none font-mono text-[10px] tracking-wide uppercase">
                   {[
                     director ? `Dir. ${director}` : null,
                     artista,
@@ -229,7 +229,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
                 tamano="icono"
                 onClick={() => setEditarAbierto(true)}
                 title="Editar"
-                className="h-7 w-7 rounded-md text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--bg-soft)]"
+                className="h-7 w-7 rounded-md text-(--ink-2) hover:text-(--ink) hover:bg-(--bg-soft)"
               >
                 <Pencil size={12} />
               </Button>
@@ -239,17 +239,17 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
                 onClick={() => setEliminarAbierto(true)}
                 disabled={pending}
                 title="Eliminar"
-                className="h-7 w-7 rounded-md text-[var(--ink-2)] hover:text-red-500 hover:bg-red-500/10"
+                className="h-7 w-7 rounded-md text-(--ink-2) hover:text-red-500 hover:bg-red-500/10"
               >
                 <Trash2 size={12} />
               </Button>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 mt-1.5 font-mono text-[10.5px] font-medium text-[var(--ink-3)] uppercase tracking-[0.03em] select-none">
+          <div className="flex flex-wrap items-center gap-2.5 mt-1.5 font-mono text-[10.5px] font-medium text-(--ink-3) uppercase tracking-[0.03em] select-none">
             {fechaFormateada && (
               <span suppressHydrationWarning className="flex items-center gap-1">
-                <CalendarDays size={10.5} className="text-[var(--ink-3)]" />
+                <CalendarDays size={10.5} className="text-(--ink-3)" />
                 {fechaFormateada}
               </span>
             )}
@@ -278,7 +278,7 @@ export function TarjetaRecordatorio({ recordatorio, categorias, mostrarCategoria
                 suppressHydrationWarning
                 className={cn(
                   'flex items-center gap-1 font-semibold',
-                  etiquetaAutoDelete.urgente ? 'text-amber-600' : 'text-[var(--ink-3)]'
+                  etiquetaAutoDelete.urgente ? 'text-amber-600' : 'text-(--ink-3)'
                 )}
               >
                 <Timer size={10} />

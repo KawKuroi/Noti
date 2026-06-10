@@ -119,10 +119,10 @@ export function ListaRecordatorios({
           className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
           style={{ background: 'var(--bg-soft)', border: '1px solid var(--line)' }}
         >
-          <Bell className="w-6 h-6 text-[var(--ink-3)]" />
+          <Bell className="w-6 h-6 text-(--ink-3)" />
         </div>
-        <p className="text-sm font-medium text-[var(--ink)]">Sin recordatorios proximos</p>
-        <p className="text-xs text-[var(--ink-3)] mt-1">Todos tus recordatorios estan al dia.</p>
+        <p className="text-sm font-medium text-(--ink)">Sin recordatorios proximos</p>
+        <p className="text-xs text-(--ink-3) mt-1">Todos tus recordatorios estan al dia.</p>
       </div>
     )
   }

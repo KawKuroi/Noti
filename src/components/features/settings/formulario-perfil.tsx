@@ -33,9 +33,9 @@ export function FormularioPerfil({ nombreActual, zonaHorariaActual }: Props) {
   }
 
   const labelClass =
-    'mono block text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink-3)] mb-1.5'
+    'mono block text-[11px] font-medium uppercase tracking-[0.08em] text-(--ink-3) mb-1.5'
   const fieldClass =
-    'w-full px-3 py-2 border border-[var(--line-2)] rounded-[10px] text-sm bg-[var(--bg)] text-[var(--ink)] placeholder:text-[var(--ink-3)] focus:outline-none focus:border-[var(--ink)]'
+    'w-full px-3 py-2 border border-(--line-2) rounded-[10px] text-sm bg-(--bg) text-(--ink) placeholder:text-(--ink-3) focus:outline-hidden focus:border-(--ink)'
 
   return (
     <form onSubmit={manejarEnvio} className="space-y-4">
@@ -75,7 +75,7 @@ export function FormularioPerfil({ nombreActual, zonaHorariaActual }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="px-4 py-2 bg-[var(--ink)] text-[var(--bg)] text-sm font-medium rounded-[10px] hover:opacity-90 transition-opacity disabled:opacity-50"
+        className="px-4 py-2 bg-(--ink) text-(--bg) text-sm font-medium rounded-[10px] hover:opacity-90 transition-opacity disabled:opacity-50"
       >
         {pending ? 'Guardando...' : 'Guardar cambios'}
       </button>

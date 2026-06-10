@@ -40,12 +40,12 @@ export function ChipsCategoriasSidebar({ categorias, contadores }: Props) {
 
   const total = Object.values(contadores).reduce((a, b) => a + b, 0)
 
-  const activeClass = 'flex items-center justify-between px-2.5 py-1.5 rounded-[10px] text-[13px] font-medium transition-colors text-left bg-[var(--ink)] text-[var(--bg)] border border-[var(--ink)] focus:outline-none'
-  const inactiveClass = 'flex items-center justify-between px-2.5 py-1.5 rounded-[10px] text-[13px] font-normal transition-colors text-left bg-transparent text-[var(--ink-2)] hover:bg-[var(--bg-soft)] hover:text-[var(--ink)] border border-transparent focus:outline-none'
+  const activeClass = 'flex items-center justify-between px-2.5 py-1.5 rounded-[10px] text-[13px] font-medium transition-colors text-left bg-(--ink) text-(--bg) border border-(--ink) focus:outline-hidden'
+  const inactiveClass = 'flex items-center justify-between px-2.5 py-1.5 rounded-[10px] text-[13px] font-normal transition-colors text-left bg-transparent text-(--ink-2) hover:bg-(--bg-soft) hover:text-(--ink) border border-transparent focus:outline-hidden'
 
   return (
-    <div className="bg-[var(--bg)] rounded-[14px] border border-[var(--line)] p-4 select-none">
-      <p className="font-mono text-[11px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em] mb-3">
+    <div className="bg-(--bg) rounded-[14px] border border-(--line) p-4 select-none">
+      <p className="font-mono text-[11px] font-medium text-(--ink-3) uppercase tracking-[0.09em] mb-3">
         Categorías
       </p>
       <div className="flex flex-col gap-1">
@@ -57,7 +57,7 @@ export function ChipsCategoriasSidebar({ categorias, contadores }: Props) {
             <span
               className={cn(
                 'w-2 h-2 rounded-full shrink-0 mr-2.5',
-                !categoriaActual ? 'bg-[var(--bg)]' : 'bg-[var(--ink-3)]'
+                !categoriaActual ? 'bg-(--bg)' : 'bg-(--ink-3)'
               )}
             />
             <span className="truncate">Todos</span>
@@ -67,8 +67,8 @@ export function ChipsCategoriasSidebar({ categorias, contadores }: Props) {
               className={cn(
                 'px-1.5 py-[2px] rounded-[999px] font-mono text-[10.5px] font-medium transition-colors',
                 !categoriaActual
-                  ? 'bg-[color-mix(in oklab,var(--bg)_20%,transparent)] border border-[color-mix(in oklab,var(--bg)_30%,transparent)] text-[var(--bg)]'
-                  : 'bg-[var(--bg-soft)] border border-[var(--line)] text-[var(--ink-3)]'
+                  ? 'bg-[color-mix(in oklab,var(--bg)_20%,transparent)] border border-[color-mix(in oklab,var(--bg)_30%,transparent)] text-(--bg)'
+                  : 'bg-(--bg-soft) border border-(--line) text-(--ink-3)'
               )}
             >
               {total}
@@ -99,8 +99,8 @@ export function ChipsCategoriasSidebar({ categorias, contadores }: Props) {
                   className={cn(
                     'px-1.5 py-[2px] rounded-[999px] font-mono text-[10.5px] font-medium transition-colors',
                     activa
-                      ? 'bg-[color-mix(in oklab,var(--bg)_20%,transparent)] border border-[color-mix(in oklab,var(--bg)_30%,transparent)] text-[var(--bg)]'
-                      : 'bg-[var(--bg-soft)] border border-[var(--line)] text-[var(--ink-3)]'
+                      ? 'bg-[color-mix(in oklab,var(--bg)_20%,transparent)] border border-[color-mix(in oklab,var(--bg)_30%,transparent)] text-(--bg)'
+                      : 'bg-(--bg-soft) border border-(--line) text-(--ink-3)'
                   )}
                 >
                   {count}

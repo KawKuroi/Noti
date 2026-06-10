@@ -69,9 +69,9 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
   const hayEventosTodoElDia = eventosPorDia.some((d) => d.todoElDia.length > 0)
 
   return (
-    <div className="flex flex-col h-full min-h-0 border border-[var(--line)] rounded-[14px] overflow-hidden bg-[var(--bg)]">
+    <div className="flex flex-col h-full min-h-0 border border-(--line) rounded-[14px] overflow-hidden bg-(--bg)">
       {/* Cabecera de dias */}
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-[var(--line)] bg-[var(--bg)]">
+      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-(--line) bg-(--bg)">
         <div />
         {dias.map((dia) => {
           const esDiaHoy = isToday(dia)
@@ -79,14 +79,14 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
             <div
               key={dia.toISOString()}
               className={cn(
-                'px-2 py-2 text-center border-l border-[var(--line)]',
-                esDiaHoy && 'bg-[var(--ink)]',
+                'px-2 py-2 text-center border-l border-(--line)',
+                esDiaHoy && 'bg-(--ink)',
               )}
             >
-              <p className={cn('mono text-[11px] uppercase tracking-[0.08em]', esDiaHoy ? 'text-[var(--bg)]' : 'text-[var(--ink-3)]')}>
+              <p className={cn('mono text-[11px] uppercase tracking-[0.08em]', esDiaHoy ? 'text-(--bg)' : 'text-(--ink-3)')}>
                 {format(dia, 'EEE', { locale: es })}
               </p>
-              <p className={cn('text-sm font-medium', esDiaHoy ? 'text-[var(--bg)]' : 'text-[var(--ink)]')}>
+              <p className={cn('text-sm font-medium', esDiaHoy ? 'text-(--bg)' : 'text-(--ink)')}>
                 {format(dia, 'd')}
               </p>
             </div>
@@ -96,10 +96,10 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
 
       {/* Fila "Todo el dia" — solo si hay al menos un evento sin hora esa semana. */}
       {hayEventosTodoElDia && (
-        <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-[var(--line)] bg-[var(--bg-soft)]">
-          <div className="mono text-[11px] text-[var(--ink-3)] uppercase tracking-[0.08em] px-2 py-1 text-right">Todo el dia</div>
+        <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-(--line) bg-(--bg-soft)">
+          <div className="mono text-[11px] text-(--ink-3) uppercase tracking-[0.08em] px-2 py-1 text-right">Todo el dia</div>
           {eventosPorDia.map(({ dia, todoElDia }) => (
-            <div key={`allday-${dia.toISOString()}`} className="border-l border-[var(--line)] p-1 space-y-1">
+            <div key={`allday-${dia.toISOString()}`} className="border-l border-(--line) p-1 space-y-1">
               {todoElDia.map((rec) => {
                 const color = coloresPorCategoria.get(rec.categoriaId) ?? 'var(--ink-3)'
                 return (
@@ -128,7 +128,7 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
           {HORAS.map((hora) => (
             <div
               key={`hora-${hora}`}
-              className="mono text-[10px] text-[var(--ink-3)] text-right pr-2 leading-none -translate-y-1.5"
+              className="mono text-[10px] text-(--ink-3) text-right pr-2 leading-none -translate-y-1.5"
               style={{ gridColumn: '1', gridRow: `${hora + 1}` }}
             >
               {hora === 0 ? '' : `${String(hora).padStart(2, '0')}:00`}
@@ -139,13 +139,13 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
           {eventosPorDia.map(({ dia, conHora }, indiceDia) => (
             <div
               key={`col-${dia.toISOString()}`}
-              className="relative border-l border-[var(--line)]"
+              className="relative border-l border-(--line)"
               style={{ gridColumn: `${indiceDia + 2}`, gridRow: '1 / span 24' }}
             >
               {HORAS.map((hora) => (
                 <div
                   key={`linea-${dia.toISOString()}-${hora}`}
-                  className="absolute left-0 right-0 border-t border-[var(--line)]"
+                  className="absolute left-0 right-0 border-t border-(--line)"
                   style={{ top: `${(hora / 24) * 100}%` }}
                 />
               ))}
@@ -171,10 +171,10 @@ export function VistaSemana({ referencia, recordatorios, categorias, onDiaClick 
                       borderLeft: `2px solid ${color}`,
                     }}
                   >
-                    <p className="text-[11px] font-medium text-[var(--ink)] truncate leading-tight">
+                    <p className="text-[11px] font-medium text-(--ink) truncate leading-tight">
                       {rec.titulo}
                     </p>
-                    <p className="mono text-[10px] text-[var(--ink-3)] leading-tight">
+                    <p className="mono text-[10px] text-(--ink-3) leading-tight">
                       {formatearHora(fecha)}
                     </p>
                   </button>

@@ -68,7 +68,7 @@ export function ReproductorAudio({ src, nombreArchivo, onEliminar }: Props) {
     <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2 min-w-[220px] max-w-[280px]">
       <audio ref={audioRef} src={src} preload="metadata" />
 
-      <Music size={14} className="text-indigo-400 flex-shrink-0" />
+      <Music size={14} className="text-indigo-400 shrink-0" />
 
       <div className="flex-1 min-w-0">
         <p className="text-xs text-indigo-700 font-medium truncate">{nombreArchivo}</p>
@@ -90,7 +90,7 @@ export function ReproductorAudio({ src, nombreArchivo, onEliminar }: Props) {
             onChange={manejarSeek}
             className="flex-1 h-1 accent-indigo-500"
           />
-          <span className="text-xs text-indigo-500 flex-shrink-0 tabular-nums">
+          <span className="text-xs text-indigo-500 shrink-0 tabular-nums">
             {formatearTiempo(progreso)}/{formatearTiempo(duracion)}
           </span>
         </div>
@@ -99,7 +99,7 @@ export function ReproductorAudio({ src, nombreArchivo, onEliminar }: Props) {
       {onEliminar && (
         <button
           onClick={onEliminar}
-          className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+          className="text-gray-400 hover:text-red-500 transition-colors shrink-0"
           title="Eliminar audio"
         >
           <Trash2 size={13} />

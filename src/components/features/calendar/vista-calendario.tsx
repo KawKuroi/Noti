@@ -81,46 +81,46 @@ export function VistaCalendario({
           <button
             onClick={() => navegar(-1)}
             title="Anterior"
-            className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-[var(--line-2)] bg-[var(--bg)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-4)] transition-colors focus:outline-none"
+            className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-(--line-2) bg-(--bg) text-(--ink-2) hover:text-(--ink) hover:border-(--ink-4) transition-colors focus:outline-hidden"
           >
             <ChevronLeft size={16} />
           </button>
-          <h2 className="font-mono text-[13px] font-medium text-[var(--ink)] capitalize min-w-[160px] text-center tracking-tight">
+          <h2 className="font-mono text-[13px] font-medium text-(--ink) capitalize min-w-[160px] text-center tracking-tight">
             {titulo}
           </h2>
           <button
             onClick={() => navegar(1)}
             title="Siguiente"
-            className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-[var(--line-2)] bg-[var(--bg)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-4)] transition-colors focus:outline-none"
+            className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-(--line-2) bg-(--bg) text-(--ink-2) hover:text-(--ink) hover:border-(--ink-4) transition-colors focus:outline-hidden"
           >
             <ChevronRight size={16} />
           </button>
           <button
             onClick={irAHoy}
-            className="flex items-center px-3 py-1.5 rounded-[10px] text-[12.5px] font-medium text-[var(--ink-2)] hover:text-[var(--ink)] hover:bg-[var(--bg-soft)] border border-[var(--line-2)] hover:border-[var(--ink-4)] transition-colors focus:outline-none"
+            className="flex items-center px-3 py-1.5 rounded-[10px] text-[12.5px] font-medium text-(--ink-2) hover:text-(--ink) hover:bg-(--bg-soft) border border-(--line-2) hover:border-(--ink-4) transition-colors focus:outline-hidden"
           >
             Hoy
           </button>
         </div>
 
         {/* Toggle vista Mes/Semana — pill container */}
-        <div className="flex items-center gap-1 p-[3px] bg-[var(--bg-soft)] border border-[var(--line)] rounded-[999px] select-none">
+        <div className="flex items-center gap-1 p-[3px] bg-(--bg-soft) border border-(--line) rounded-[999px] select-none">
           <button
             onClick={() => cambiarVista('mes')}
-            className={`px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium transition-all focus:outline-none ${
+            className={`px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium transition-all focus:outline-hidden ${
               vista === 'mes'
-                ? 'bg-[var(--bg)] text-[var(--ink)] shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-[var(--line-2)]'
-                : 'text-[var(--ink-2)] hover:text-[var(--ink)] border border-transparent'
+                ? 'bg-(--bg) text-(--ink) shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-(--line-2)'
+                : 'text-(--ink-2) hover:text-(--ink) border border-transparent'
             }`}
           >
             Mes
           </button>
           <button
             onClick={() => cambiarVista('semana')}
-            className={`px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium transition-all focus:outline-none ${
+            className={`px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium transition-all focus:outline-hidden ${
               vista === 'semana'
-                ? 'bg-[var(--bg)] text-[var(--ink)] shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-[var(--line-2)]'
-                : 'text-[var(--ink-2)] hover:text-[var(--ink)] border border-transparent'
+                ? 'bg-(--bg) text-(--ink) shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-(--line-2)'
+                : 'text-(--ink-2) hover:text-(--ink) border border-transparent'
             }`}
           >
             Semana
@@ -156,7 +156,7 @@ export function VistaCalendario({
         {recordatoriosFiltrados.length === 0 && (
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
             <div
-              className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs text-[var(--ink-3)] backdrop-blur"
+              className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs text-(--ink-3) backdrop-blur-sm"
               style={{ background: 'color-mix(in oklab, var(--bg) 90%, transparent)', border: '1px solid var(--line)' }}
             >
               <Info size={12} />

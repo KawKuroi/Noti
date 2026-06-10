@@ -59,7 +59,7 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
         {DIAS_CABECERA.map((dia) => (
           <div
             key={dia}
-            className="py-2 text-center font-mono text-[10px] font-medium text-[var(--ink-3)] uppercase tracking-[0.09em]"
+            className="py-2 text-center font-mono text-[10px] font-medium text-(--ink-3) uppercase tracking-[0.09em]"
           >
             {dia}
           </div>
@@ -68,7 +68,7 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
 
       {/* Grid de días */}
       <div
-        className="grid grid-cols-7 border border-[var(--line)] rounded-[14px] overflow-hidden flex-1 min-h-0"
+        className="grid grid-cols-7 border border-(--line) rounded-[14px] overflow-hidden flex-1 min-h-0"
         style={{ gridTemplateRows: `repeat(${filas}, minmax(0, 1fr))` }}
       >
         {dias.map((dia, idx) => {
@@ -86,13 +86,13 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
               key={dia.toISOString()}
               onClick={() => total > 0 || esDelMes ? onDiaClick(dia) : undefined}
               className={cn(
-                'p-2 flex flex-col items-start gap-1 transition-colors text-left overflow-hidden focus:outline-none',
-                'border-b border-r border-[var(--line)]',
+                'p-2 flex flex-col items-start gap-1 transition-colors text-left overflow-hidden focus:outline-hidden',
+                'border-b border-r border-(--line)',
                 !esUltFila ? '' : 'border-b-0',
                 esPrimerColumna ? 'border-l-0' : '',
                 esDelMes
-                  ? 'bg-[var(--bg)] hover:bg-[var(--bg-soft)]'
-                  : 'bg-[var(--bg-soft)] opacity-60 hover:opacity-80',
+                  ? 'bg-(--bg) hover:bg-(--bg-soft)'
+                  : 'bg-(--bg-soft) opacity-60 hover:opacity-80',
                 total > 0 && 'cursor-pointer',
                 total === 0 && !esDelMes && 'cursor-default',
               )}
@@ -100,9 +100,9 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
               <span
                 className={cn(
                   'font-mono text-[12px] font-medium leading-none w-6 h-6 flex items-center justify-center rounded-full',
-                  esDiaHoy && 'bg-[var(--ink)] text-[var(--bg)] font-semibold',
-                  !esDiaHoy && esDelMes && 'text-[var(--ink-2)]',
-                  !esDiaHoy && !esDelMes && 'text-[var(--ink-4)]',
+                  esDiaHoy && 'bg-(--ink) text-(--bg) font-semibold',
+                  !esDiaHoy && esDelMes && 'text-(--ink-2)',
+                  !esDiaHoy && !esDelMes && 'text-(--ink-4)',
                 )}
               >
                 {format(dia, 'd')}
@@ -127,7 +127,7 @@ export function VistaMes({ referencia, recordatorios, categorias, onDiaClick }: 
                     </span>
                   ))}
                   {extras > 0 && (
-                    <span className="font-mono text-[10px] text-[var(--ink-3)] mt-0.5 pl-1">
+                    <span className="font-mono text-[10px] text-(--ink-3) mt-0.5 pl-1">
                       +{extras} más
                     </span>
                   )}

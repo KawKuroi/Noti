@@ -36,7 +36,7 @@ export function VisorDocumento({ src, nombreArchivo, mime, onEliminar }: Props) 
       <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 min-w-[200px] max-w-[260px]">
         <IconoDocumento mime={mime} />
         <span className="flex-1 text-sm text-gray-700 truncate min-w-0">{nombreArchivo}</span>
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           {esPdf && (
             <Button
               variante="fantasma"

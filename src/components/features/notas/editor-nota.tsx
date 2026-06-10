@@ -110,7 +110,7 @@ export function EditorNota({ categorias, nota, onExito }: Props) {
             }`}
           >
             <div
-              className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm transition-transform ${
+              className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transition-transform ${
                 recordarme ? 'translate-x-3.5' : 'translate-x-0'
               }`}
             />

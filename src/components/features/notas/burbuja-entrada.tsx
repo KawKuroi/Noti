@@ -108,7 +108,7 @@ export function BurbujaEntrada({ entrada, onActualizar, onEliminar }: Props) {
           </div>
 
           <div className="flex flex-col items-end gap-1 max-w-[75%]">
-            <div className="bg-indigo-500 text-white text-sm rounded-2xl rounded-br-md px-4 py-2.5 leading-relaxed break-words">
+            <div className="bg-indigo-500 text-white text-sm rounded-2xl rounded-br-md px-4 py-2.5 leading-relaxed wrap-break-word">
               {entrada.contenido}
             </div>
             <span className="text-xs text-gray-400 px-1">{momento}</span>
