@@ -1,0 +1,50 @@
+# CI de Noti: lint + unit tests + build en cada push/PR a main.
+# Los E2E (Playwright) no corren aqui: requieren credenciales reales y un
+# servidor vivo; se ejecutan en local con npm run test:e2e (Fase 29.6.4).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    # Valores dummy: el build de Next solo necesita que las variables existan
+    # (las paginas que tocan DB/Supabase son dinamicas y no se prerenderizan).
+    # Ningun valor real de produccion vive en este archivo.
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: dummy-service-role-key
+      DATABASE_URL: postgresql://usuario:clave@localhost:5432/noti
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: dummy-vapid-public
+      VAPID_PRIVATE_KEY: dummy-vapid-private
+      VAPID_EMAIL: mailto:dummy@noti.app
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      CRON_SECRET: dummy-cron-secret
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
