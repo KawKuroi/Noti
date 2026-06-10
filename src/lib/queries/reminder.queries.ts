@@ -352,3 +352,49 @@ export async function getRecordatoriosANotificar(
     zonaHoraria: fila.zonaHoraria,
   }))
 }
+
+// Recordatorios con aviso programado en las proximas `horas` para un usuario.
+// Lo consume /api/recordatorios/proximos: el scheduler local de la app Tauri
+// (Fases 30/31) los usa para programar notificaciones nativas sin depender
+// del cron externo. Solo no-recurrentes con notificarEn futuro (los
+// cumpleanos siguen via push web; ver ARCHITECTURE.md "Apps nativas").
+export interface RecordatorioProximoApp {
+  id: string
+  titulo: string
+  descripcion: string | null
+  notificarEn: Date
+}
+
+export async function getRecordatoriosProximosParaApp(
+  usuarioId: string,
+  horas = 48,
+): Promise<RecordatorioProximoApp[]> {
+  const ahora = new Date()
+  const limite = new Date(ahora.getTime() + horas * 60 * 60 * 1000)
+
+  const filas = await db
+    .select({
+      id: recordatorios.id,
+      titulo: recordatorios.titulo,
+      descripcion: recordatorios.descripcion,
+      notificarEn: recordatorios.notificarEn,
+    })
+    .from(recordatorios)
+    .where(
+      and(
+        eq(recordatorios.usuarioId, usuarioId),
+        isNotNull(recordatorios.notificarEn),
+        gte(recordatorios.notificarEn, ahora),
+        lte(recordatorios.notificarEn, limite),
+        eq(recordatorios.estaCompletado, false),
+        eq(recordatorios.esRecurrente, false),
+        isNull(recordatorios.eliminadoEn),
+      ),
+    )
+    .orderBy(asc(recordatorios.notificarEn))
+
+  // isNotNull ya filtra en SQL; el filter refina el tipo sin casts.
+  return filas.filter(
+    (f): f is RecordatorioProximoApp & { descripcion: string | null } => f.notificarEn !== null,
+  )
+}

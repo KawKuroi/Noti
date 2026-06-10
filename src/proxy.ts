@@ -41,7 +41,10 @@ export async function proxy(solicitud: NextRequest) {
     // (la ruta tiene su propio rate limiting)
     ruta === '/api/contacto' ||
     ruta.startsWith('/api/cron/') ||
-    ruta.startsWith('/api/push/')
+    ruta.startsWith('/api/push/') ||
+    // El scheduler de la app Tauri necesita un 401 JSON (no redirect a HTML);
+    // la ruta valida la sesion por si misma.
+    ruta.startsWith('/api/recordatorios/')
 
   if (!user && !estaEnRutaAuth && !esRutaPublica) {
     return NextResponse.redirect(new URL('/login', solicitud.url))

@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permisos del webview principal. El contexto remote permite que la web de produccion (cargada en el webview) use la IPC de Tauri: el scheduler de notificaciones corre alli.",
+  "windows": ["principal"],
+  "remote": {
+    "urls": ["https://noti-seven-peach.vercel.app"]
+  },
+  "permissions": [
+    "core:default",
+    "notification:default"
+  ]
+}

@@ -1,0 +1,40 @@
+# Compila la app de escritorio (Fase 30) y adjunta los instaladores al
+# Release de GitHub. Se dispara al taggear app-v* (ej: app-v0.1.0).
+# La maquina de desarrollo no necesita Rust: este workflow es el build oficial.
+name: Release app Tauri (Windows)
+
+on:
+  push:
+    tags:
+      - 'app-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      # tauriScript via npx: no hace falta @tauri-apps/cli en package.json
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tauriScript: npx --yes @tauri-apps/cli
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Noti ${{ github.ref_name }} (Windows)'
+          releaseBody: 'Instaladores .msi y .exe de la app de escritorio. La app vive en la bandeja del sistema y dispara las notificaciones localmente sin depender del cron externo.'
+          releaseDraft: false
+          prerelease: false
