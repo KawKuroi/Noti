@@ -32,6 +32,11 @@ jobs:
         with:
           node-version: 24
 
+      # El proyecto Gradle generado invoca `npm run tauri` durante la
+      # compilacion Rust, asi que necesita node_modules con @tauri-apps/cli.
+      - name: Instalar dependencias npm
+        run: npm ci
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin

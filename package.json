@@ -14,7 +14,8 @@
     "db:seed": "tsx src/db/seed.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "tauri": "tauri"
   },
   "dependencies": {
     "@ai-sdk/groq": "^3.0.39",
@@ -60,6 +61,7 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.3.0",
+    "@tauri-apps/cli": "^2.11.2",
     "@types/node": "^24.13.1",
     "@types/pg": "^8.11.11",
     "@types/react": "^19.2.17",
