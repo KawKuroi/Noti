@@ -218,6 +218,32 @@ Un commit por upgrade, con `build + lint + test:e2e` tras cada uno. Orden:
 
 ---
 
+## Fase 29.5 — Limpieza post-upgrades [planificada]
+
+**Objetivo:** Eliminar codigo muerto y deprecado detectado tras la ronda de upgrades.
+
+- 29.5.1 Exports muertos: `CommandPalette()` (null, legacy), `buscarLanzamiento`/`buscarProximoLanzamiento`/`FUENTES_POR_TIPO` y los wrappers `buscar*` de una linea en los 4 servicios (0 consumidores externos, verificado por grep)
+- 29.5.2 Arreglar ~14 de los 20 warnings react-hooks v6 (refs durante render, Date.now en render, derivaciones triviales); los patrones legitimos de hidratacion quedan aceptados con la regla en warn
+- 29.5.3 Migracion manual `0012_housekeeping_columnas.sql`: DROP COLUMN IF EXISTS de `profiles.sound_enabled` y `reminders.image_url` (huerfanas desde Fases 13/16)
+- 29.5.4 Docs: referencias middleware → proxy
+
+**Done when:** lint con ≤6 warnings (solo hidratacion aceptada), build verde, deuda de columnas con migracion lista.
+
+---
+
+## Fase 29.6 — Sistema de testing profundo [planificada]
+
+**Objetivo:** Pasar de 4 E2E basicos a una bateria que cubra la logica critica.
+
+- 29.6.1 Setup Vitest + vite-tsconfig-paths; scripts `test` y `test:watch`; exportar `calcularScore`/`deduplicar` para testearlos
+- 29.6.2 Unit tests (~150 casos) en `tests/unit/`: coincidencia-titulo, parsear-fecha-natural, date.utils (zonas/recurrencias/TTL — el mas critico), release-search (score/dedup/allSettled con mocks), rate-limit (fallback), fetch-con-timeout, validations Zod, esquemaExtraccion (regex recurrencia), cron-health y push.service con mocks (reintentos, 410, dedup)
+- 29.6.3 E2E adicionales modestos (settings, palette) con patron skip-sin-credenciales
+- 29.6.4 CI `.github/workflows/ci.yml`: lint + test + build en push/PR a main (E2E solo local)
+
+**Done when:** `npm run test` verde, CI verde en GitHub, convencion documentada en PROJECT.md.
+
+---
+
 ## Fase 30 — App Tauri v2: Windows [planificada]
 
 **Objetivo:** App de escritorio que envuelve la web de produccion y programa notificaciones locales — elimina la dependencia de cron-job.org en el PC. Reemplaza la decision "sin app nativa" (ver DECISIONS.md).

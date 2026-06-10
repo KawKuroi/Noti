@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAsistente } from './asistente-provider'
 import { CandidatoCard } from './candidato-card'
 import { RecordatorioFormCard } from './recordatorio-form-card'
@@ -34,10 +34,14 @@ export function PanelSugerencias() {
   const [indiceSeleccionado, setIndiceSeleccionado] = useState(0)
   const [mostrarFormManual, setMostrarFormManual] = useState(false)
 
-  useEffect(() => {
+  // Reset al cambiar los resultados: patron "adjust state during render"
+  // (recomendado por React en lugar de setState dentro de un effect).
+  const [resultadosPrevios, setResultadosPrevios] = useState({ candidatos, extraccion })
+  if (resultadosPrevios.candidatos !== candidatos || resultadosPrevios.extraccion !== extraccion) {
+    setResultadosPrevios({ candidatos, extraccion })
     setIndiceSeleccionado(0)
     setMostrarFormManual(false)
-  }, [candidatos, extraccion])
+  }
 
   const cargando = estado === 'extrayendo' || estado === 'buscando'
   const creando = estado === 'creando'
@@ -189,9 +193,4 @@ export function PanelSugerencias() {
       )}
     </div>
   )
-}
-
-// Compatibilidad con el layout antiguo (no se monta a nivel layout).
-export function CommandPalette() {
-  return null
 }

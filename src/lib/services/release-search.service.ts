@@ -1,14 +1,12 @@
 import {
-  buscarPelicula,
-  buscarSerie,
   candidatosPelicula,
   candidatosSerie,
   proximaPelicula,
   proximaSerie,
 } from './tmdb.service'
-import { buscarJuego, candidatosJuego, proximoJuego } from './rawg.service'
-import { buscarAlbum, candidatosAlbum, proximoAlbum } from './musicbrainz.service'
-import { buscarLibro, candidatosLibro, proximoLibro } from './google-books.service'
+import { candidatosJuego, proximoJuego } from './rawg.service'
+import { candidatosAlbum, proximoAlbum } from './musicbrainz.service'
+import { candidatosLibro, proximoLibro } from './google-books.service'
 import { coincideTitulo, similitudDice } from '@/lib/utils/coincidencia-titulo'
 import type { ResultadoLanzamiento, TipoLanzamiento } from '@/types/release.types'
 import type { Extraccion } from '@/lib/ai/extractor'
@@ -59,40 +57,8 @@ export function limpiarTitulo(titulo: string): string {
   return limpio.replace(/\s+/g, ' ').trim()
 }
 
-type BusquedaFn = (titulo: string, artista?: string) => Promise<ResultadoLanzamiento | null>
-
-const FUENTES_POR_TIPO: Record<TipoLanzamiento, BusquedaFn[]> = {
-  movie: [buscarPelicula, (t) => buscarSerie(t)],
-  tv: [buscarSerie, (t) => buscarPelicula(t)],
-  game: [buscarJuego],
-  album: [buscarAlbum],
-  book: [buscarLibro],
-}
-
-export async function buscarLanzamiento(
-  titulo: string,
-  tipo: TipoLanzamiento,
-  artista?: string,
-): Promise<ResultadoLanzamiento | null> {
-  const tituloLimpio = limpiarTitulo(titulo)
-  if (!tituloLimpio) return null
-
-  const fuentes = FUENTES_POR_TIPO[tipo] ?? []
-
-  for (const fn of fuentes) {
-    // Los servicios lanzan ante fallo de API; aqui una fuente caida no debe
-    // impedir probar la siguiente.
-    try {
-      const resultado = await fn(tituloLimpio, artista)
-      if (resultado) return resultado
-    } catch (e) {
-      console.error('[release-search/buscarLanzamiento] fuente fallo:', e)
-    }
-  }
-  return null
-}
-
-function calcularScore(
+// Exportada para tests unitarios (funcion pura de ranking).
+export function calcularScore(
   candidato: ResultadoLanzamiento,
   tituloBuscado: string,
   tipoPreferido: TipoLanzamiento | null,
@@ -119,7 +85,8 @@ function calcularScore(
   return score
 }
 
-function deduplicar(candidatos: ResultadoLanzamiento[]): ResultadoLanzamiento[] {
+// Exportada para tests unitarios (funcion pura).
+export function deduplicar(candidatos: ResultadoLanzamiento[]): ResultadoLanzamiento[] {
   const vistos = new Set<string>()
   const unicos: ResultadoLanzamiento[] = []
   for (const c of candidatos) {
@@ -277,17 +244,3 @@ export async function obtenerCandidatos(extraccion: Extraccion): Promise<Resulta
   return candidatos
 }
 
-export async function buscarProximoLanzamiento(
-  tipo: TipoLanzamiento,
-  contexto: string,
-): Promise<ResultadoLanzamiento | null> {
-  const limpio = limpiarTitulo(contexto)
-  if (!limpio) return null
-  try {
-    const candidatos = await obtenerProximosPorTipo(tipo, limpio, 1)
-    return candidatos[0] ?? null
-  } catch (e) {
-    console.error('[release-search/buscarProximoLanzamiento] fuente fallo:', e)
-    return null
-  }
-}

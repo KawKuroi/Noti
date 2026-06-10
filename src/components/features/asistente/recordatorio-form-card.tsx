@@ -115,16 +115,16 @@ export function RecordatorioFormCard({ inicial, modo, creando, onGuardar, onCanc
   const esNota = categoriaSlug === 'notes'
   const esLanzamientoCategoria = SLUGS_LANZAMIENTO_SET.has(categoriaSlug)
 
-  // Cuando la categoria se cambia a un slug de lanzamiento, derivar el tipo si esta vacio.
-  useEffect(() => {
-    if (esLanzamientoCategoria && !tipoLanzamiento) {
-      const tipoDerivado = SLUG_A_TIPO[categoriaSlug]
-      if (tipoDerivado) setTipoLanzamiento(tipoDerivado)
-    }
-    if (!esLanzamientoCategoria && tipoLanzamiento) {
-      setTipoLanzamiento(null)
-    }
-  }, [categoriaSlug, esLanzamientoCategoria, tipoLanzamiento])
+  // Cuando la categoria se cambia a un slug de lanzamiento, derivar el tipo si
+  // esta vacio. Patron "adjust state during render" (sin effect): se ajusta en
+  // el mismo render en que cambia la categoria.
+  if (esLanzamientoCategoria && !tipoLanzamiento) {
+    const tipoDerivado = SLUG_A_TIPO[categoriaSlug]
+    if (tipoDerivado) setTipoLanzamiento(tipoDerivado)
+  }
+  if (!esLanzamientoCategoria && tipoLanzamiento) {
+    setTipoLanzamiento(null)
+  }
 
   // Libera el guard de envio cuando el provider deja de estar en estado "creando"
   // (caso exitoso desmonta la card; caso de error la mantiene pero permite reintento).

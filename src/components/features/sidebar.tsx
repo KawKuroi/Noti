@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -54,10 +54,13 @@ export function Sidebar({
   const t = useTranslations('Sidebar')
   const [drawerAbierto, setDrawerAbierto] = useState(false)
 
-  // Cierra el drawer cuando cambia la ruta
-  useEffect(() => {
+  // Cierra el drawer cuando cambia la ruta: patron "adjust state during
+  // render" (sin effect, evita un render extra con el drawer abierto).
+  const [rutaPrevia, setRutaPrevia] = useState(ruta)
+  if (rutaPrevia !== ruta) {
+    setRutaPrevia(ruta)
     setDrawerAbierto(false)
-  }, [ruta])
+  }
 
   const categoriasGenerales = categorias.filter(
     (c) =>

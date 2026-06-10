@@ -181,11 +181,6 @@ export async function candidatosJuego(titulo: string, limite = 5): Promise<Resul
   return resultados
 }
 
-export async function buscarJuego(titulo: string): Promise<ResultadoLanzamiento | null> {
-  const candidatos = await candidatosJuego(titulo, 1)
-  return candidatos[0] ?? null
-}
-
 export async function proximoJuego(franquicia: string, limite = 5): Promise<ResultadoLanzamiento[]> {
   const expandido = expandirAlias(franquicia)
   const hoy = new Date().toISOString().slice(0, 10)

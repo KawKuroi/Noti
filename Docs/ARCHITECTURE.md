@@ -212,3 +212,4 @@ Todas las migraciones viven en `src/db/migrations/`. Las marcadas como **manual*
 | 0009_note_attachments.sql | Manual |
 | 0010_soft_delete_cuenta.sql | Manual |
 | 0011_notificaciones_historial_vencidos.sql | Drizzle (solo agrega columnas/indice) |
+| 0012_housekeeping_columnas.sql | Manual (DROP de columnas huerfanas sound_enabled / image_url) |

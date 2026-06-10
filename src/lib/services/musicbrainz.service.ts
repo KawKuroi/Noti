@@ -218,14 +218,6 @@ export async function candidatosAlbum(
   return filtrados
 }
 
-export async function buscarAlbum(
-  titulo: string,
-  artista?: string,
-): Promise<ResultadoLanzamiento | null> {
-  const candidatos = await candidatosAlbum(titulo, artista, 1)
-  return candidatos[0] ?? null
-}
-
 export async function proximoAlbum(artista: string, limite = 5): Promise<ResultadoLanzamiento[]> {
   const artistaId = await buscarArtistaId(artista)
   if (!artistaId) return []

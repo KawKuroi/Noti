@@ -42,15 +42,19 @@ export function ListaRecordatoriosPaginada({
   const [filtro, setFiltro] = useState<FiltroEstado>('todos')
   const centinela = useRef<HTMLDivElement>(null)
 
-  // Refs para evitar closures viejas en el IntersectionObserver
+  // Refs para evitar closures viejas en el IntersectionObserver.
+  // Se sincronizan en un effect (no durante el render) para cumplir las
+  // reglas de react-hooks v6: corre tras cada render, sin array de deps.
   const registrosRef = useRef(registros)
-  registrosRef.current = registros
   const hasMasRef = useRef(hasMas)
-  hasMasRef.current = hasMas
   const cargandoRef = useRef(cargando)
-  cargandoRef.current = cargando
   const ordenamientoRef = useRef(ordenamiento)
-  ordenamientoRef.current = ordenamiento
+  useEffect(() => {
+    registrosRef.current = registros
+    hasMasRef.current = hasMas
+    cargandoRef.current = cargando
+    ordenamientoRef.current = ordenamiento
+  })
 
   async function ejecutarCargaMas() {
     if (cargandoRef.current || !hasMasRef.current) return

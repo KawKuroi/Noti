@@ -5,8 +5,8 @@
 
 ## Fase activa
 
-**En progreso:** Fase 26 (Seguridad) — primera fase de la revision integral de junio 2026.
-**Estado:** Fases 0-24 completadas. Fase 25 implementada; pendiente solo la verificacion manual 25.6 (puede cerrarse en paralelo). Fases 26-31 planificadas en `Docs/ROADMAP.md`.
+**En progreso:** Fase 29.5 (Limpieza post-upgrades) → luego 29.6 (Testing profundo).
+**Estado:** Fases 0-29 completadas y en produccion. Fase 25 implementada; pendiente solo la verificacion manual 25.6. Revision integral: 26 (seguridad), 27 (busqueda IA), 28 (PWA robusta) y 29 (upgrades: date-fns 4, Zod 4, Next 16 + eslint 9 flat, Tailwind 4, drizzle-kit 0.31.10 — Drizzle 1.0 sigue en RC, se adopta cuando sea estable) entregadas. Fases 29.5, 29.6, 30 y 31 planificadas en `Docs/ROADMAP.md`.
 
 ## Revision integral (junio 2026) — resumen
 
@@ -65,6 +65,6 @@ Orden de sospecha si una notificacion no llega: (a) job en cron-job.org con resp
 
 ## Deuda tecnica conocida
 
-- Columna `sound_enabled` en `profiles` quedo huerfana tras retirar Pomodoro (Fase 13). Housekeeping futuro.
-- Columna `image_url` en `reminders` quedo huerfana tras Fase 16 (portadas no persistentes). Housekeeping futuro.
-- `/api/ai/recordatorio` ya no lo invoca el cliente. Mantener por compatibilidad; eliminar tras confirmar que nada lo usa.
+- Columnas huerfanas `profiles.sound_enabled` y `reminders.image_url`: migracion `0012_housekeeping_columnas.sql` lista (Fase 29.5) — aplicar manualmente en Supabase.
+- ~6 warnings react-hooks v6 aceptados (patrones de hidratacion: setMontado, sessionStorage del asistente, deteccion standalone). La regla queda en warn en eslint.config.mjs.
+- `/api/ai/recordatorio`: eliminado (verificado en Fase 29.5 — la ruta ya no existia).

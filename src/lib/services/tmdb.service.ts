@@ -215,16 +215,6 @@ export async function candidatosSerie(titulo: string, limite = 5): Promise<Resul
   return filtrados
 }
 
-export async function buscarPelicula(titulo: string): Promise<ResultadoLanzamiento | null> {
-  const candidatos = await candidatosPelicula(titulo, 1)
-  return candidatos[0] ?? null
-}
-
-export async function buscarSerie(titulo: string): Promise<ResultadoLanzamiento | null> {
-  const candidatos = await candidatosSerie(titulo, 1)
-  return candidatos[0] ?? null
-}
-
 export async function proximaPelicula(franquicia: string, limite = 5): Promise<ResultadoLanzamiento[]> {
   const hoy = new Date().toISOString().slice(0, 10)
   const busqueda = await buscarConFallbackIdioma('/search/movie', {

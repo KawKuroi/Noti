@@ -64,17 +64,26 @@ export function BusquedaGlobal() {
     return () => document.removeEventListener('keydown', handler)
   }, [])
 
+  // El focus es interaccion con el DOM (effect legitimo); los resets de estado
+  // al cerrar van con el patron "adjust state during render".
   useEffect(() => {
     if (abierto) {
-      setTimeout(() => inputRef.current?.focus(), 50)
-    } else {
+      const t = setTimeout(() => inputRef.current?.focus(), 50)
+      return () => clearTimeout(t)
+    }
+  }, [abierto])
+
+  const [abiertoPrevio, setAbiertoPrevio] = useState(abierto)
+  if (abiertoPrevio !== abierto) {
+    setAbiertoPrevio(abierto)
+    if (!abierto) {
       setQuery('')
       setQueryDemorada('')
       setFiltro('todo')
       setItemActivo(0)
       setTiempoMs(null)
     }
-  }, [abierto])
+  }
 
   useEffect(() => {
     tiempoInicio.current = performance.now()
@@ -112,9 +121,13 @@ export function BusquedaGlobal() {
     return true
   })
 
-  useEffect(() => {
+  // Reset del item activo cuando cambia el numero de resultados (adjust
+  // state during render, sin effect).
+  const [cantidadPrevia, setCantidadPrevia] = useState(resultados.length)
+  if (cantidadPrevia !== resultados.length) {
+    setCantidadPrevia(resultados.length)
     setItemActivo(0)
-  }, [resultados.length])
+  }
 
   useEffect(() => {
     if (!abierto) return

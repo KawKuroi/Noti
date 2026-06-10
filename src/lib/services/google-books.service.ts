@@ -92,14 +92,6 @@ export async function candidatosLibro(
   return candidatos
 }
 
-export async function buscarLibro(
-  titulo: string,
-  autor?: string,
-): Promise<ResultadoLanzamiento | null> {
-  const candidatos = await candidatosLibro(titulo, autor, 1)
-  return candidatos[0] ?? null
-}
-
 export async function proximoLibro(autor: string, limite = 5): Promise<ResultadoLanzamiento[]> {
   const query = `inauthor:${encodeURIComponent(autor)}`
   const items = await consultar(query, { orderBy: 'newest' })

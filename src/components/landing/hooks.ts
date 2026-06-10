@@ -23,8 +23,15 @@ export function useScrollReveal(): void {
 export function useTypewriter(text: string, speed = 38, startDelay = 200): string {
   const [out, setOut] = useState('')
 
-  useEffect(() => {
+  // Reset inmediato cuando cambia el texto (adjust state during render);
+  // el effect solo maneja los timers (sincronizacion externa legitima).
+  const [textoPrevio, setTextoPrevio] = useState(text)
+  if (textoPrevio !== text) {
+    setTextoPrevio(text)
     setOut('')
+  }
+
+  useEffect(() => {
     let cancelled = false
     let intervalId: ReturnType<typeof setInterval> | null = null
 

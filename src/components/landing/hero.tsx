@@ -95,8 +95,15 @@ function HeroChat() {
   const ej = EJEMPLOS_HERO[idx]
   const tipeado = useTypewriter(ej.user, 42, 250)
 
-  useEffect(() => {
+  // Reset de fase al cambiar de ejemplo (adjust state during render);
+  // el effect solo programa los timers.
+  const [idxPrevio, setIdxPrevio] = useState(idx)
+  if (idxPrevio !== idx) {
+    setIdxPrevio(idx)
     setFase('typing')
+  }
+
+  useEffect(() => {
     const duracionTipeo = 250 + ej.user.length * 42 + 200
     const tFinish = setTimeout(() => setFase('thinking'), duracionTipeo)
     const tReply = setTimeout(() => setFase('reply'), duracionTipeo + 700)

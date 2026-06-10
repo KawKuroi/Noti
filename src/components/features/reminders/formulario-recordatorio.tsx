@@ -405,8 +405,11 @@ export function FormularioRecordatorio({ categorias, recordatorio, slugInicial, 
   const [slugInicialEdicion] = useState(categoriaInicial?.slug)
   const [tituloActual, setTituloActual] = useState(recordatorio?.titulo ?? '')
 
+  // Ref sincronizada en effect (no en render) — reglas react-hooks v6.
   const onExitoRef = useRef(onExito)
-  onExitoRef.current = onExito
+  useEffect(() => {
+    onExitoRef.current = onExito
+  })
 
   useEffect(() => {
     if (estado.ok) {

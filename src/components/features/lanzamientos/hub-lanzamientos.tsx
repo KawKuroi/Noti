@@ -84,10 +84,11 @@ export function HubLanzamientos({ datos, todos, categorias }: Props) {
     () => ordenarRecordatorios(todos, ordenamiento),
     [todos, ordenamiento],
   )
-  const categoriaActivaOrdenada = useMemo(
-    () => (categoriaActiva ? ordenarRecordatorios(categoriaActiva.recordatorios, ordenamiento) : []),
-    [categoriaActiva, ordenamiento],
-  )
+  // Sin useMemo: la lista por categoria es pequena y la dependencia
+  // (categoriaActiva) se deriva en cada render — memoizar aqui no aporta.
+  const categoriaActivaOrdenada = categoriaActiva
+    ? ordenarRecordatorios(categoriaActiva.recordatorios, ordenamiento)
+    : []
 
   const activeTabClass =
     'flex items-center px-3.5 py-[5px] rounded-[999px] text-[12.5px] font-medium text-(--ink) bg-(--bg) shadow-[0_1px_3px_rgba(10,10,10,0.05)] border border-(--line-2) focus:outline-hidden transition-all'
