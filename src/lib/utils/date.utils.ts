@@ -120,8 +120,11 @@ export function calcularProximaOcurrencia(regla: string, ancla: Date, ahora: Dat
     const diasJs = reglaParseada.dias.map(diaIsoAJs)
     const hoy = startOfDay(ahora)
 
-    // Buscar el proximo dia valido en los proximos 7 dias
-    for (let offset = 0; offset < 7; offset++) {
+    // Buscar el proximo dia valido en los proximos 8 dias. El offset 7 (mismo
+    // dia de la proxima semana) es necesario para reglas de un solo dia cuando
+    // la hora de hoy ya paso; sin el, el fallback addWeeks(ancla) devolvia una
+    // fecha relativa al ancla (potencialmente en el pasado). Bug hallado en 29.6.
+    for (let offset = 0; offset <= 7; offset++) {
       const candidato = new Date(hoy)
       candidato.setDate(candidato.getDate() + offset)
       if (diasJs.includes(getDay(candidato))) {
