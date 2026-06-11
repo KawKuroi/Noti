@@ -15,7 +15,7 @@ export function Features() {
       style={{ paddingTop: 'var(--pad-section)', paddingBottom: 'var(--pad-section)' }}
     >
       <div className="wrap">
-        <div className="reveal" style={{ maxWidth: 680, marginBottom: 64 }}>
+        <div className="reveal" style={{ maxWidth: 680, marginBottom: 48 }}>
           <div className="eyebrow">Caracteristicas</div>
           <h2
             style={{
@@ -106,15 +106,15 @@ export function Features() {
         }
         .bento-resto {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
           gap: var(--gap);
         }
-        @media (max-width: 920px) {
+        @media (max-width: 980px) {
           .bento-resto {
             grid-template-columns: repeat(2, 1fr);
           }
         }
-        @media (max-width: 680px) {
+        @media (max-width: 640px) {
           .bento-top,
           .bento-resto {
             grid-template-columns: 1fr;

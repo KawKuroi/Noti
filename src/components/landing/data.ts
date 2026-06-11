@@ -12,10 +12,7 @@ import {
   GraduationCap,
   MapPin,
   Mic,
-  Moon,
   Music,
-  Paperclip,
-  Search,
   ShieldCheck,
   Smartphone,
   Sparkles,
@@ -50,46 +47,28 @@ export const BENEFICIOS: Beneficio[] = [
     etiqueta: 'Asistente',
   },
   {
+    icono: Bell,
+    titulo: 'Acciones desde la notificacion',
+    descripcion: 'Ver, posponer 15 minutos o completar sin abrir la app.',
+    etiqueta: 'Push',
+  },
+  {
+    icono: Mic,
+    titulo: 'Entrada por voz',
+    descripcion: 'Dicta el recordatorio; Whisper lo transcribe y el asistente lo agenda.',
+    etiqueta: 'Voz',
+  },
+  {
     icono: Calendar,
     titulo: 'Vista de calendario',
-    descripcion:
-      'Vistas mensual y semanal con puntos de color por categoria. Filtro multi-select y click en dia para detalle.',
+    descripcion: 'Mes y semana con puntos de color por categoria.',
     etiqueta: 'Vista',
   },
   {
     icono: ShieldCheck,
     titulo: 'Tus datos, solo tuyos',
-    descripcion:
-      'Row Level Security en Supabase garantiza que nadie mas puede ver tus recordatorios. Codigo publico y auditable.',
+    descripcion: 'Row Level Security en cada tabla. Codigo publico y auditable.',
     etiqueta: 'Privacidad',
-  },
-  {
-    icono: Bell,
-    titulo: 'Acciones desde la notificacion',
-    descripcion:
-      'Ver, posponer 15 minutos o completar directamente desde la notificacion del sistema sin abrir la app.',
-    etiqueta: 'Push',
-  },
-  {
-    icono: Moon,
-    titulo: 'Dark mode',
-    descripcion:
-      'Tema oscuro completo con tokens CSS semanticos. Tu preferencia se guarda automaticamente entre sesiones.',
-    etiqueta: 'Apariencia',
-  },
-  {
-    icono: Mic,
-    titulo: 'Entrada por voz',
-    descripcion:
-      'Dicta tus recordatorios. Whisper Large v3 Turbo (Groq) transcribe el audio al instante y el asistente lo agenda.',
-    etiqueta: 'Voz',
-  },
-  {
-    icono: Paperclip,
-    titulo: 'Notas con adjuntos',
-    descripcion:
-      'Adjunta imagenes, audios, PDFs y videos directamente en tus cuadernos de notas tipo chat.',
-    etiqueta: 'Notas',
   },
 ]
 

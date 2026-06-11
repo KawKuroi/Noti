@@ -12,7 +12,7 @@ const SUB =
 
 export function Hero() {
   return (
-    <section style={{ position: 'relative', paddingTop: 120, paddingBottom: 'var(--pad-section)' }}>
+    <section style={{ position: 'relative', paddingTop: 130, paddingBottom: 'var(--pad-section)' }}>
       <div
         className="dotgrid"
         style={{
@@ -25,86 +25,89 @@ export function Hero() {
         }}
       />
       <div className="wrap" style={{ position: 'relative' }}>
-        <div style={{ textAlign: 'center', maxWidth: 820, margin: '0 auto' }}>
-          <h1
-            className="reveal in"
-            data-d="1"
-            style={{
-              fontSize: 'clamp(50px, 7vw, 101px)',
-              lineHeight: 0.96,
-              marginTop: 0,
-              marginBottom: 25,
-              fontWeight: 500,
-            }}
-          >
-            {HEADLINE.map((linea, i) => (
-              <span key={i} style={{ display: 'block' }}>
-                {i === HEADLINE.length - 1 ? (
-                  <span style={{ color: 'var(--ink-3)' }}>{linea}</span>
-                ) : (
-                  linea
-                )}
-              </span>
-            ))}
-          </h1>
-          <p
-            className="reveal in"
-            data-d="2"
-            style={{
-              fontSize: 'clamp(18px, 1.4vw, 22px)',
-              lineHeight: 1.55,
-              color: 'var(--ink-2)',
-              maxWidth: 600,
-              margin: '0 auto',
-            }}
-          >
-            {SUB}
-          </p>
-          <div
-            className="reveal in"
-            data-d="3"
-            style={{
-              display: 'flex',
-              gap: 10,
-              justifyContent: 'center',
-              marginTop: 37,
-              flexWrap: 'wrap',
-            }}
-          >
-            <Link className="btn btn-primary" href="/register">
-              Empezar gratis <ArrowRight size={14} />
-            </Link>
-            <a className="btn btn-ghost" href={REPO_URL} target="_blank" rel="noreferrer">
-              <Github size={16} /> Ver en GitHub
-            </a>
+        <div className="hero-grid">
+          <div className="hero-texto">
+            <h1
+              className="reveal in"
+              data-d="1"
+              style={{
+                fontSize: 'clamp(42px, 4.8vw, 74px)',
+                lineHeight: 1.0,
+                marginTop: 0,
+                marginBottom: 22,
+                fontWeight: 500,
+              }}
+            >
+              {HEADLINE.map((linea, i) => (
+                <span key={i} style={{ display: 'block' }}>
+                  {i === HEADLINE.length - 1 ? (
+                    <span style={{ color: 'var(--ink-3)' }}>{linea}</span>
+                  ) : (
+                    linea
+                  )}
+                </span>
+              ))}
+            </h1>
+            <p
+              className="reveal in"
+              data-d="2"
+              style={{
+                fontSize: 'clamp(17px, 1.3vw, 20px)',
+                lineHeight: 1.55,
+                color: 'var(--ink-2)',
+                maxWidth: 480,
+              }}
+            >
+              {SUB}
+            </p>
+            <div
+              className="reveal in hero-ctas"
+              data-d="3"
+              style={{
+                display: 'flex',
+                gap: 10,
+                marginTop: 34,
+                flexWrap: 'wrap',
+              }}
+            >
+              <Link className="btn btn-primary" href="/register">
+                Empezar gratis <ArrowRight size={14} />
+              </Link>
+              <a className="btn btn-ghost" href={REPO_URL} target="_blank" rel="noreferrer">
+                <Github size={16} /> Ver en GitHub
+              </a>
+            </div>
           </div>
-          <div
-            className="reveal in mono"
-            data-d="4"
-            style={{
-              display: 'flex',
-              gap: 14,
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              marginTop: 26,
-              fontSize: 11.5,
-              color: 'var(--ink-3)',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-            }}
-          >
-            <span>Open source</span>
-            <span aria-hidden="true">·</span>
-            <span>100% gratis</span>
-            <span aria-hidden="true">·</span>
-            <span>Web, Windows y Android</span>
-          </div>
-        </div>
 
-        <div className="reveal in" data-d="5" style={{ marginTop: 72 }}>
-          <HeroChat />
+          <div className="reveal in" data-d="4" style={{ minWidth: 0 }}>
+            <HeroChat />
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .hero-grid {
+          display: grid;
+          grid-template-columns: 1.05fr 1fr;
+          gap: 48px;
+          align-items: center;
+        }
+        @media (max-width: 860px) {
+          .hero-grid {
+            grid-template-columns: 1fr;
+            gap: 44px;
+          }
+          .hero-texto {
+            text-align: center;
+          }
+          .hero-texto p {
+            margin: 0 auto;
+          }
+          .hero-ctas {
+            justify-content: center;
+          }
+        }
+      `}</style>
     </section>
   )
 }

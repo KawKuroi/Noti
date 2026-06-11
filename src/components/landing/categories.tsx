@@ -5,7 +5,11 @@ import { CATEGORIAS_LANDING } from './data'
 
 export function Categories() {
   const [hover, setHover] = useState(0)
-  const activa = CATEGORIAS_LANDING[hover] ?? CATEGORIAS_LANDING[0]
+  // Click ancla el ejemplo (gana sobre el hover); re-click en la misma fila
+  // libera el ancla. Solo estado en memoria: al recargar vuelve el modo hover.
+  const [fijado, setFijado] = useState<number | null>(null)
+  const seleccion = fijado ?? hover
+  const activa = CATEGORIAS_LANDING[seleccion] ?? CATEGORIAS_LANDING[0]
   const IconoActivo = activa.icono
 
   return (
@@ -36,12 +40,19 @@ export function Categories() {
         <div className="cat-grid">
           <div className="reveal" data-d="1">
             {CATEGORIAS_LANDING.map((c, i) => {
-              const isActive = hover === i
+              const isActive = seleccion === i
+              const estaFijada = fijado === i
               const Icono = c.icono
               return (
                 <div
                   key={c.slug}
                   onMouseEnter={() => setHover(i)}
+                  onClick={() => {
+                    setHover(i)
+                    setFijado(estaFijada ? null : i)
+                  }}
+                  role="button"
+                  aria-pressed={estaFijada}
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'auto auto 1fr auto',
@@ -60,11 +71,16 @@ export function Categories() {
                     className="mono"
                     style={{
                       fontSize: 11,
-                      color: isActive ? 'var(--ink)' : 'var(--ink-4)',
+                      color: estaFijada ? 'var(--bg)' : isActive ? 'var(--ink)' : 'var(--ink-4)',
+                      background: estaFijada ? 'var(--ink)' : 'transparent',
+                      borderRadius: 6,
+                      padding: '2px 4px',
+                      marginLeft: -4,
                       letterSpacing: '0.04em',
                       fontVariantNumeric: 'tabular-nums',
-                      transition: 'color .2s ease',
+                      transition: 'color .2s ease, background .2s ease',
                       width: 24,
+                      textAlign: 'center',
                     }}
                   >
                     {String(i + 1).padStart(2, '0')}
