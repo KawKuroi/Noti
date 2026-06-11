@@ -56,6 +56,12 @@ src/db/schema.ts     → Schema Drizzle (fuente de verdad del modelo de datos)
 - Nunca `any` en TypeScript
 - Warnings react-hooks v6 (set-state-in-effect, refs, purity) estan en `warn`: los ~7 restantes son patrones de hidratacion aceptados — no agregar nuevos sin justificar
 
+## Convenciones de rendimiento (Fase 34)
+
+- Paginas publicas (landing, login, register) estaticas/ISR: nunca leer `searchParams` en el server component — los lee el cliente con `useSearchParams()` dentro de `<Suspense>` (ver `recovery-toast.tsx`)
+- Queries leidas por layout + pagina en la misma request van envueltas en `cache()` de React (dedup por render): `requerirUsuario`, `getPerfilDelUsuarioActual`; `getCategorias` usa `unstable_cache` (cross-request, datos fijos)
+- Secciones cliente bajo el fold de la landing: `next/dynamic` (divide el bundle JS; el HTML sigue saliendo del server)
+
 ## Convenciones de testing (Fase 29.6)
 
 - Unit tests en `tests/unit/<modulo>.test.ts` (Vitest, `vitest.config.ts` con `resolve.tsconfigPaths` para el alias `@/*`). Imports explicitos de `vitest` (sin globals).

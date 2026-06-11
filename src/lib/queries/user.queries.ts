@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { perfiles } from '@/db/schema'
@@ -39,7 +40,9 @@ export async function getPerfilesConResumenDiario(horaUTC: string): Promise<Perf
   return filas.filter((f) => f.horaResumen === horaUTC)
 }
 
-export async function getPerfilDelUsuarioActual(): Promise<Perfil | null> {
+// cache() de React: el layout del dashboard y varias paginas lo piden en la
+// misma request; asi la query a la DB se ejecuta una sola vez por render.
+export const getPerfilDelUsuarioActual = cache(async (): Promise<Perfil | null> => {
   const usuario = await requerirUsuario()
 
   const filas = await db
@@ -49,4 +52,4 @@ export async function getPerfilDelUsuarioActual(): Promise<Perfil | null> {
     .limit(1)
 
   return filas[0] ? mapearPerfil(filas[0]) : null
-}
+})

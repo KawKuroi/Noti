@@ -21,7 +21,7 @@ import { SeccionVencidos } from '@/components/features/inicio/seccion-vencidos'
 export const metadata: Metadata = { title: 'Inicio | Noti' }
 
 interface Props {
-  searchParams: Promise<{ categoria?: string; recovered?: string; error?: string }>
+  searchParams: Promise<{ categoria?: string }>
 }
 
 function construirResumen(recordatorios: { fechaVencimiento: Date | null }[]): string {
@@ -61,7 +61,7 @@ function obtenerDiasConRecordatorios(
 
 export default async function PaginaInicio({ searchParams }: Props) {
   const user = await requerirUsuario()
-  const { categoria: categoriaIdParam, recovered, error } = await searchParams
+  const { categoria: categoriaIdParam } = await searchParams
 
   const [perfil, categorias, todosLosRecordatorios, contadores] = await Promise.all([
     getPerfilDelUsuarioActual(),
@@ -86,7 +86,7 @@ export default async function PaginaInicio({ searchParams }: Props) {
     <div className="max-w-5xl mx-auto">
       <InstallPrompt />
       <NotificationPrompt />
-      <RecoveryToast recovered={recovered === 'true'} error={error} />
+      <RecoveryToast />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
         {/* Columna principal */}

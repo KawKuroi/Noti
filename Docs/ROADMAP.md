@@ -44,6 +44,7 @@ Fases 0–32 completadas. Releases publicados en GitHub: Windows (`app-v0.1.0`, 
 - **Fase 29.6** — Testing profundo: Vitest (223 unit tests en 10 suites), 2 E2E nuevos (settings, asistente), CI en GitHub Actions; bugfix en `calcularProximaOcurrencia` (offset 7 semanal) hallado por los tests.
 - **Fase 32** — Descargas de las apps nativas en landing (seccion nueva) y settings (card Aplicacion), servicio github-releases (API de GitHub, cache 1 h); SEO: titulo nuevo, og:url, favicon.ico multirresolucion, descriptions ≤160.
 - **Fase 33** — Refinado visual de la landing: hero compacto (chat visible en el fold), titular "Sin ruido. Sin olvidos.", strip de confianza mono, bento de features con 2 destacadas y mini-visuales, Geist Mono real, hover de cards consistente, enlace Descargas en el nav.
+- **Fase 34** — Feedback visual + rendimiento: hero a dos columnas (titulo izquierda, demo derecha; sin strip), features 2 destacadas + 4 compactas, categorias con focus fijable por click; landing estatica/ISR (next-intl al layout del dashboard, RecoveryToast lee window.location), code-splitting bajo el fold, React.cache, favicon-32x32 e icon.svg declarados.
 
 ---
 

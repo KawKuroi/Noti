@@ -1,3 +1,5 @@
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import { requerirUsuario } from '@/lib/auth'
 import { getCategorias } from '@/lib/queries/category.queries'
 import { getPerfilDelUsuarioActual } from '@/lib/queries/user.queries'
@@ -6,6 +8,7 @@ import { upsertPerfil } from '@/lib/actions/user.actions'
 import { Sidebar } from '@/components/features/sidebar'
 import { BusquedaGlobal } from '@/components/features/busqueda-global'
 import { AsistenteProvider } from '@/components/features/asistente'
+import { AjustarLang } from '@/components/providers/ajustar-lang'
 
 interface Props {
   children: React.ReactNode
@@ -14,10 +17,12 @@ interface Props {
 export default async function LayoutDashboard({ children }: Props) {
   const user = await requerirUsuario()
 
-  const [categorias, perfil, notificaciones] = await Promise.all([
+  const [categorias, perfil, notificaciones, locale, messages] = await Promise.all([
     getCategorias(),
     getPerfilDelUsuarioActual(),
     getHistorialNotificaciones(user.id),
+    getLocale(),
+    getMessages(),
   ])
 
   // Fallback: si el usuario existe en auth pero no tiene perfil creado
@@ -28,7 +33,9 @@ export default async function LayoutDashboard({ children }: Props) {
   }
 
   return (
-    <AsistenteProvider>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <AjustarLang locale={locale} />
+      <AsistenteProvider>
       <div
         className="h-screen overflow-hidden"
         style={{ background: 'var(--bg)' }}
@@ -50,6 +57,7 @@ export default async function LayoutDashboard({ children }: Props) {
         </div>
       </div>
       <BusquedaGlobal />
-    </AsistenteProvider>
+      </AsistenteProvider>
+    </NextIntlClientProvider>
   )
 }

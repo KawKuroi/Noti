@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
-import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
 import { RegistrarSW } from '@/components/features/registrar-sw'
 import { ProvedorTema } from '@/components/providers/proveedor-tema'
@@ -41,7 +39,9 @@ export const metadata: Metadata = {
     // para que el icono aparezca en los resultados de busqueda.
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
       { url: '/icons/icon-192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
     ],
     apple: '/icons/icon-180.png',
   },
@@ -89,20 +89,18 @@ interface Props {
   children: React.ReactNode
 }
 
-export default async function LayoutRaiz({ children }: Props) {
-  const locale = await getLocale()
-  const messages = await getMessages()
-
+// Layout raiz estatico: la lectura de cookies de next-intl vive en el layout
+// del dashboard (unico lugar con textos traducidos) para que las paginas
+// publicas puedan prerenderizarse. El lang real lo ajusta AjustarLang alli.
+export default function LayoutRaiz({ children }: Props) {
   return (
-    <html lang={locale} suppressHydrationWarning className={`${geist.variable} ${geistMono.variable}`}>
+    <html lang="es" suppressHydrationWarning className={`${geist.variable} ${geistMono.variable}`}>
       <body className="font-sans antialiased">
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ProvedorTema>
-            <RegistrarSW />
-            {children}
-            <Toaster richColors position="top-right" />
-          </ProvedorTema>
-        </NextIntlClientProvider>
+        <ProvedorTema>
+          <RegistrarSW />
+          {children}
+          <Toaster richColors position="top-right" />
+        </ProvedorTema>
       </body>
     </html>
   )
