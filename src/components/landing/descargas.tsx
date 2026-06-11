@@ -75,7 +75,7 @@ export function Descargas({ enlaces }: Props) {
             return (
               <div
                 key={p.nombre}
-                className="card-landing"
+                className="card-landing card-hover"
                 style={{
                   padding: 28,
                   borderRadius: 18,

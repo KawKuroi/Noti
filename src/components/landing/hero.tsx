@@ -6,13 +6,13 @@ import { ArrowRight, Github, Mic, Sparkles } from 'lucide-react'
 import { EJEMPLOS_HERO, REPO_URL } from './data'
 import { useTypewriter } from './hooks'
 
-const HEADLINE = ['Recuerda lo que importa.', 'Sin apps. Sin ruido.']
+const HEADLINE = ['Recuerda lo que importa.', 'Sin ruido. Sin olvidos.']
 const SUB =
   'Recordatorios con push reales y chat IA. Gratis, para siempre — en la web, Windows y Android.'
 
 export function Hero() {
   return (
-    <section style={{ position: 'relative', paddingTop: 150, paddingBottom: 'var(--pad-section)' }}>
+    <section style={{ position: 'relative', paddingTop: 120, paddingBottom: 'var(--pad-section)' }}>
       <div
         className="dotgrid"
         style={{
@@ -78,9 +78,30 @@ export function Hero() {
               <Github size={16} /> Ver en GitHub
             </a>
           </div>
+          <div
+            className="reveal in mono"
+            data-d="4"
+            style={{
+              display: 'flex',
+              gap: 14,
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              marginTop: 26,
+              fontSize: 11.5,
+              color: 'var(--ink-3)',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}
+          >
+            <span>Open source</span>
+            <span aria-hidden="true">·</span>
+            <span>100% gratis</span>
+            <span aria-hidden="true">·</span>
+            <span>Web, Windows y Android</span>
+          </div>
         </div>
 
-        <div className="reveal in" data-d="5" style={{ marginTop: 276 }}>
+        <div className="reveal in" data-d="5" style={{ marginTop: 72 }}>
           <HeroChat />
         </div>
       </div>
@@ -122,7 +143,7 @@ function HeroChat() {
   const IconoReply = ej.reply.icono
 
   return (
-    <div style={{ width: '100%', maxWidth: 520, margin: '0 auto' }}>
+    <div style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
       <div
         className="card-landing"
         style={{

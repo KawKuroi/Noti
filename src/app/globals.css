@@ -263,7 +263,7 @@
     --pad-section: 138px;
     --gap: 23px;
 
-    --font-mono: var(--font-sans);
+    --font-mono: var(--font-geist-mono);
   }
 
   .dark {
@@ -443,6 +443,25 @@
   background: var(--bg-elev);
   border: 1px solid var(--line);
   border-radius: var(--landing-radius);
+}
+
+/* Hover de cards interactivas — mismo lenguaje que .btn-primary (lift suave).
+   No se aplica a mocks ni al chat del hero, que no son clicables. */
+.landing-root .card-hover {
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.landing-root .card-hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-2);
+  box-shadow: 0 12px 40px -18px rgba(10, 10, 10, 0.18);
+}
+
+.dark .landing-root .card-hover:hover {
+  box-shadow: 0 12px 40px -18px rgba(0, 0, 0, 0.55);
 }
 
 /* Sticky nav glass */

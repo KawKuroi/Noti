@@ -51,6 +51,9 @@ export function Nav() {
             <a href="#demo" style={enlaceNav}>
               Demo
             </a>
+            <a href="#descargas" style={enlaceNav}>
+              Descargas
+            </a>
             <a href="#faq" style={enlaceNav}>
               FAQ
             </a>

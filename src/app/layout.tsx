@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist } from 'next/font/google'
+import { Geist, Geist_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
@@ -11,6 +11,14 @@ const geist = Geist({
   subsets: ['latin'],
   variable: '--font-sans',
   weight: ['300', '400', '500', '600', '700'],
+})
+
+// Mono real para las etiquetas tecnicas de la landing (.mono, .eyebrow);
+// la app interna sigue usando la sans (ver --font-mono en globals.css).
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+  weight: ['400', '500'],
 })
 
 // La imagen OG/Twitter la genera src/app/opengraph-image.tsx (convencion de
@@ -86,7 +94,7 @@ export default async function LayoutRaiz({ children }: Props) {
   const messages = await getMessages()
 
   return (
-    <html lang={locale} suppressHydrationWarning className={geist.variable}>
+    <html lang={locale} suppressHydrationWarning className={`${geist.variable} ${geistMono.variable}`}>
       <body className="font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ProvedorTema>
