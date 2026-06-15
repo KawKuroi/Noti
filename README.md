@@ -2,10 +2,10 @@
 
   <h1>Noti</h1>
 
-  <p>PWA minimalista para centralizar todos tus recordatorios con notificaciones push reales, asistente IA por lenguaje natural y busqueda global.</p>
+  <p>PWA minimalista y apps nativas (Windows/Android) para recordatorios con notificaciones push reales, asistente IA por lenguaje natural, chat de lanzamientos y busqueda global.</p>
 
   <p>
-    <img src="https://img.shields.io/badge/Next.js_15-000000?style=flat&logo=nextdotjs&logoColor=white" alt="Next.js" />
+    <img src="https://img.shields.io/badge/Next.js_16-000000?style=flat&logo=nextdotjs&logoColor=white" alt="Next.js" />
     <img src="https://img.shields.io/badge/React_19-61DAFB?style=flat&logo=react&logoColor=black" alt="React" />
     <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white" alt="TypeScript" />
     <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
@@ -13,6 +13,8 @@
     <img src="https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=flat&logo=drizzle&logoColor=black" alt="Drizzle ORM" />
     <img src="https://img.shields.io/badge/Vercel_AI_SDK_v6-000000?style=flat&logo=vercel&logoColor=white" alt="Vercel AI SDK" />
     <img src="https://img.shields.io/badge/Groq-F55036?style=flat&logo=groq&logoColor=white" alt="Groq" />
+    <img src="https://img.shields.io/badge/Tauri_v2-24C8DB?style=flat&logo=tauri&logoColor=white" alt="Tauri v2" />
+    <img src="https://img.shields.io/badge/Vitest-6E9F18?style=flat&logo=vitest&logoColor=white" alt="Vitest" />
     <img src="https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white" alt="Vercel" />
   </p>
 </div>
@@ -49,6 +51,14 @@
 - Multiples dispositivos por usuario con gestion desde Settings
 - Countdown de cumpleanos: notificacion a 3 dias y 1 dia antes
 - Reprogramacion automatica de recordatorios recurrentes al enviar la notificacion
+- Scheduler local en apps Tauri: las notificaciones disparan a la hora exacta con la app cerrada, sin depender de cron-job.org
+
+### Apps nativas (Windows y Android)
+- Wrapper Tauri v2 que carga la web de produccion en un webview — sin reescritura de UI
+- Windows: bandeja del sistema, cierra sin cerrar la app, timers JS + notificacion nativa
+- Android: AlarmManager via tauri-plugin-notification con Doze activo — dispara a la hora exacta
+- Distribuidas sin tiendas: `.msi` / `.exe` (Windows) y `.apk` self-signed (Android) en GitHub Releases
+- Descarga directa desde la landing y desde la seccion Descargas en Settings
 
 ### Busqueda y navegacion
 - Busqueda global con Ctrl+K — full-text search con `to_tsvector` / `websearch_to_tsquery` en PostgreSQL
@@ -70,10 +80,14 @@
 - Autenticacion con Google OAuth y email/contrasena via Supabase Auth
 - Dark mode con next-themes y tokens CSS semanticos
 - Internacionalizacion ES/EN con next-intl (cookie-based, namespaces Sidebar/Comun/Settings)
-- Rate limiting en todas las API routes
+- Rate limiting con Upstash Redis via `@upstash/ratelimit` en todas las API routes (fallback en memoria en dev)
 - Row Level Security (RLS) en todas las tablas de Supabase
-- Tests E2E con Playwright (flujo sin autenticacion + test opcional con credenciales)
-- 100% en tier gratuito: Supabase + Vercel + Groq
+- 223 unit tests con Vitest (logica pura, mocks de DB/Redis/web-push) y tests E2E con Playwright
+- CI en GitHub Actions: lint + unit tests + build en cada push/PR a main (Node 24)
+- Watchdog cron: /settings muestra aviso si el cron lleva mas de 10 min sin ejecutarse
+- Soft delete de cuenta: zona de peligro en Settings con recuperacion por 30 dias
+- Stack actualizado: Next.js 16, Tailwind CSS 4, Zod 4, date-fns 4, eslint 9 flat config
+- 100% en tier gratuito: Supabase + Vercel + Groq + Upstash
 
 ## Prerequisitos
 
@@ -112,6 +126,8 @@ cp .env.example .env.local
 | `CRON_SECRET` | Token para proteger los endpoints de cron | Si |
 | `NEXT_PUBLIC_APP_URL` | URL publica de la app (sin barra final) | Si |
 | `BLOB_READ_WRITE_TOKEN` | Token de Vercel Blob para adjuntos en Notas | Si (Fase 22+) |
+| `UPSTASH_REDIS_REST_URL` | URL de Upstash Redis para rate limiting | Si (Fase 26+) |
+| `UPSTASH_REDIS_REST_TOKEN` | Token de Upstash Redis | Si (Fase 26+) |
 | `RESEND_API_KEY` | API key de Resend para el formulario de sugerencias (resend.com, free tier) | Si |
 | `CONTACT_DESTINATION_EMAIL` | Email destinatario del formulario de sugerencias de la landing | Si |
 
@@ -139,10 +155,12 @@ npm start
 
 ```bash
 npm run lint            # ESLint
+npm run test            # Unit tests con Vitest (una pasada)
+npm run test:watch      # Unit tests en modo watch (desarrollo)
+npm run test:e2e        # Tests E2E con Playwright
 npm run db:generate     # Generar migraciones Drizzle
 npm run db:push         # Aplicar migraciones
 npm run db:studio       # Abrir Drizzle Studio (UI visual de la BD)
-npm run test:e2e        # Tests E2E con Playwright
 ```
 
 ## Demo en vivo
