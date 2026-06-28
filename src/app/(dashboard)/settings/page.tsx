@@ -26,7 +26,7 @@ import { BotonBorrarRecordatorios } from '@/components/features/settings/boton-b
 import { PageHeader } from '@/components/ui/page-header'
 import { Settings } from 'lucide-react'
 
-export const metadata: Metadata = { title: 'Configuracion | Noti' }
+export const metadata: Metadata = { title: { absolute: 'Configuracion' } }
 
 export default async function PaginaSettings() {
   await requerirUsuario()
@@ -107,9 +107,7 @@ export default async function PaginaSettings() {
         <FormularioAutoDeleteVencidos valorActual={perfil?.autoEliminarVencidosDias ?? null} />
       </ConfigCard>
 
-      <ConfigCard titulo="Aplicacion" descripcion="La PWA se instala al instante desde el navegador. Las apps nativas de Windows y Android programan las notificaciones en el sistema, asi que llegan a la hora exacta aunque la app este cerrada; si instalas una, conviene desactivar las notificaciones del navegador en ese dispositivo para no recibirlas duplicadas.">
-        <FormularioInstalacion enlaces={enlacesDescarga} />
-      </ConfigCard>
+      <FormularioInstalacion enlaces={enlacesDescarga} />
 
       <FormularioInicioEscritorio />
 

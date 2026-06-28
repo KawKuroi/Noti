@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { usePWAInstall } from '@/hooks/use-pwa-install'
+import { useEsAppNativa } from '@/hooks/use-es-app-nativa'
 
 const CLAVE_DESCARTADO = 'noti-install-prompt-dismissed-at'
 const DIAS_RE_MOSTRAR = 14
@@ -35,6 +36,7 @@ function marcarDescartado() {
 
 export function InstallPrompt() {
   const { soportado, instalado, esIOS, esIOSSinSoportePush, instalar } = usePWAInstall()
+  const esAppNativa = useEsAppNativa()
   const [descartado, setDescartado] = useState(true)
   const [dialogAbierto, setDialogAbierto] = useState(false)
 
@@ -52,6 +54,8 @@ export function InstallPrompt() {
     toast.success('Noti instalada')
   }
 
+  // Dentro de una app nativa instalada no tiene sentido ofrecer instalar.
+  if (esAppNativa) return null
   if (instalado || descartado) return null
   if (!soportado && !esIOS) return null
 

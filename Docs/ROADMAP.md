@@ -195,3 +195,21 @@ Fases 0–32 completadas. Releases publicados en GitHub: Windows (`app-v0.1.0`, 
 - 31.5 Build y firma: keystore self-signed (`keytool`) en secrets de GitHub (`ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD`); workflow `tauri-android-release.yml` (Java 17 + SDK/NDK + target `aarch64-linux-android`) → `tauri android build --apk` → firma con `apksigner` → APK en el Release (sideload, sin Play Store)
 
 **Done when:** Instalar APK → login → recordatorio a +3 min → cerrar la app por completo → la notificacion llega a la hora exacta; tras reiniciar el telefono sigue llegando.
+
+---
+
+## Fase 35 — Auto-update de la app de escritorio (Windows) [pendiente]
+
+**Objetivo:** Que la app de escritorio se actualice sola o avise de una version nueva desde la propia app, sin que el usuario tenga que volver a descargar el instalador. Solo Windows/escritorio: un APK sideload de Android no se auto-actualiza igual, asi que su canal de update sigue siendo la seccion Descargas / GitHub Releases.
+
+**Mecanismo (tier gratuito):** `tauri-plugin-updater` con GitHub Releases como servidor de updates via un `latest.json` estatico que genera y sube `tauri-action` cuando hay firma configurada.
+
+- 35.1 Dependencias (target desktop en `src-tauri/Cargo.toml`): `tauri-plugin-updater` + `tauri-plugin-process` (para `relaunch()` tras instalar)
+- 35.2 `src-tauri/tauri.conf.json`: `bundle.createUpdaterArtifacts: true`; `plugins.updater.endpoints = ["https://github.com/KawKuroi/Noti/releases/latest/download/latest.json"]`; `plugins.updater.pubkey = "<clave publica>"`
+- 35.3 `src-tauri/capabilities/default.json`: `updater:default` (+ `process:allow-restart` si el relaunch lo dispara el webview)
+- 35.4 `src-tauri/src/lib.rs`: registrar ambos plugins (desktop) y exponer el flujo. UX a elegir: aviso al abrir con boton "Actualizar" (descarga, instala y reinicia) vs. boton "Buscar actualizaciones" en /settings
+- 35.5 CI `tauri-release.yml`: pasar a `tauri-action` los env `TAURI_SIGNING_PRIVATE_KEY` y `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`; con `createUpdaterArtifacts` sube `latest.json` + `.sig` al Release
+
+**Prerequisito manual (una sola vez):** generar el par de claves con `npx @tauri-apps/cli signer generate`; guardar la privada en secrets de GitHub (`TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, nunca en el repo, igual que el keystore de Android); pegar la clave **publica** en `tauri.conf.json` (esa si se versiona).
+
+**Done when:** publicar un release `app-v*` mas nuevo → abrir la app instalada → la app detecta la version, la instala y se reinicia ya actualizada.
