@@ -17,6 +17,8 @@ import { FormularioAutoDeleteVencidos } from '@/components/features/settings/for
 import { FormularioApariencia } from '@/components/features/settings/formulario-apariencia'
 import { FormularioIdioma } from '@/components/features/settings/formulario-idioma'
 import { FormularioInstalacion } from '@/components/features/settings/formulario-instalacion'
+import { FormularioInicioEscritorio } from '@/components/features/settings/formulario-inicio-escritorio'
+import { ConfigCard } from '@/components/features/settings/config-card'
 import { BotonSugerencias } from '@/components/features/settings/boton-sugerencias'
 import { BotonCerrarSesion } from '@/components/features/settings/boton-cerrar-sesion'
 import { BotonBorrarCuenta } from '@/components/features/settings/boton-borrar-cuenta'
@@ -25,42 +27,6 @@ import { PageHeader } from '@/components/ui/page-header'
 import { Settings } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Configuracion | Noti' }
-
-function ConfigCard({
-  titulo,
-  descripcion,
-  children,
-}: {
-  titulo: string
-  descripcion?: string
-  children: React.ReactNode
-}) {
-  return (
-    <section
-      style={{
-        background: 'var(--bg)',
-        border: '1px solid var(--line)',
-        borderRadius: '14px',
-        padding: '22px 24px',
-      }}
-    >
-      <h2
-        className="font-medium"
-        style={{ fontSize: '15px', color: 'var(--ink)', marginBottom: descripcion ? '4px' : '16px' }}
-      >
-        {titulo}
-      </h2>
-      {descripcion && (
-        <p
-          style={{ fontSize: '13.5px', color: 'var(--ink-3)', marginBottom: '16px', lineHeight: 1.5 }}
-        >
-          {descripcion}
-        </p>
-      )}
-      {children}
-    </section>
-  )
-}
 
 export default async function PaginaSettings() {
   await requerirUsuario()
@@ -144,6 +110,8 @@ export default async function PaginaSettings() {
       <ConfigCard titulo="Aplicacion" descripcion="La PWA se instala al instante desde el navegador. Las apps nativas de Windows y Android programan las notificaciones en el sistema, asi que llegan a la hora exacta aunque la app este cerrada; si instalas una, conviene desactivar las notificaciones del navegador en ese dispositivo para no recibirlas duplicadas.">
         <FormularioInstalacion enlaces={enlacesDescarga} />
       </ConfigCard>
+
+      <FormularioInicioEscritorio />
 
       <ConfigCard titulo="Idioma" descripcion="Elige el idioma de la interfaz.">
         <FormularioIdioma localeActual={localeActual} />
