@@ -13,7 +13,7 @@ import { expandirOcurrenciasEnRango } from '@/lib/utils/date.utils'
 import { VistaCalendario } from '@/components/features/calendar/vista-calendario'
 import { PageHeader } from '@/components/ui/page-header'
 
-export const metadata: Metadata = { title: 'Calendario | Noti' }
+export const metadata: Metadata = { title: { absolute: 'Calendario' } }
 
 interface Props {
   searchParams: Promise<{ mes?: string; vista?: string; fecha?: string }>

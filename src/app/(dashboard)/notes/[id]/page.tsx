@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const user = await requerirUsuario()
   const nota = await getRecordatorioPorId(user.id, id)
-  return { title: nota ? `${nota.titulo} | Noti` : 'Cuaderno | Noti' }
+  return { title: { absolute: nota ? nota.titulo : 'Cuaderno' } }
 }
 
 export default async function PaginaCuaderno({ params }: Props) {

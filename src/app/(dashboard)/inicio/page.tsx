@@ -18,7 +18,7 @@ import { MiniCalendario } from '@/components/features/inicio/mini-calendario'
 import { ChipsCategoriasSidebar } from '@/components/features/inicio/chips-categorias-sidebar'
 import { SeccionVencidos } from '@/components/features/inicio/seccion-vencidos'
 
-export const metadata: Metadata = { title: 'Inicio | Noti' }
+export const metadata: Metadata = { title: { absolute: 'Inicio' } }
 
 interface Props {
   searchParams: Promise<{ categoria?: string }>

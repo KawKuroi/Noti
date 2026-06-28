@@ -6,7 +6,7 @@ import { ListaCuadernos } from '@/components/features/notas/lista-cuadernos'
 import { BotonNuevoCuaderno } from '@/components/features/notas/boton-nuevo-cuaderno'
 import { PageHeader } from '@/components/ui/page-header'
 
-export const metadata: Metadata = { title: 'Notas | Noti' }
+export const metadata: Metadata = { title: { absolute: 'Notas' } }
 
 export default async function PaginaNotas() {
   const user = await requerirUsuario()

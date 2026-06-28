@@ -9,7 +9,7 @@ import { BarraAsistente } from '@/components/features/asistente'
 import { PageHeader } from '@/components/ui/page-header'
 import { SLUGS_LANZAMIENTO } from '@/lib/utils/constants'
 
-export const metadata: Metadata = { title: 'Lanzamientos | Noti' }
+export const metadata: Metadata = { title: { absolute: 'Lanzamientos' } }
 export const dynamic = 'force-dynamic'
 
 export default async function PaginaLanzamientos() {

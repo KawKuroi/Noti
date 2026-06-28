@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import {
   BookOpen,
@@ -27,6 +28,14 @@ const ICONOS: Record<string, React.ComponentType<{ size?: number; className?: st
 interface Props {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ destacado?: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const categorias = await getCategorias()
+  const categoria = categorias.find((c) => c.slug === slug)
+  // absolute: la pestana muestra solo el nombre de la categoria, sin la marca "| Noti".
+  return { title: { absolute: categoria?.nombre ?? 'Noti' } }
 }
 
 export default async function PaginaCategoria({ params, searchParams }: Props) {
