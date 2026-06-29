@@ -1,6 +1,6 @@
 [package]
 name = "noti"
-version = "0.1.0"
+version = "0.2.0"
 description = "Noti - recordatorios con notificaciones nativas (wrapper Tauri de la PWA)"
 authors = ["KawKuroi"]
 edition = "2021"
