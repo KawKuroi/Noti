@@ -21,7 +21,7 @@
 - La opcion de instalar/descargar la app ya no aparece dentro de las apps nativas (escritorio y Android): el banner `InstallPrompt` (`src/components/features/install-prompt.tsx`) y la tarjeta "Aplicacion" (`FormularioInstalacion`) se ocultan cuando se corre dentro de Tauri. En cualquier navegador (escritorio o movil) se mantienen.
 - Deteccion unificada en `src/hooks/use-es-app-nativa.ts` (`useEsAppNativa`, via `useSyncExternalStore` para evitar warning de hooks y mismatch de hidratacion): true si existe `window.__TAURI__`. `FormularioInstalacion` ahora renderiza su propia `ConfigCard` (se quito el envoltorio en `settings/page.tsx`).
 - Verificado: lint sin nuevos warnings, build verde.
-- Auto-update de la app de escritorio (Windows): planificado como Fase 35 en `ROADMAP.md` (diseno + prerequisito manual de clave de firma). Pendiente de implementar en ciclo dedicado.
+- Auto-update de la app de escritorio (Windows): IMPLEMENTADO (Fase 35). `tauri-plugin-updater` + `createUpdaterArtifacts` + `plugins.updater` (endpoint GitHub Releases + pubkey) en `src-tauri`; comandos `buscar_actualizacion`/`instalar_actualizacion` (`lib.rs`); seccion "Actualizaciones" en /settings (`formulario-actualizacion.tsx`, solo escritorio); env de firma en `tauri-release.yml`. Clave generada (contrasena vacia) fuera del repo en `C:\Users\kevin\noti-updater-keys\`. Pendiente para que funcione: subir el secret `TAURI_SIGNING_PRIVATE_KEY` (contenido de `noti.key`) a GitHub, bumpear version y taggear un `app-v*` nuevo. No verificable localmente (sin cargo); se valida en el build de CI/release.
 
 ## 2026-06-28 — Opciones de inicio de la app de escritorio
 

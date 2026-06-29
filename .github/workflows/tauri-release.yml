@@ -31,6 +31,10 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Firma del updater: con createUpdaterArtifacts, tauri-action genera y
+          # sube latest.json + .sig al Release. Sin estos secrets el build falla.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tauriScript: npx --yes @tauri-apps/cli
           tagName: ${{ github.ref_name }}

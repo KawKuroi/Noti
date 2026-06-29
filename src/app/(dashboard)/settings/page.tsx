@@ -18,6 +18,7 @@ import { FormularioApariencia } from '@/components/features/settings/formulario-
 import { FormularioIdioma } from '@/components/features/settings/formulario-idioma'
 import { FormularioInstalacion } from '@/components/features/settings/formulario-instalacion'
 import { FormularioInicioEscritorio } from '@/components/features/settings/formulario-inicio-escritorio'
+import { FormularioActualizacion } from '@/components/features/settings/formulario-actualizacion'
 import { ConfigCard } from '@/components/features/settings/config-card'
 import { BotonSugerencias } from '@/components/features/settings/boton-sugerencias'
 import { BotonCerrarSesion } from '@/components/features/settings/boton-cerrar-sesion'
@@ -110,6 +111,8 @@ export default async function PaginaSettings() {
       <FormularioInstalacion enlaces={enlacesDescarga} />
 
       <FormularioInicioEscritorio />
+
+      <FormularioActualizacion />
 
       <ConfigCard titulo="Idioma" descripcion="Elige el idioma de la interfaz.">
         <FormularioIdioma localeActual={localeActual} />

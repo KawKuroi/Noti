@@ -84,6 +84,54 @@ fn actualizar_config(
     config::guardar(app, &cfg).map_err(|e| e.to_string())
 }
 
+// Info de actualizacion que consume la web (camelCase para el JSON del invoke).
+#[cfg(desktop)]
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct InfoActualizacion {
+    disponible: bool,
+    version: Option<String>,
+    notas: Option<String>,
+}
+
+// Consulta el endpoint de updates (latest.json en GitHub Releases) y reporta si
+// hay una version mas nueva que la instalada.
+#[cfg(desktop)]
+#[tauri::command]
+async fn buscar_actualizacion(app: tauri::AppHandle) -> Result<InfoActualizacion, String> {
+    use tauri_plugin_updater::UpdaterExt;
+    let updater = app.updater().map_err(|e| e.to_string())?;
+    match updater.check().await.map_err(|e| e.to_string())? {
+        Some(actualizacion) => Ok(InfoActualizacion {
+            disponible: true,
+            version: Some(actualizacion.version.clone()),
+            notas: actualizacion.body.clone(),
+        }),
+        None => Ok(InfoActualizacion {
+            disponible: false,
+            version: None,
+            notas: None,
+        }),
+    }
+}
+
+// Descarga e instala la actualizacion y reinicia la app ya actualizada.
+#[cfg(desktop)]
+#[tauri::command]
+async fn instalar_actualizacion(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri_plugin_updater::UpdaterExt;
+    let updater = app.updater().map_err(|e| e.to_string())?;
+    let Some(actualizacion) = updater.check().await.map_err(|e| e.to_string())? else {
+        return Err("No hay actualizacion disponible".to_string());
+    };
+    actualizacion
+        .download_and_install(|_descargado, _total| {}, || {})
+        .await
+        .map_err(|e| e.to_string())?;
+    // restart() no retorna: relanza el proceso con la nueva version.
+    app.restart();
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default().plugin(tauri_plugin_notification::init());
@@ -101,11 +149,14 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ))
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             obtener_config_inicio,
             set_autostart,
             set_iniciar_minimizado,
-            set_cerrar_a_bandeja
+            set_cerrar_a_bandeja,
+            buscar_actualizacion,
+            instalar_actualizacion
         ]);
 
     builder

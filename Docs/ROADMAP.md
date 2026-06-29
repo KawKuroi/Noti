@@ -198,7 +198,7 @@ Fases 0–32 completadas. Releases publicados en GitHub: Windows (`app-v0.1.0`, 
 
 ---
 
-## Fase 35 — Auto-update de la app de escritorio (Windows) [pendiente]
+## Fase 35 — Auto-update de la app de escritorio (Windows) [implementada — pendiente secrets + prueba en release]
 
 **Objetivo:** Que la app de escritorio se actualice sola o avise de una version nueva desde la propia app, sin que el usuario tenga que volver a descargar el instalador. Solo Windows/escritorio: un APK sideload de Android no se auto-actualiza igual, asi que su canal de update sigue siendo la seccion Descargas / GitHub Releases.
 
@@ -211,5 +211,11 @@ Fases 0–32 completadas. Releases publicados en GitHub: Windows (`app-v0.1.0`, 
 - 35.5 CI `tauri-release.yml`: pasar a `tauri-action` los env `TAURI_SIGNING_PRIVATE_KEY` y `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`; con `createUpdaterArtifacts` sube `latest.json` + `.sig` al Release
 
 **Prerequisito manual (una sola vez):** generar el par de claves con `npx @tauri-apps/cli signer generate`; guardar la privada en secrets de GitHub (`TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, nunca en el repo, igual que el keystore de Android); pegar la clave **publica** en `tauri.conf.json` (esa si se versiona).
+
+**Implementado (2026-06-28):** dependencia `tauri-plugin-updater` (target desktop); `createUpdaterArtifacts: true` + `plugins.updater` (endpoint a `releases/latest/download/latest.json` + pubkey) en `tauri.conf.json`; comandos `buscar_actualizacion` / `instalar_actualizacion` en `lib.rs` (usan `app.updater()` y `app.restart()`); seccion "Actualizaciones" en /settings (`formulario-actualizacion.tsx`, solo escritorio, auto-chequea al abrir + boton); env de firma en `tauri-release.yml`. Clave generada con contrasena vacia en `C:\Users\kevin\noti-updater-keys\` (la privada NO esta en el repo).
+
+**Pendiente para que funcione:** (1) subir el secret `TAURI_SIGNING_PRIVATE_KEY` (contenido de `noti.key`) a GitHub; `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` puede quedar vacio. (2) bumpear version y taggear un `app-v*` nuevo. (3) backup de la carpeta de claves (si se pierde la privada, los updates dejan de firmarse).
+
+**Caveat del endpoint:** `releases/latest/download/latest.json` apunta al ultimo Release de GitHub; si un Release de Android (`android-v*`) queda como el mas reciente, el updater de escritorio no vera ese `latest.json` hasta el siguiente Release de escritorio. Mitigacion futura: marcar los Releases de Android como prerelease o usar un tag fijo de updater.
 
 **Done when:** publicar un release `app-v*` mas nuevo → abrir la app instalada → la app detecta la version, la instala y se reinicia ya actualizada.
